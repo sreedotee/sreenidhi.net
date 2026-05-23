@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statewatch — Sreenidhi</title>
+    <meta name="description" content="Formally specifying the state space of a UI flow. Turned out to be more alarming than expected." />
+    <link rel="icon" href="/favicon.ico" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Statewatch — Sreenidhi" />
+    <meta property="og:description" content="Formally specifying the state space of a UI flow. Turned out to be more alarming than expected." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <header class="A-topbar">
+      <div class="A-topbar__name"><a href="/">Sreenidhi <span>— Software Designer</span></a></div>
+      <nav>
+        <ul>
+          <li><a href="/about/">About</a></li>
+          <li><a href="mailto:sreenidhi.dev@gmail.com">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="P-page">
+      <section class="P-hero">
+        <h1 class="P-hero__title">Statewatch</h1>
+        <p class="P-hero__lead">Most design tools let you draw screens. They don't let you specify what's possible — all the intermediate states, the loading edges, the error branches, the recovery paths. I built a state machine to map a checkout flow. The diagram looked alarming. That felt correct.</p>
+        <dl class="P-meta">
+          <div><dt>Tool</dt><dd>State Machines</dd></div>
+          <div><dt>Year</dt><dd>2026</dd></div>
+          <div><dt>Type</dt><dd>Play</dd></div>
+          <div><dt>Topic</dt><dd>Formalism</dd></div>
+        </dl>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot">
+          <img src="https://picsum.photos/seed/statewatch-diagram/1600/900" alt="State machine diagram of a UI checkout flow" />
+        </section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">Tried to formally specify the state space of a UI flow I was designing. Ended up with states I hadn't drawn in Figma — and a different understanding of what I'd actually been building.</p>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para P-body__caption">What looks like a three-step flow in Figma is thirty-something states in reality.</p>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para">State machines don't make the complexity go away. They make it visible. Designing from a diagram like this means you're designing from the truth of the system, not a happy-path sketch of it. Most edge cases aren't edge cases — they're just states nobody drew.</p>
+      </section>
+    </main>
+
+    <footer class="A-foot">
+      <span class="A-foot__year">© 2026</span>
+      <nav class="A-foot__social">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+          <img src="https://cdn.simpleicons.org/linkedin/04083d" alt="" />
+        </a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <img src="https://cdn.simpleicons.org/instagram/04083d" alt="" />
+        </a>
+        <a href="https://substack.com/" target="_blank" rel="noreferrer" aria-label="Substack">
+          <img src="https://cdn.simpleicons.org/substack/04083d" alt="" />
+        </a>
+      </nav>
+    </footer>
+  </body>
+</html>

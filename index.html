@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sreenidhi — Software Designer</title>
+    <meta name="description" content="designer making software for people on the internet." />
+    <link rel="icon" href="/favicon.ico" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sreenidhi — Software Designer" />
+    <meta property="og:description" content="designer making software for people on the internet." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <header class="A-topbar">
+      <div class="A-topbar__name"><a href="#top">Sreenidhi <span>— Software Designer</span></a></div>
+      <nav>
+        <ul>
+          <li><a href="/about/">About</a></li>
+          <li><a href="mailto:sreenidhi.dev@gmail.com">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section class="A-hero">
+      <canvas class="silk" aria-hidden="true"></canvas>
+      <div class="A-hero__grid">
+        <div>
+          <h1>Attention is currency.<br/>I make things that earn it.</h1>
+        </div>
+        <div class="A-hero__intro">
+          <p>Hello, I'm Sreenidhi. I'm a software designer shaping how people move, decide and act across the internet.</p>
+          <div class="A-hero__ctas">
+            <a class="btn-text" href="mailto:sreenidhi.dev@gmail.com"><span class="arrow">↳</span> Let's Talk</a>
+            <a class="btn-pill" href="#work">View work</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="A-section" id="work">
+      <div class="A-section__ornament A-section__ornament--left">
+        <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <filter id="engrave-myst7" x="-10%" y="-10%" width="120%" height="120%">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+              <feDropShadow dx="0" dy="1.5" stdDeviation="0.6" flood-color="#04083d" flood-opacity="0.11" />
+            </filter>
+            <filter id="alpha-myst7">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+            </filter>
+            <mask id="mask-myst7" mask-type="alpha">
+              <image href="/moodboard/myst7.jpg" width="400" height="500" filter="url(#alpha-myst7)" />
+            </mask>
+            <radialGradient id="cursor-myst7" cx="50%" cy="50%" r="35%">
+              <stop offset="0%" stop-color="#04083d" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#04083d" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <image href="/moodboard/myst7.jpg" width="400" height="500" filter="url(#engrave-myst7)" />
+          <g class="A-section__ornament-fill" mask="url(#mask-myst7)">
+            <rect width="400" height="500" fill="url(#cursor-myst7)" />
+          </g>
+        </svg>
+      </div>
+      <div class="A-section__inner">
+        <header class="A-section__head">
+          <h2 class="A-section__title">Selected Work</h2>
+          <p class="A-section__lede">A handful of projects I care about — product, redesigns, and brand work.</p>
+        </header>
+        <div class="A-section__body">
+          <div class="work-showcase">
+            <ol class="work-index">
+              <li><a class="work-index__item is-active" href="/projects/atelia/" data-index="0">Atelia</a></li>
+              <li><a class="work-index__item" href="/projects/tofha/" data-index="1">Tofha</a></li>
+              <li><a class="work-index__item" href="/projects/whering/" data-index="2">Whering</a></li>
+              <li><a class="work-index__item" href="/projects/golden-group/" data-index="3">Golden Group</a></li>
+              <li><a class="work-index__item" href="/projects/sku-coverage/" data-index="4">SKU Coverage</a></li>
+            </ol>
+            <div class="work-carousel">
+              <div class="work-carousel__track">
+                <a class="work-slide" href="/projects/atelia/"><img src="/og-assets/XqEvrIW8ATaJtQo1zjviqmRcIw.png" alt="Atelia" /></a>
+                <a class="work-slide" href="/projects/tofha/"><img src="https://picsum.photos/seed/tofha/1600/1000" alt="Tofha" /></a>
+                <a class="work-slide" href="/projects/whering/"><img src="/og-assets/os5RPayt0sCKQ86VIrUQBqcvJn0.png" alt="Whering" /></a>
+                <a class="work-slide" href="/projects/golden-group/"><img src="/og-assets/diz98iZevCiTKDf2stGSC2TMgc.png" alt="Golden Group" /></a>
+                <a class="work-slide" href="/projects/sku-coverage/"><img src="/og-assets/yqYtOuEe9db61FV0T0anWI9ajJg.jpg" alt="SKU Coverage" /></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="A-section A-section--cc" id="creative">
+      <div class="A-section__ornament">
+        <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <filter id="engrave-myst" x="-10%" y="-10%" width="120%" height="120%">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+              <feDropShadow dx="0" dy="1.5" stdDeviation="0.6" flood-color="#04083d" flood-opacity="0.11" />
+            </filter>
+            <filter id="alpha-myst">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+            </filter>
+            <mask id="mask-myst" mask-type="alpha">
+              <image href="/moodboard/myst.jpg" width="400" height="500" filter="url(#alpha-myst)" />
+            </mask>
+            <radialGradient id="cursor-myst" cx="50%" cy="50%" r="35%">
+              <stop offset="0%" stop-color="#04083d" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#04083d" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <image href="/moodboard/myst.jpg" width="400" height="500" filter="url(#engrave-myst)" />
+          <g class="A-section__ornament-fill" mask="url(#mask-myst)">
+            <rect width="400" height="500" fill="url(#cursor-myst)" />
+          </g>
+        </svg>
+      </div>
+      <div class="A-section__inner">
+        <div class="cc-layout">
+          <h2 class="cc-heading">Creative Coding</h2>
+
+          <div class="cc-table">
+            <div class="cc-table__head">
+              <span>Project</span>
+              <span>Description</span>
+              <span></span>
+            </div>
+            <a class="cc-row" href="https://sky-high-shader.vercel.app/" target="_blank" rel="noreferrer">
+              <span class="cc-row__title">Cloud Nine</span>
+              <span class="cc-row__desc">Interactive Shader</span>
+              <span class="cc-row__arrow" aria-hidden="true">↗</span>
+              <img class="cc-row__preview" src="/og-assets/upcauKlgquxgkGQjQbkGuVBSK8.png" alt="" loading="lazy" />
+            </a>
+            <a class="cc-row" href="https://horsin-around-omega.vercel.app/horse-loader.html" target="_blank" rel="noreferrer">
+              <span class="cc-row__title">Horsin' Around</span>
+              <span class="cc-row__desc">Needlework Animation</span>
+              <span class="cc-row__arrow" aria-hidden="true">↗</span>
+              <img class="cc-row__preview" src="/og-assets/maHEBDy8FnNwaka6cbLtQANEw.png" alt="" loading="lazy" />
+            </a>
+            <a class="cc-row" href="https://globe-interactive-rose.vercel.app/" target="_blank" rel="noreferrer">
+              <span class="cc-row__title">Interactive Globe</span>
+              <span class="cc-row__desc">Claude Code Experiment</span>
+              <span class="cc-row__arrow" aria-hidden="true">↗</span>
+              <img class="cc-row__preview" src="/og-assets/GfwBFWMHYRrHCz8rOoIugSJJ0lg.png" alt="" loading="lazy" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="A-section" id="play">
+      <div class="A-section__ornament">
+        <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <filter id="engrave-myst5" x="-10%" y="-10%" width="120%" height="120%">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+              <feDropShadow dx="0" dy="1.5" stdDeviation="0.6" flood-color="#04083d" flood-opacity="0.11" />
+            </filter>
+            <filter id="alpha-myst5">
+              <feColorMatrix type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.299 -0.587 -0.114 0 1" />
+            </filter>
+            <mask id="mask-myst5" mask-type="alpha">
+              <image href="/moodboard/myst5.jpg" width="400" height="500" filter="url(#alpha-myst5)" />
+            </mask>
+            <radialGradient id="cursor-myst5" cx="50%" cy="50%" r="35%">
+              <stop offset="0%" stop-color="#04083d" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#04083d" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <image href="/moodboard/myst5.jpg" width="400" height="500" filter="url(#engrave-myst5)" />
+          <g class="A-section__ornament-fill" mask="url(#mask-myst5)">
+            <rect width="400" height="500" fill="url(#cursor-myst5)" />
+          </g>
+        </svg>
+      </div>
+      <div class="A-section__inner">
+        <header class="A-section__head">
+          <h2 class="A-section__title">Play</h2>
+          <p class="A-section__lede">Tools, simulations, and writing — what I work through outside the brief.</p>
+        </header>
+        <div class="A-section__body">
+          <div class="play-showcase">
+            <div class="play-main">
+              <a class="play-main__slide is-active" href="/play/statewatch/" aria-label="Statewatch — formal verification tool for UI behavior">
+                <img src="https://picsum.photos/seed/statewatch/1600/900" alt="Statewatch" />
+                <div class="play-main__caption">
+                  <span class="play-main__title">Statewatch</span>
+                  <span class="play-main__sub">Formalism Tool</span>
+                </div>
+              </a>
+              <a class="play-main__slide" href="/play/community-platform/" aria-label="Community Platform Diagnostics — agent-based simulation">
+                <img src="https://picsum.photos/seed/community-abm/1600/900" alt="Community Platform Diagnostics" />
+                <div class="play-main__caption">
+                  <span class="play-main__title">Community Platform Diagnostics</span>
+                  <span class="play-main__sub">Agent-Based Model</span>
+                </div>
+              </a>
+              <a class="play-main__slide" href="/play/duolingo-streak/" aria-label="Duolingo Streak Mechanic — modeled in Machinations">
+                <img src="https://picsum.photos/seed/machinations-streak/1600/900" alt="Duolingo Streak Mechanic" />
+                <div class="play-main__caption">
+                  <span class="play-main__title">Duolingo Streak Mechanic</span>
+                  <span class="play-main__sub">Machinations</span>
+                </div>
+              </a>
+              <a class="play-main__slide" href="#" aria-label="Essays — written explorations">
+                <img src="https://picsum.photos/seed/essays/1600/900" alt="Essays" />
+                <div class="play-main__caption">
+                  <span class="play-main__title">Essays</span>
+                  <span class="play-main__sub">Writing</span>
+                </div>
+              </a>
+            </div>
+            <div class="play-thumbs">
+              <button type="button" class="play-thumb is-active" data-index="0" aria-label="Statewatch">
+                <img src="https://picsum.photos/seed/statewatch/400/240" alt="" />
+                <span class="play-thumb__label">Statewatch</span>
+              </button>
+              <button type="button" class="play-thumb" data-index="1" aria-label="Community Platform Diagnostics">
+                <img src="https://picsum.photos/seed/community-abm/400/240" alt="" />
+                <span class="play-thumb__label">Community Platform Diagnostics</span>
+              </button>
+              <button type="button" class="play-thumb" data-index="2" aria-label="Duolingo Streak Mechanic">
+                <img src="https://picsum.photos/seed/machinations-streak/400/240" alt="" />
+                <span class="play-thumb__label">Duolingo Streak</span>
+              </button>
+              <button type="button" class="play-thumb" data-index="3" aria-label="Essays">
+                <img src="https://picsum.photos/seed/essays/400/240" alt="" />
+                <span class="play-thumb__label">Essays</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="A-tools" id="tools">
+      <div class="A-tools__inner">
+        <header class="A-tools__head">
+          <div class="A-tools__eyebrow">(02) TOOLS I USE</div>
+          <div class="A-tools__phonetic">/tuːlz aɪ juːz/</div>
+        </header>
+        <div class="A-tools__marquee">
+          <div class="A-tools__track">
+            <div class="A-tools__item"><img src="/og-assets/e0LK3AQjDbIRwtPptJT88SzBSY.svg" alt="Tool 1" /></div>
+            <div class="A-tools__item"><img src="/og-assets/aGGS1uPj1PryDqLNLK6dKKiMVQ.svg" alt="Tool 2" /></div>
+            <div class="A-tools__item"><img src="/og-assets/KCM8wiu7OhD9owDYlHhl4zvjG1Q.svg" alt="Tool 3" /></div>
+            <div class="A-tools__item"><img src="/og-assets/acksfATV82OzzuDaGeKpoFrKU.svg" alt="Tool 4" /></div>
+            <div class="A-tools__item"><img src="/og-assets/xSqe5QTmM6OFq9G3gDnNJitoNI.svg" alt="Tool 5" /></div>
+            <div class="A-tools__item"><img src="/og-assets/HIYHEYevVPZ9airu35rSv9EAU.svg" alt="Tool 6" /></div>
+            <div class="A-tools__item"><img src="/og-assets/13EdbXQMxqrGgSI1stS1Dss20E.svg" alt="Tool 7" /></div>
+            <div class="A-tools__item"><img src="/og-assets/61eC3wLhgLJgxsiFoOatmHH5bKE.svg" alt="Tool 8" /></div>
+            <!-- Duplicate set for seamless loop -->
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/e0LK3AQjDbIRwtPptJT88SzBSY.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/aGGS1uPj1PryDqLNLK6dKKiMVQ.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/KCM8wiu7OhD9owDYlHhl4zvjG1Q.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/acksfATV82OzzuDaGeKpoFrKU.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/xSqe5QTmM6OFq9G3gDnNJitoNI.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/HIYHEYevVPZ9airu35rSv9EAU.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/13EdbXQMxqrGgSI1stS1Dss20E.svg" alt="" /></div>
+            <div class="A-tools__item" aria-hidden="true"><img src="/og-assets/61eC3wLhgLJgxsiFoOatmHH5bKE.svg" alt="" /></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="A-testimonials" id="testimonials">
+      <div class="A-testimonials__inner">
+        <header class="A-testimonials__head">
+          <div>
+            <div class="A-testimonials__eyebrow">(03) TESTIMONIALS</div>
+            <div class="A-testimonials__phonetic">/ˌtɛs.tɪˈmoʊ.ni.əlz/</div>
+          </div>
+          <div class="A-testimonials__word">Testimonials</div>
+        </header>
+
+        <article class="A-testimonials__card">
+          <header class="A-testimonials__top">
+            <div class="A-testimonials__mark">&ldquo;</div>
+            <div class="A-testimonials__pagination">
+              <span class="A-testimonials__bar"></span>
+              <span class="A-testimonials__count"></span>
+            </div>
+          </header>
+
+          <div class="A-testimonials__slides">
+            <div class="A-testimonials__slide is-active" data-name="Akansha Soni">
+              <p class="A-testimonials__quote">They don't just design websites — they construct experiences. Structure dissolves into motion, ideas turn into systems, and every interaction feels deliberate yet unexpected. Working with them reframed how we think about digital space: not as pages, but as a living extension of the brand.</p>
+            </div>
+            <div class="A-testimonials__slide" data-name="Manthan Ugemuge">
+              <p class="A-testimonials__quote">Working with Sreenidhi across multiple design projects has been a genuine pleasure. She's exceptionally talented, executes with speed and clarity, and brings the kind of design knowledge that's contagious to everyone around her. I learned a lot just by being in the same room as her. Any team would be lucky to have her.</p>
+            </div>
+            <div class="A-testimonials__slide" data-name="Namira Khan">
+              <p class="A-testimonials__quote">Their creative vision goes far beyond aesthetics. Every interaction feels intentional, every detail considered. The team translated abstract ideas into a digital experience that feels bold, intuitive, and distinctly ours. It proved to us that strong creativity, when executed with precision, is what truly elevates a brand.</p>
+            </div>
+          </div>
+
+          <footer class="A-testimonials__footer">
+            <div class="A-testimonials__nav">
+              <button class="A-testimonials__arrow" data-dir="-1" aria-label="Previous testimonial">←</button>
+              <button class="A-testimonials__arrow" data-dir="1" aria-label="Next testimonial">→</button>
+            </div>
+            <div class="A-testimonials__name">Akansha Soni</div>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section class="A-trifecta" id="trifecta">
+      <div class="A-trifecta__inner">
+        <header class="A-trifecta__head">
+          <div class="A-trifecta__eyebrow">SERVICES</div>
+          <p class="A-trifecta__lede">Design is the synthesis. It lives at the intersection of technology, business, and culture.</p>
+        </header>
+        <div class="A-trifecta__diagram">
+          <img src="/moodboard/trifecta.jpeg" alt="Trifecta diagram — design at the intersection of technology, business, and culture" />
+        </div>
+      </div>
+    </section>
+
+    <footer class="A-foot">
+      <span class="A-foot__year">© 2026</span>
+      <nav class="A-foot__social">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+          <img src="https://cdn.simpleicons.org/linkedin/04083d" alt="" />
+        </a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <img src="https://cdn.simpleicons.org/instagram/04083d" alt="" />
+        </a>
+        <a href="https://substack.com/" target="_blank" rel="noreferrer" aria-label="Substack">
+          <img src="https://cdn.simpleicons.org/substack/04083d" alt="" />
+        </a>
+      </nav>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
+*.local
+
+# Dev reference — screenshots and data dumps, not needed in repo
+reference/silk/
+reference/*.png
+reference/*.json
+reference/og-grab-*
