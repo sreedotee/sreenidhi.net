@@ -483,14 +483,37 @@ end
 ;; REPORTERS
 ;; ============================================================
 
-to-report n-new      report count users with [ user-state = "new"      ] end
-to-report n-passive  report count users with [ user-state = "passive"  ] end
-to-report n-active   report count users with [ user-state = "active"   ] end
-to-report n-host     report count users with [ user-state = "host"     ] end
-to-report n-inactive report count users with [ user-state = "inactive" ] end
-to-report n-churned  report count users with [ user-state = "churned"  ] end
-to-report n-total    report count users                                   end
-to-report n-events   report count events                                  end
+to-report n-new
+  report count users with [ user-state = "new" ]
+end
+
+to-report n-passive
+  report count users with [ user-state = "passive" ]
+end
+
+to-report n-active
+  report count users with [ user-state = "active" ]
+end
+
+to-report n-host
+  report count users with [ user-state = "host" ]
+end
+
+to-report n-inactive
+  report count users with [ user-state = "inactive" ]
+end
+
+to-report n-churned
+  report count users with [ user-state = "churned" ]
+end
+
+to-report n-total
+  report count users
+end
+
+to-report n-events
+  report count events
+end
 
 to-report avg-satisfaction
   let live users with [ user-state != "churned" ]
