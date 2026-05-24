@@ -1021,15 +1021,15 @@ body.is-scrolled .A-topbar {
   width: 100%;
   max-width: var(--max);
   margin: 0 auto;
-  transform: translateX(min(-60px, calc((100vw - var(--max)) / 2 - 60px + (var(--max) - 100vw) / 2)));
+  transform: translateX(-60px);
   display: flex;
   flex-direction: column;
   gap: 56px;
   align-items: flex-start;
 }
-/* Above ~1320 the centering math collapses to translateX(-60px); below it, cap so the heading never hides off the left edge */
+/* Below ~1320 the -60px offset starts clipping the headline off the left edge — pull it back to 0 */
 @media (max-width: 1320px) {
-  .A-hero__grid { transform: translateX(0); }
+  .A-hero__grid { transform: none; }
 }
 
 .A-hero h1 {
@@ -2192,6 +2192,8 @@ body.is-scrolled .A-topbar {
 @media (max-width: 1200px) {
   .A-topbar { padding: 14px 24px; }
   .A-hero { padding: 40px 24px 56px; }
+  .A-hero h1 { font-size: clamp(44px, 6vw, 80px); }
+  .A-hero__intro { font-size: 18px; line-height: 1.4; max-width: 380px; }
   .A-section {
     height: auto;
     min-height: 100vh;
