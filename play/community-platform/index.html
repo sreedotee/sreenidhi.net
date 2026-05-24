@@ -36,7 +36,7 @@
     <main class="P-page">
       <section class="P-hero">
         <h1 class="P-hero__title">Community Platform Diagnostics</h1>
-        <p class="P-hero__lead">Toxicity migrates to where moderation is lightest. Contributor burnout follows engagement spikes. Lurkers are stable until they aren't. These aren't observations about specific platforms — they're emergent behaviors that appear from a handful of agent rules. I ran this in NetLogo to see how fast.</p>
+        <p class="P-hero__lead">A platform with many passive users may still feel socially dead, while a smaller but highly interactive community becomes self-sustaining. I built this in NetLogo to find the threshold.</p>
         <dl class="P-meta">
           <div><dt>Tool</dt><dd>NetLogo</dd></div>
           <div><dt>Year</dt><dd>2026</dd></div>
@@ -47,23 +47,27 @@
 
       <div class="P-shots">
         <section class="P-shot">
-          <img src="https://picsum.photos/seed/netlogo-community/1600/900" alt="NetLogo simulation — community platform agent behavior over time" />
-        </section>
-        <section class="P-shot">
-          <img src="https://picsum.photos/seed/netlogo-community-2/1600/900" alt="NetLogo simulation — degradation pattern at the edges" />
+          <iframe
+            src="https://netlogoweb.org/web?url=https://raw.githubusercontent.com/sreedotee/sreenidhi.net/main/public/models/community-platform.nlogo"
+            width="100%"
+            height="700"
+            frameborder="0"
+            title="Community Platform Diagnostics — NetLogo Simulation"
+            style="border: none; display: block;"
+          ></iframe>
         </section>
       </div>
 
       <section class="P-body">
-        <p class="P-body__para">Every online community eventually develops the same pathologies. I wanted to see how quickly simple agent rules produce recognizable community shapes — and which platform design decisions actually move the needle.</p>
+        <p class="P-body__para">Users move through five states: newcomer, passive, active, host, and churned. Most newcomers slide into passivity. A few convert to active — and a small fraction of those start hosting events. The question is what happens at each transition. Adjust referral rate, event quality, or host recovery time and the equilibrium shifts — sometimes catastrophically.</p>
       </section>
 
       <section class="P-body">
-        <p class="P-body__para P-body__caption">The community doesn't degrade uniformly. It collapses at the edges first.</p>
+        <p class="P-body__para P-body__caption">Host burnout is the real bottleneck. Lose your hosts and the community goes passive in about 40 ticks.</p>
       </section>
 
       <section class="P-body">
-        <p class="P-body__para">Platform design decisions that look cosmetic — where the report button sits, how contributor activity is surfaced, whether newcomers land in high-density or low-density zones — have measurable effects on agent behavior in the model. That's either reassuring or alarming depending on your mood.</p>
+        <p class="P-body__para">What surprised me: growth doesn't stabilize communities, it stresses them. A referral spike floods the system with newcomers, but if host capacity can't absorb them, satisfaction drops and churn follows. The platform design decisions that matter most aren't acquisition levers — they're the ones that protect the small group doing the actual work.</p>
       </section>
     </main>
 
