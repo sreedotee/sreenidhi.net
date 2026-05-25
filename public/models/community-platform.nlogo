@@ -119,7 +119,7 @@ to go
   ;; 2. Curation: incrementally boost visibility of high-quality events
   if curation-strength > 0 [
     ask events with [ ev-quality > 70 ] [
-      set ev-visibility min list 1.0 (ev-visibility + curation-strength * 0.02)
+      set ev-visibility cap 1.0 (ev-visibility + curation-strength * 0.02)
     ]
   ]
 
@@ -193,7 +193,7 @@ to-report dunbar-factor
   let n-engaged count users with [ user-state = "active" or user-state = "host" ]
   ;; At or below dunbar-limit: full cohesion (factor = 1.0)
   ;; Beyond dunbar-limit: cohesion falls — floor at 0.15 for very large groups
-  report max list 0.15 (min list 1.0 (dunbar-limit / max list 1 n-engaged))
+  report at-least 0.15 (cap 1.0 (dunbar-limit / at-least 1 n-engaged))
 end
 
 ;; ============================================================
@@ -203,7 +203,7 @@ end
 to do-tick
   set ticks-in-state ticks-in-state + 1
 
-  set satisfaction max list 0 (satisfaction - satisfaction-decay)
+  set satisfaction at-least 0 (satisfaction - satisfaction-decay)
   set churn-risk (1 - (satisfaction / 100)) * churn-sensitivity
 
   if user-state = "new"      [ behave-new      ]
@@ -256,7 +256,7 @@ end
 ;; Empirical: ~80% of users in healthy communities remain lurkers/passives
 ;; (Higher Logic community engagement data, 2023)
 to behave-passive
-  if random-float 1 < min list 1.0 (activity-level * (0.3 + participation-density)) [
+  if random-float 1 < cap 1.0 (activity-level * (0.3 + participation-density)) [
     let nearby events in-radius 10
     if any? nearby [
       let target max-one-of nearby [ ev-quality * ev-visibility ]
@@ -271,7 +271,7 @@ to behave-passive
     ]
     if any? peers [
       set social-connections social-connections + 1
-      set satisfaction min list 100 (satisfaction + 2)
+      set satisfaction cap 100 (satisfaction + 2)
       set total-interactions total-interactions + 1
     ]
   ]
@@ -281,7 +281,7 @@ to behave-passive
   if attendance-history >= activation-threshold [
     set user-state "active"
     set ticks-in-state 0
-    set activity-level min list 1.0 (activity-level + 0.1)
+    set activity-level cap 1.0 (activity-level + 0.1)
   ]
 
   if satisfaction < 20 and ticks-in-state > 6 [
@@ -309,7 +309,7 @@ to behave-active
     ]
     if any? peers [
       set social-connections social-connections + 1
-      set satisfaction min list 100 (satisfaction + 4)
+      set satisfaction cap 100 (satisfaction + 4)
       set total-interactions total-interactions + 1
       face one-of peers
       fd 0.4
@@ -371,8 +371,8 @@ to update-host-satisfaction
       ;; Luma reports 62% average attendance; threshold of 1 attendee/event/tick is conservative
       let avg-att mean [ ev-attendance-tick ] of my-evs
       ifelse avg-att >= 1
-        [ set satisfaction min list 100 (satisfaction + 4) ]
-        [ set satisfaction max list 0  (satisfaction - 2) ]
+        [ set satisfaction cap 100 (satisfaction + 4) ]
+        [ set satisfaction at-least 0  (satisfaction - 2) ]
     ]
   ]
 end
@@ -383,7 +383,7 @@ to behave-inactive
 
   if participation-density > reactivation-threshold [
     if random-float 1 < 0.12 [
-      set satisfaction min list 100 (satisfaction + 15)
+      set satisfaction cap 100 (satisfaction + 15)
       set user-state  "passive"
       set ticks-inactive 0
       set ticks-in-state 0
@@ -398,7 +398,7 @@ to behave-inactive
       [ notification-rate * 0.5 ]
       [ notification-rate ]
     if random-float 1 < effective-rate [
-      set satisfaction min list 100 (satisfaction + 20)
+      set satisfaction cap 100 (satisfaction + 20)
       if satisfaction > 25 [
         set user-state  "passive"
         set ticks-inactive 0
@@ -424,13 +424,13 @@ to attend [ target ]
 
   let exp-quality [ ev-quality ] of target
   let gain (exp-quality / 100) * social-reinforcement-strength * 18
-  set satisfaction      min list 100 (satisfaction + gain)
+  set satisfaction      cap 100 (satisfaction + gain)
   set attendance-history attendance-history + 1
-  set activity-level    min list 1.0  (activity-level + 0.015)
-  set host-probability  min list 0.5  (host-probability + 0.008)
+  set activity-level    cap 1.0  (activity-level + 0.015)
+  set host-probability  cap 0.5  (host-probability + 0.008)
 
   face target
-  fd min list 1.0 (distance target * 0.3)
+  fd cap 1.0 (distance target * 0.3)
 end
 
 ;; ============================================================
@@ -448,7 +448,7 @@ to update-metrics
     set participation-density cnt-active-and-host / n-live
 
     ;; 1 event per 10 live users = "healthy" event density benchmark
-    let event-density-score min list 1 (count events * 10 / max list 1 n-live)
+    let event-density-score cap 1 (count events * 10 / at-least 1 n-live)
     let satisfaction-score  ifelse-value any? live
       [ mean [ satisfaction ] of live / 100 ]
       [ 0 ]
@@ -482,6 +482,15 @@ end
 ;; ============================================================
 ;; REPORTERS
 ;; ============================================================
+
+;; Clamping helpers — ifelse avoids max/capsyntax issues in Tortoise
+to-report cap [ hi x ]
+  ifelse x > hi [ report hi ] [ report x ]
+end
+
+to-report at-least [ lo x ]
+  ifelse x < lo [ report lo ] [ report x ]
+end
 
 to-report cnt-new
   report count users with [ user-state = "new" ]
