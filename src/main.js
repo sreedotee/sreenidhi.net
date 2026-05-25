@@ -18,18 +18,21 @@ function lenisRaf(time) {
 }
 requestAnimationFrame(lenisRaf)
 
-/* ----- Sticky-head tuck progression ----- */
+/* ----- Sticky-head tuck progression — viewport-relative so it tracks "content arriving" rather than fixed pixels.
+   START: body just touched the bottom of the viewport (tuck = 0, head fully open).
+   END:   body has scrolled up to the vertical-middle of the viewport (tuck = 1, head locked at compact size).
+   Past END, raw goes >1 but is clamped, so the head stops shrinking even as the user keeps scrolling. */
 const sections = [...document.querySelectorAll('.A-section')]
   .map((section) => ({ section, body: section.querySelector('.A-section__body') }))
   .filter((s) => s.body)
-
-const START = 500
-const END = 100
 
 let pending = false
 
 function update() {
   pending = false
+  const vh = window.innerHeight
+  const START = vh
+  const END = vh * 0.5
   for (const { section, body } of sections) {
     const top = body.getBoundingClientRect().top
     const raw = (START - top) / (START - END)
