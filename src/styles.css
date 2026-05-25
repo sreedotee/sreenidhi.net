@@ -1045,7 +1045,25 @@ body:has(.A-hero).is-scrolled .A-foot {
   background: var(--white);
 }
 
-.A-hero canvas.silk { opacity: 1; }
+/* Silk runs at exact OG uniforms; opacity stays full. Perceived intensity is tuned by ::after. */
+.A-hero canvas.silk { opacity: 0.94; }
+
+/* Vertical mask that (a) puts a faint white wash over the silk to drop intensity ~1% to match the OG,
+   and (b) ramps to fully white at the bottom so the hero blends seamlessly into the white body.
+   z-index sits between the silk canvas (z:0) and the hero content (z:2) so text is never dimmed. */
+.A-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0)    32%,
+    rgba(255, 255, 255, 0)    58%,
+    rgba(255, 255, 255, 0.65) 88%,
+    rgba(255, 255, 255, 1)    100%);
+}
 
 .A-hero__grid {
   position: relative;
