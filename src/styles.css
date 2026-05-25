@@ -1864,6 +1864,16 @@ body:has(.A-hero).is-scrolled .A-foot {
   flex-direction: column;
   min-height: 0;
 }
+.A-trifecta__line {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+  margin: 0 0 32px;
+  max-width: 720px;
+  flex: 0 0 auto;
+}
 .A-trifecta__diagram {
   flex: 1;
   min-height: 0;
