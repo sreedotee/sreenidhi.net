@@ -46,7 +46,7 @@
     <main class="P-page">
       <section class="P-hero">
         <h1 class="P-hero__title">Duolingo Streak Mechanic</h1>
-        <p class="P-hero__lead">I played Wordle every day until I broke my streak once. Never went back. Duolingo runs on the exact same mechanic — daily streak, loss aversion, the whole loop — but with one difference: a freeze that absorbs the miss. I modeled what that buffer actually does to the system.</p>
+        <p class="P-hero__lead">I played Wordle every day until I broke my streak once. Never went back. Duolingo runs on the exact same mechanic (daily streak, loss aversion, the whole loop), but with one difference: a freeze that absorbs the miss. I modeled what that buffer actually does to the system.</p>
         <dl class="P-meta">
           <div><dt>Tool</dt><dd>Machinations</dd></div>
           <div><dt>Year</dt><dd>2026</dd></div>
@@ -55,13 +55,17 @@
         </dl>
       </section>
 
+      <section class="P-body">
+        <p class="P-body__para">Been wanting to try Machinations for a while. Gamification mechanics (streaks, loss aversion, habit loops) show up in almost every consumer app now. The Duolingo streak felt like a good first thing to model: simple enough to be legible, interesting enough to actually think about.</p>
+      </section>
+
       <div class="P-shots">
         <!-- ============================================================
-             SCENARIO A — No freeze in stock. Missed day collapses streak.
+             SCENARIO A. No freeze in stock. Missed day collapses streak.
              ============================================================ -->
         <section class="P-shot P-shot--svg">
           <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagA-title">
-            <title id="diagA-title">Scenario A — No freeze. One missed day collapses the streak to zero.</title>
+            <title id="diagA-title">Scenario A. No freeze. One missed day collapses the streak to zero.</title>
             <defs>
               <pattern id="dotgridA" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
                 <circle cx="20" cy="20" r="1" fill="#04083d" opacity="0.08"/>
@@ -165,13 +169,19 @@
             <text class="mA-foot" x="80" y="875">Real Duolingo: default freeze cap = 2 (5 for Streak Society at 7+ day streaks). +3 free at every 100-day milestone.</text>
           </svg>
         </section>
+      </div>
 
+      <section class="P-body">
+        <p class="P-body__para P-body__caption">Without the freeze, one missed day collapses the whole system. With it, the loop survives real life.</p>
+      </section>
+
+      <div class="P-shots">
         <!-- ============================================================
-             SCENARIO B — Freeze in stock. The miss is absorbed.
+             SCENARIO B. Freeze in stock. The miss is absorbed.
              ============================================================ -->
         <section class="P-shot P-shot--svg">
           <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagB-title">
-            <title id="diagB-title">Scenario B — Freeze absorbs the miss. The streak is preserved.</title>
+            <title id="diagB-title">Scenario B. Freeze absorbs the miss. The streak is preserved.</title>
             <defs>
               <pattern id="dotgridB" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
                 <circle cx="20" cy="20" r="1" fill="#04083d" opacity="0.08"/>
@@ -278,15 +288,7 @@
       </div>
 
       <section class="P-body">
-        <p class="P-body__para">Been wanting to try Machinations for a while. Gamification mechanics — streaks, loss aversion, habit loops — show up in almost every consumer app now. The Duolingo streak felt like a good first thing to model: simple enough to be legible, interesting enough to actually think about.</p>
-      </section>
-
-      <section class="P-body">
-        <p class="P-body__para P-body__caption">Without the freeze, one missed day collapses the whole system. With it, the loop survives real life.</p>
-      </section>
-
-      <section class="P-body">
-        <p class="P-body__para">Streaks run on loss aversion, not motivation. Users aren't pushing the streak forward — they're protecting it from collapse. A streak that can't be repaired is a bomb set for a bad day. The freeze isn't a convenience feature. It's structural infrastructure that keeps the loop from being too fragile to survive real life.</p>
+        <p class="P-body__para">Streaks run on loss aversion, not motivation. Users aren't pushing the streak forward. They're protecting it from collapse. A streak that can't be repaired is a bomb set for a bad day. The freeze isn't a convenience feature. It's structural infrastructure that keeps the loop from being too fragile to survive real life.</p>
       </section>
     </main>
 
