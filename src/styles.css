@@ -1679,7 +1679,7 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 .A-testimonials__head {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   align-items: flex-end;
   gap: 48px;
   margin-bottom: 40px;
@@ -1699,14 +1699,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   color: rgba(4, 8, 61, 0.4);
   margin-top: 4px;
 }
-.A-testimonials__word {
-  font-family: var(--serif);
-  font-size: clamp(32px, 4vw, 56px);
-  line-height: 0.85;
-  letter-spacing: -0.05em;
-  color: var(--navy);
-}
-
 .A-testimonials__card {
   background: rgba(230, 230, 230, 0.25);
   padding: 32px 32px 32px;
@@ -2318,7 +2310,6 @@ body:has(.A-hero).is-scrolled .A-foot {
     gap: 12px;
     margin-bottom: 24px;
   }
-  .A-testimonials__word { font-size: clamp(40px, 9vw, 56px); }
   .A-testimonials__card {
     padding: 24px;
     min-height: 0;
