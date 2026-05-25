@@ -46,7 +46,7 @@ document.getElementById('app').innerHTML = /* html */ `
     <div class="page-hero__inner" style="flex-direction: column; align-items: flex-start;">
       <div class="eyebrow" style="margin-bottom: 16px;">(02) ABOUT</div>
       <p style="font-family: var(--sans); font-size: 14px; color: var(--navy); max-width: 460px; line-height: 1.5;">
-        I'm Sreenidhi, a software designer whose interest in design began with a fascination for people and software, and the way each continually shapes the other.
+        I'm Sreenidhi, a designer whose interest in design began with a fascination for people and software, and the way each continually shapes the other.
         <br/><br/>
         I'm especially interested in how culture, technology, and human behavior shape one another over time. I carry that lens into my work, creating things informed by both craft and curiosity.
       </p>
