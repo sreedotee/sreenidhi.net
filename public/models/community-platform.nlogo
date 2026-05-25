@@ -126,14 +126,14 @@ to go
   ;; 3. Acquire new users — referral multiplies organic rate when community is dense
   ;;    Formula: organic × (1 + referral_strength × density)
   ;;    Source: referral marketing drives 3–5x conversion (Digital Silk 2024)
-  let n-new round (acquisition-rate * (1 + referral-strength * participation-density))
-  create-users n-new [
+  let arrivals round (acquisition-rate * (1 + referral-strength * participation-density))
+  create-users arrivals [
     setxy random-xcor random-ycor
     set shape "person"
     set size 1.2
     initialize-new-user
   ]
-  set total-users-created total-users-created + n-new
+  set total-users-created total-users-created + arrivals
 
   ;; 4. All non-churned users act
   ask users with [ user-state != "churned" ] [
@@ -214,12 +214,12 @@ to do-tick
 
   if user-state != "churned" [
     if random-float 1 < (churn-risk * base-churn-rate) [
-      go-churned
+      do-churn
     ]
   ]
 end
 
-to go-churned
+to do-churn
   set user-state    "churned"
   set ticks-churned 0
   set total-churned total-churned + 1
@@ -247,7 +247,7 @@ to behave-new
     if ticks-in-state > 4 [
       ifelse random-float 1 < 0.42
         [ set user-state "passive"  set ticks-in-state 0 ]
-        [ go-churned ]
+        [ do-churn ]
     ]
   ]
 end
@@ -408,7 +408,7 @@ to behave-inactive
   ]
 
   if ticks-inactive > max-inactive-ticks [
-    go-churned
+    do-churn
   ]
 end
 
@@ -442,10 +442,10 @@ to update-metrics
   let n-live count live
 
   ifelse n-live > 0 [
-    let n-active-and-host count users with [
+    let cnt-active-and-host count users with [
       user-state = "active" or user-state = "host"
     ]
-    set participation-density n-active-and-host / n-live
+    set participation-density cnt-active-and-host / n-live
 
     ;; 1 event per 10 live users = "healthy" event density benchmark
     let event-density-score min list 1 (count events * 10 / max 1 n-live)
@@ -483,35 +483,35 @@ end
 ;; REPORTERS
 ;; ============================================================
 
-to-report n-new
+to-report cnt-new
   report count users with [ user-state = "new" ]
 end
 
-to-report n-passive
+to-report cnt-passive
   report count users with [ user-state = "passive" ]
 end
 
-to-report n-active
+to-report cnt-active
   report count users with [ user-state = "active" ]
 end
 
-to-report n-host
+to-report cnt-host
   report count users with [ user-state = "host" ]
 end
 
-to-report n-inactive
+to-report cnt-inactive
   report count users with [ user-state = "inactive" ]
 end
 
-to-report n-churned
+to-report cnt-churned
   report count users with [ user-state = "churned" ]
 end
 
-to-report n-total
+to-report cnt-total
   report count users
 end
 
-to-report n-events
+to-report cnt-events
   report count events
 end
 
@@ -893,7 +893,7 @@ MONITOR
 870
 155
 Active
-n-active
+cnt-active
 0
 1
 11
@@ -904,7 +904,7 @@ MONITOR
 950
 155
 Hosts
-n-host
+cnt-host
 0
 1
 11
@@ -915,7 +915,7 @@ MONITOR
 870
 205
 Passive
-n-passive
+cnt-passive
 0
 1
 11
@@ -926,7 +926,7 @@ MONITOR
 950
 205
 Inactive
-n-inactive
+cnt-inactive
 0
 1
 11
@@ -948,7 +948,7 @@ MONITOR
 950
 255
 Events
-n-events
+cnt-events
 0
 1
 11
@@ -1035,11 +1035,11 @@ true
 true
 "" ""
 PENS
-"new" 1.0 0 -6995700 true "" "plot n-new"
-"active" 1.0 0 -10899396 true "" "plot n-active"
-"host" 1.0 0 -955883 true "" "plot n-host"
-"passive" 1.0 0 -7500403 true "" "plot n-passive"
-"inactive" 1.0 0 -13345367 true "" "plot n-inactive"
+"new" 1.0 0 -6995700 true "" "plot cnt-new"
+"active" 1.0 0 -10899396 true "" "plot cnt-active"
+"host" 1.0 0 -955883 true "" "plot cnt-host"
+"passive" 1.0 0 -7500403 true "" "plot cnt-passive"
+"inactive" 1.0 0 -13345367 true "" "plot cnt-inactive"
 
 PLOT
 780
