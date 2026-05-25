@@ -193,7 +193,7 @@ to-report dunbar-factor
   let n-engaged count users with [ user-state = "active" or user-state = "host" ]
   ;; At or below dunbar-limit: full cohesion (factor = 1.0)
   ;; Beyond dunbar-limit: cohesion falls — floor at 0.15 for very large groups
-  report max list 0.15 (min list 1.0 (dunbar-limit / max 1 n-engaged))
+  report max list 0.15 (min list 1.0 (dunbar-limit / max list 1 n-engaged))
 end
 
 ;; ============================================================
@@ -448,7 +448,7 @@ to update-metrics
     set participation-density cnt-active-and-host / n-live
 
     ;; 1 event per 10 live users = "healthy" event density benchmark
-    let event-density-score min list 1 (count events * 10 / max 1 n-live)
+    let event-density-score min list 1 (count events * 10 / max list 1 n-live)
     let satisfaction-score  ifelse-value any? live
       [ mean [ satisfaction ] of live / 100 ]
       [ 0 ]
