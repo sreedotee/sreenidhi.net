@@ -36,7 +36,7 @@
     <main class="P-page">
       <section class="P-hero">
         <h1 class="P-hero__title">Community Platform Diagnostics</h1>
-        <p class="P-hero__lead">Everyone is launching a community app right now — Luma, Partiful, Geneva, the new Meetup. The design conversation is mostly about onboarding screens and notification copy. I wanted to ask the question one level above that: what actually makes a platform feel alive, and which design levers move it.</p>
+        <p class="P-hero__lead">Everyone is launching a community app right now. Luma, Partiful, Geneva, the new Meetup. The design conversation is mostly about onboarding screens and notification copy. I wanted to ask the question one level above that: what actually makes a platform feel alive, and which design levers move it.</p>
         <dl class="P-meta">
           <div><dt>Tool</dt><dd>NetLogo</dd></div>
           <div><dt>Year</dt><dd>2026</dd></div>
@@ -46,29 +46,29 @@
       </section>
 
       <section class="P-body">
-        <p class="P-body__para">Most UX research moves one variable at a time — an A/B test, a survey, a usability session. That's the right shape when you want to isolate one cause. It's the wrong shape when the thing you're studying is an ecosystem: in a community platform, referral rate, host availability, event quality, social density, and price all push against each other in ways no single test surfaces. Inspired by <a href="https://uxdesign.cc/using-simulation-models-in-ux-research-ba9f4cdcf32c" target="_blank" rel="noreferrer">this UX Design piece</a> on simulation in user research, I wanted to try agent-based modelling — build a tiny synthetic platform and watch what happens when the knobs move.</p>
+        <p class="P-body__para">I went down a UXR rabbit hole recently and came across <a href="https://uxdesign.cc/using-simulation-models-in-ux-research-ba9f4cdcf32c" target="_blank" rel="noreferrer">this UX Design piece</a> on using simulation models in user research. The idea of watching a whole ecosystem play out instead of testing one variable at a time stuck with me, so I wanted to try agent-based modelling for myself. Build a tiny synthetic platform, turn some knobs, see what happens.</p>
       </section>
 
       <section class="P-body">
-        <p class="P-body__para">The model is a city-scale Luma. About 100 users move through six states — new, passive, active, host, inactive, churned. Each carries a topic interest (drawn from a power-law: lots of mainstream, few niche), a social motive (homebody to butterfly), and a budget. Events spawn daily — some host-created in the host's own niche, some platform-curated round-robin across topics — and live a day or two, the way real events do. Users find events by proximity, topic match, motive, and affordability. Hosts emerge from sustained attendance, then keep going only as long as their events draw people. Burnout is built in.</p>
+        <p class="P-body__para">The model is a city-scale Luma. About 100 users move through six states: new, passive, active, host, inactive, churned. Each carries a topic interest (drawn from a power-law, so lots of mainstream and few niche), a social motive (homebody to butterfly), and a budget. Events spawn daily. Some are host-created in the host's own niche, some are platform-curated round-robin across topics, and they live a day or two the way real events do. Users find events by proximity, topic match, motive, and affordability. Hosts emerge from sustained attendance, then keep going only as long as their events draw people. Burnout is built in.</p>
       </section>
 
       <section class="P-body">
-        <p class="P-body__para P-body__caption">What to watch in the snapshots and the live model below: yellow stars are events. Person dots are users — sky blue (new), gray (passive), green (active), orange (host), dark blue (inactive), red (churned). Orange is always the smallest population, and the most load-bearing.</p>
+        <p class="P-body__para P-body__caption">What to watch in the snapshots and the live model below: yellow stars are events. Person dots are users. Sky blue (new), gray (passive), green (active), orange (host), dark blue (inactive), red (churned). Orange is always the smallest population, and the most load-bearing.</p>
       </section>
 
       <div class="P-shots">
         <section class="P-shot">
-          <img src="/snapshots/bootstrap.png" alt="Day 50 of a healthy run — first host emerging, mostly passive lurkers, sparse events" />
+          <img src="/snapshots/bootstrap.png" alt="Day 50 of a healthy run, first host emerging, mostly passive lurkers, sparse events" />
           <p class="P-shot__caption">Day 50, healthy parameters. One orange host has just emerged. Most of the population is still passive (gray) or churning out (red). One event running. The platform is alive but hasn't caught fire yet.</p>
         </section>
         <section class="P-shot">
-          <img src="/snapshots/equilibrium.png" alt="Day 110 — vibrant: host cluster, yellow event stars, green band of actives" />
-          <p class="P-shot__caption">Day 110, same parameters. A dense host cluster has formed in one topic, drawing event stars and a green ring of regular attendees. This is what "alive" looks like — concentrated, spatially clustered, sustained by a small group of hosts.</p>
+          <img src="/snapshots/equilibrium.png" alt="Day 110, vibrant: host cluster, yellow event stars, green band of actives" />
+          <p class="P-shot__caption">Day 110, same parameters. A dense host cluster has formed in one topic, drawing event stars and a green ring of regular attendees. This is what "alive" looks like: concentrated, spatially clustered, sustained by a small group of hosts.</p>
         </section>
         <section class="P-shot">
-          <img src="/snapshots/collapse.png" alt="Day 220 with adverse parameters — collapsed: no hosts, no events, mass churn" />
-          <p class="P-shot__caption">Day 220, adverse parameters (low event creation, fast satisfaction decay, no notifications). The platform never built a host class. With no orange dots seeding events, the rest unravels — heavy red churn, scattered survivors. Same model, different knobs, completely different fate.</p>
+          <img src="/snapshots/collapse.png" alt="Day 220 with adverse parameters, collapsed: no hosts, no events, mass churn" />
+          <p class="P-shot__caption">Day 220, adverse parameters (low event creation, fast satisfaction decay, no notifications). The platform never built a host class. With no orange dots seeding events, the rest unravels. Heavy red churn, scattered survivors. Same model, different knobs, completely different fate.</p>
         </section>
       </div>
 
@@ -86,11 +86,11 @@
       </div>
 
       <section class="P-body">
-        <p class="P-body__para">A few things kept showing up across runs. Hosts are the load-bearing minority — lose one and it cascades through everyone who attended their events. Growth doesn't stabilise communities, it stresses them: a referral spike floods the system with newcomers, and if host capacity can't absorb them, satisfaction drops and churn follows. The smallest topic dies first, not because it's small but because it can't sustain even one host. Platform curation keeps niches breathing; it can't make them thrive without an organiser. The design decisions that matter most aren't acquisition levers — they're the ones that protect the small group doing the actual work.</p>
+        <p class="P-body__para">A few things kept showing up across runs. Hosts are the load-bearing minority. Lose one and it cascades through everyone who attended their events. Growth doesn't stabilise communities, it stresses them: a referral spike floods the system with newcomers, and if host capacity can't absorb them, satisfaction drops and churn follows. The smallest topic dies first, not because it's small but because it can't sustain even one host. Platform curation keeps niches breathing; it can't make them thrive without an organiser. The design decisions that matter most aren't acquisition levers. They're the ones that protect the small group doing the actual work.</p>
       </section>
 
       <section class="P-body">
-        <p class="P-body__para">This isn't production research. The model isn't calibrated against real platform data — slider defaults are educated, not measured, and I haven't run sensitivity analyses to validate emergent rates against the benchmarks it cites. But the point of a tool like this isn't prediction. It's helping a designer see causality as a shape rather than a list of factors. When I look at a community product now, I notice myself reaching for different questions — who's hosting, what happens when they stop, how long does this thing have to absorb a referral spike. The simulation didn't tell me what to design. It changed what I look for.</p>
+        <p class="P-body__para">This isn't production research. The model isn't calibrated against real platform data. Slider defaults are educated, not measured, and I haven't run sensitivity analyses to validate emergent rates against the benchmarks it cites. But the point of a tool like this isn't prediction. It's helping a designer see causality as a shape rather than a list of factors. When I look at a community product now, I notice myself reaching for different questions. Who's hosting, what happens when they stop, how long does this thing have to absorb a referral spike. The simulation didn't tell me what to design. It changed what I look for.</p>
       </section>
     </main>
 
