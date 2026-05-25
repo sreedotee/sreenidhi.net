@@ -160,7 +160,7 @@ to go
     if random-float 1 < (event-creation-rate * activity-level) [
       let hx xcor
       let hy ycor
-      create-events 1 [
+      hatch-events 1 [
         setxy hx + (random 10 - 5) hy + (random 10 - 5)
         set shape "star"
         set size 1.5
