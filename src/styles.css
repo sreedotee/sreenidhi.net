@@ -1059,9 +1059,9 @@ body:has(.A-hero).is-scrolled .A-foot {
   z-index: 1;
   background: linear-gradient(to bottom,
     rgba(255, 255, 255, 0.04) 0%,
-    rgba(255, 255, 255, 0)    32%,
-    rgba(255, 255, 255, 0)    58%,
-    rgba(255, 255, 255, 0.65) 88%,
+    rgba(255, 255, 255, 0)    30%,
+    rgba(255, 255, 255, 0)    82%,
+    rgba(255, 255, 255, 0.55) 94%,
     rgba(255, 255, 255, 1)    100%);
 }
 
