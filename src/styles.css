@@ -1157,45 +1157,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   margin: 0;
 }
 
-/* Section ornament wrapper — engraved-on-white SVG inside, with a cursor-responsive radial-gradient overlay on hover */
-.A-section__ornament {
-  position: absolute;
-  top: 8%;
-  right: 2%;
-  height: 75%;
-  width: 55%;
-  pointer-events: auto;
-  z-index: 0;
-  overflow: visible;
-  --mx: 50%;
-  --my: 50%;
-}
-.A-section__ornament > svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  color: #ffffff;
-  filter: drop-shadow(0 1.5px 1px rgba(4, 8, 61, 0.11));
-}
-/* Colored fill inside the SVG — masked to only the engraved shapes, fades in on hover, gradient center is moved by JS to follow cursor */
-.A-section__ornament-fill {
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.A-section__ornament:hover .A-section__ornament-fill {
-  opacity: 1;
-}
-.A-section__ornament--left {
-  right: auto;
-  left: 2%;
-}
-
-/* Creative Coding ornament — scaled down since it's a mock background, not the focus */
-.A-section--cc .A-section__ornament {
-  height: 45%;
-  width: 32%;
-  top: 12%;
-}
 .A-section__inner { position: relative; z-index: 1; }
 .A-section__head { position: relative; }
 
@@ -2250,16 +2211,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   }
   .A-section__title { font-size: clamp(32px, 7vw, 48px); }
   .A-section__lede { font-size: 15px; max-width: 100%; opacity: 1; }
-  /* Background ornaments — pin behind content, fade so they don't overpower text */
-  .A-section__ornament,
-  .A-section--cc .A-section__ornament {
-    width: 70%;
-    height: 50%;
-    top: 8%;
-    right: 0;
-    opacity: 0.45;
-  }
-  .A-section__ornament--left { left: 0; right: auto; }
 
   /* Selected work — stack index above carousel */
   .work-showcase {
@@ -2417,10 +2368,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   .A-section { padding: 56px 16px 72px; }
   .A-section__title { font-size: clamp(28px, 8.5vw, 40px); }
   .A-section__head { margin-bottom: 24px; }
-  /* Tone background ornaments down further on phones so text stays legible */
-  .A-section__ornament,
-  .A-section--cc .A-section__ornament { opacity: 0.3; width: 80%; height: 45%; }
-
   .work-index__item { font-size: 16px; }
   .work-carousel { aspect-ratio: 4 / 3; }
 

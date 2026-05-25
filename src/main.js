@@ -195,19 +195,6 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
-/* ----- Cursor-responsive fill on engraved ornaments — moves each ornament's radialGradient center to track cursor position ----- */
-document.querySelectorAll('.A-section__ornament').forEach((wrap) => {
-  const gradient = wrap.querySelector('radialGradient')
-  if (!gradient) return
-  wrap.addEventListener('mousemove', (e) => {
-    const rect = wrap.getBoundingClientRect()
-    const xPct = ((e.clientX - rect.left) / rect.width) * 100
-    const yPct = ((e.clientY - rect.top) / rect.height) * 100
-    gradient.setAttribute('cx', `${xPct}%`)
-    gradient.setAttribute('cy', `${yPct}%`)
-  })
-})
-
 /* ----- Play thumbnail selector ----- */
 const playSection = document.querySelector('#play')
 if (playSection) {
