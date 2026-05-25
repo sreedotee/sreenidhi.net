@@ -13,6 +13,11 @@
 ;;    density (critical mass studies)
 ;;  - Luma event attendance rate ~62% (2025)
 ;;
+;;  Time scale: 1 tick = 1 day. Typical run: 180–365 ticks (6–12 months
+;;  of platform activity). All churn / activation / attendance rates
+;;  above are quoted in their native units (monthly, 30-day) — slider
+;;  defaults are calibrated so per-tick rates produce those aggregates.
+;;
 ;;  Inspired by Luma, Meetup, Partiful, Geneva.
 ;;  ============================================================
 
@@ -41,6 +46,7 @@ users-own [
   ticks-in-state        ;; ticks since last state change
   ever-hosted?          ;; true once user became a host (survives state changes)
   ticks-churned         ;; countdown before churned turtle is removed
+  user-interest         ;; 0–4: which topic cluster this user prefers
 ]
 
 events-own [
@@ -50,6 +56,7 @@ events-own [
   ev-visibility          ;; 0–1 discoverability
   ev-lifespan            ;; ticks remaining
   ev-creator             ;; turtle or nobody
+  ev-topic               ;; 0–4: which topic cluster this event serves
 ]
 
 ;; ============================================================
@@ -85,6 +92,7 @@ to setup
       set ev-visibility       0.4 + random-float 0.4
       set ev-lifespan         8 + random 12
       set ev-creator          nobody
+      set ev-topic            random 5
     ]
     set total-events-created total-events-created + 1
   ]
@@ -106,6 +114,7 @@ to initialize-new-user
   set ticks-in-state     0
   set ever-hosted?       false
   set ticks-churned      0
+  set user-interest      random 5
 end
 
 ;; ============================================================
@@ -124,9 +133,12 @@ to go
   ]
 
   ;; 3. Acquire new users — referral multiplies organic rate when community is dense
-  ;;    Formula: organic × (1 + referral_strength × density)
-  ;;    Source: referral marketing drives 3–5x conversion (Digital Silk 2024)
-  let arrivals round (acquisition-rate * (1 + referral-strength * participation-density))
+  ;;    Saturating form: density / (0.2 + density). Half-saturation at density=0.2.
+  ;;    Real referral hits diminishing returns past saturation — the same
+  ;;    enthusiastic minority can only invite so many people. Without this,
+  ;;    a healthy community grows unboundedly which is empirically false.
+  let saturation-factor participation-density / (0.2 + participation-density)
+  let arrivals round (acquisition-rate * (1 + referral-strength * saturation-factor))
   create-users arrivals [
     setxy random-xcor random-ycor
     set shape "person"
@@ -160,6 +172,7 @@ to go
     if random-float 1 < (event-creation-rate * activity-level) [
       let hx xcor
       let hy ycor
+      let host-int user-interest
       hatch-events 1 [
         setxy hx + (random 10 - 5) hy + (random 10 - 5)
         set shape "star"
@@ -171,6 +184,8 @@ to go
         set ev-visibility       event-visibility + random-float 0.25
         set ev-lifespan         8 + random 15
         set ev-creator          myself
+        ;; Hosts create events for their own niche — depth over breadth
+        set ev-topic            host-int
       ]
       set total-events-created total-events-created + 1
     ]
@@ -232,7 +247,11 @@ end
 to behave-new
   let nearby events in-radius 10
   ifelse any? nearby [
-    let target max-one-of nearby [ ev-quality * ev-visibility ]
+    let my-int user-interest
+    let target max-one-of nearby [
+      ev-quality * ev-visibility *
+      (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+    ]
     attend target
     ;; onboarding-quality: probability of a great first experience
     ;; All new users eventually reach passive — quality shapes how satisfied they arrive
@@ -259,7 +278,11 @@ to behave-passive
   if random-float 1 < cap 1.0 (activity-level * (0.3 + participation-density)) [
     let nearby events in-radius 10
     if any? nearby [
-      let target max-one-of nearby [ ev-quality * ev-visibility ]
+      let my-int user-interest
+      let target max-one-of nearby [
+        ev-quality * ev-visibility *
+        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+      ]
       attend target
     ]
   ]
@@ -296,7 +319,11 @@ to behave-active
   if random-float 1 < activity-level [
     let nearby events in-radius 14
     if any? nearby [
-      let target max-one-of nearby [ ev-quality * ev-visibility ]
+      let my-int user-interest
+      let target max-one-of nearby [
+        ev-quality * ev-visibility *
+        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+      ]
       attend target
     ]
   ]
@@ -339,7 +366,11 @@ to behave-host
   if random-float 1 < activity-level [
     let nearby events in-radius 14
     if any? nearby [
-      let target max-one-of nearby [ ev-quality * ev-visibility ]
+      let my-int user-interest
+      let target max-one-of nearby [
+        ev-quality * ev-visibility *
+        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+      ]
       attend target
     ]
   ]
@@ -368,11 +399,16 @@ to update-host-satisfaction
   ask users with [ user-state = "host" ] [
     let my-evs events with [ ev-creator = myself ]
     if any? my-evs [
-      ;; Luma reports 62% average attendance; threshold of 1 attendee/event/tick is conservative
+      ;; Continuous signal — avoids the cliff where 0.95 attendance is punished
+      ;; identically to 0.0. Mapping:
+      ;;   avg=0   → -3   (silence stings)
+      ;;   avg=0.5 → -1   (light turnout, mild discouragement)
+      ;;   avg=1   → +1   (one attendee, marginal lift)
+      ;;   avg=2   → +5   (real engagement)
+      ;;   avg=3+  → +9   (capped by satisfaction cap at 100)
       let avg-att mean [ ev-attendance-tick ] of my-evs
-      ifelse avg-att >= 1
-        [ set satisfaction cap 100 (satisfaction + 4) ]
-        [ set satisfaction at-least 0  (satisfaction - 2) ]
+      let delta (avg-att * 4) - 3
+      set satisfaction cap 100 (at-least 0 (satisfaction + delta))
     ]
   ]
 end
