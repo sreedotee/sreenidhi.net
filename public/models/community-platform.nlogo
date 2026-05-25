@@ -95,9 +95,10 @@ to setup
       set ev-attendance-tick  0
       set ev-total-attendance 0
       set ev-visibility       0.4 + random-float 0.4
-      ;; Lifespan = days the event is live as a listing (RSVP-able window).
-      ;; Per-tick attendance accumulates as RSVPs over that window.
-      set ev-lifespan         3 + random 4
+      ;; Events are atomic happenings — one day, sometimes two (late-night
+      ;; parties bleeding into the next morning). Attendance is the actual
+      ;; show-up signal, not a multi-day RSVP accumulator.
+      set ev-lifespan         1 + random 2
       set ev-creator          nobody
       set ev-topic            random 5
       ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
@@ -157,32 +158,28 @@ to go
   ]
   set total-users-created total-users-created + arrivals
 
-  ;; 3b. Platform-seeded events — every 7 ticks (~weekly), platform highlights
-  ;;     ONE event PER TOPIC (5 total). Prevents niche starvation: without this,
-  ;;     topics that produce no hosts have no events, their users have nothing
-  ;;     to attend, they churn, the topic dies and never recovers. Per-topic
-  ;;     seeding guarantees every interest has a baseline weekly opportunity.
-  if ticks > 0 and (ticks mod 7) = 0 [
-    let t 0
-    repeat 5 [
-      let topic-i t
-      create-events 1 [
-        setxy random-xcor random-ycor
-        set shape "star"
-        set size 1.5
-        set color yellow
-        set ev-quality          40 + random 40    ;; platform surfaces decent events; not magic
-        set ev-attendance-tick  0
-        set ev-total-attendance 0
-        set ev-visibility       0.5 + random-float 0.3   ;; curation = visibility boost, not quality
-        set ev-lifespan         4 + random 4
-        set ev-creator          nobody
-        set ev-topic            topic-i
-        ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
-      ]
-      set total-events-created total-events-created + 1
-      set t t + 1
+  ;; 3b. Platform-seeded events — ONE per day, cycling through the 5 topics.
+  ;;     Each topic gets a platform event every 5 days. Combined with host
+  ;;     events, this means a topic with no hosts can still offer something
+  ;;     occasionally — but its users will struggle to hit activation
+  ;;     thresholds, which is realistic: niches without organisers wither.
+  if ticks > 0 [
+    let topic-i ticks mod 5
+    create-events 1 [
+      setxy random-xcor random-ycor
+      set shape "star"
+      set size 1.5
+      set color yellow
+      set ev-quality          40 + random 40    ;; platform surfaces decent events; not magic
+      set ev-attendance-tick  0
+      set ev-total-attendance 0
+      set ev-visibility       0.5 + random-float 0.3   ;; curation = visibility boost, not quality
+      set ev-lifespan         1 + random 2
+      set ev-creator          nobody
+      set ev-topic            topic-i
+      ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
     ]
+    set total-events-created total-events-created + 1
   ]
 
   ;; 4. All non-churned users act
@@ -220,7 +217,7 @@ to go
         set ev-attendance-tick  0
         set ev-total-attendance 0
         set ev-visibility       event-visibility + random-float 0.25
-        set ev-lifespan         3 + random 4
+        set ev-lifespan         1 + random 2
         set ev-creator          myself
         ;; Hosts create events for their own niche — depth over breadth
         set ev-topic            host-int
