@@ -100,7 +100,7 @@ to setup
       ;; show-up signal, not a multi-day RSVP accumulator.
       set ev-lifespan         1 + random 2
       set ev-creator          nobody
-      set ev-topic            random 5
+      set ev-topic            sample-topic
       ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
     ]
     set total-events-created total-events-created + 1
@@ -123,7 +123,7 @@ to initialize-new-user
   set ticks-in-state     0
   set ever-hosted?       false
   set ticks-churned      0
-  set user-interest      random 5
+  set user-interest      sample-topic
   set social-motive      0.2 + random-float 0.6
   set budget             15 + random 40
 end
@@ -233,17 +233,28 @@ to go
 end
 
 ;; ============================================================
-;; DUNBAR EFFECT
+;; DUNBAR EFFECT (LOCAL)
 ;; ============================================================
 
-;; Social cohesion degrades as the engaged community exceeds optimal group size.
+;; Social cohesion degrades as the engaged people IN YOUR ORBIT exceed
+;; optimal group size. Previously this counted globally — but Dunbar's claim
+;; is about the cohort YOU personally can maintain ties with, not how many
+;; engaged users exist in the city. A user in a dense pocket feels Dunbar
+;; pressure even if the overall platform is small; a user on the periphery
+;; feels none even if the platform is huge.
+;;
+;; Radius 12 ≈ "social orbit" — broader than the radius for finding events
+;; (10–14) but narrower than the whole world. Each user gets a personalized
+;; reading based on who's engaged near them.
+;;
 ;; Based on: Dunbar (1992), Stowe Boyd "Community by the Numbers" (2008).
 ;; Optimal range: 25–80 members. Groups past 150 lose distributed leadership.
-;; dunbar-limit slider lets you explore different platform contexts.
 to-report dunbar-factor
-  let n-engaged count users with [ user-state = "active" or user-state = "host" ]
+  let n-engaged count other users in-radius 12 with [
+    user-state = "active" or user-state = "host"
+  ]
   ;; At or below dunbar-limit: full cohesion (factor = 1.0)
-  ;; Beyond dunbar-limit: cohesion falls — floor at 0.15 for very large groups
+  ;; Beyond dunbar-limit: cohesion falls — floor at 0.15 for dense pockets
   report at-least 0.15 (cap 1.0 (dunbar-limit / at-least 1 n-engaged))
 end
 
@@ -591,6 +602,20 @@ to-report event-score [ ev-q ev-v ev-t my-int my-mot ]
     [ 1.0 ]
     [ 0.2 + my-mot * 0.6 ]
   report ev-q * ev-v * topic-weight
+end
+
+;; Power-law topic sampler — real platforms have huge mainstream topics
+;; (food, music) and tiny niches (model trains). Uniform random would have
+;; made all five interests equally popular, hiding the "small niches die first"
+;; failure mode. Distribution: 40% / 25% / 17% / 12% / 6%.
+;; Topic 0 ≈ mainstream; topic 4 ≈ deep niche.
+to-report sample-topic
+  let r random-float 1
+  if r < 0.40 [ report 0 ]
+  if r < 0.65 [ report 1 ]
+  if r < 0.82 [ report 2 ]
+  if r < 0.94 [ report 3 ]
+  report 4
 end
 
 to-report cnt-new
