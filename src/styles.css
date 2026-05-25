@@ -1961,10 +1961,9 @@ body:has(.A-hero).is-scrolled .A-foot {
   line-height: 20px;
   letter-spacing: 0;
   color: #a3a3a3;
-  /* Solid bg + a faint inset top-edge line. JS drives --lift via lerp toward the scroll-derived target.
-     No drop-shadow below — that read as a floating UI bar. Instead the top edge emerges as a
-     1px hairline as the paper is "pulled up", suggesting the top of the paper sheet. */
-  background: var(--white);
+  /* Transparent until the trifecta pulls the footer up — bg fades in as --lift grows from 0 → 1
+     so the bar reads as a sheet of paper being revealed, not a persistent UI strip. */
+  background: rgba(255, 255, 255, var(--lift, 0));
   box-shadow: inset 0 1px 0 rgba(4, 8, 61, calc(var(--lift, 0) * 0.22));
 }
 .A-foot__year { color: inherit; }
