@@ -1369,6 +1369,16 @@ body:has(.A-hero).is-scrolled .A-foot {
   object-fit: cover;
   display: block;
 }
+.P-shot__caption {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  opacity: 0.7;
+  margin: 10px 0 0;
+  max-width: 760px;
+}
 
 .P-body {
   padding: 120px 0;
