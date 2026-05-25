@@ -5,7 +5,8 @@
 ;;  Agent-based simulation of participation density, host
 ;;  dynamics, and ecosystem health in event-driven communities.
 ;;
-;;  Calibrated against empirical benchmarks:
+;;  Informed by empirical benchmarks (used to set plausible defaults,
+;;  not validated against measured emergent rates):
 ;;  - Monthly churn ~4% (Recurly 2024)
 ;;  - ~9% new-user → active conversion in 30 days (Eppo)
 ;;  - Optimal social group size 25–80 (Dunbar / Life with Alacrity)
@@ -14,9 +15,10 @@
 ;;  - Luma event attendance rate ~62% (2025)
 ;;
 ;;  Time scale: 1 tick = 1 day. Typical run: 180–365 ticks (6–12 months
-;;  of platform activity). All churn / activation / attendance rates
-;;  above are quoted in their native units (monthly, 30-day) — slider
-;;  defaults are calibrated so per-tick rates produce those aggregates.
+;;  of platform activity). Slider defaults aim to reproduce the aggregates
+;;  above; precise calibration would require BehaviorSpace experiments not
+;;  included here — treat emergent rates as directionally meaningful, not
+;;  numerically exact.
 ;;
 ;;  Inspired by Luma, Meetup, Partiful, Geneva.
 ;;  ============================================================
@@ -93,7 +95,9 @@ to setup
       set ev-attendance-tick  0
       set ev-total-attendance 0
       set ev-visibility       0.4 + random-float 0.4
-      set ev-lifespan         8 + random 12
+      ;; Lifespan = days the event is live as a listing (RSVP-able window).
+      ;; Per-tick attendance accumulates as RSVPs over that window.
+      set ev-lifespan         3 + random 4
       set ev-creator          nobody
       set ev-topic            random 5
       ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
@@ -167,11 +171,11 @@ to go
         set shape "star"
         set size 1.5
         set color yellow
-        set ev-quality          50 + random 40    ;; platform-curated = above-average
+        set ev-quality          40 + random 40    ;; platform surfaces decent events; not magic
         set ev-attendance-tick  0
         set ev-total-attendance 0
-        set ev-visibility       0.6 + random-float 0.3
-        set ev-lifespan         10 + random 14
+        set ev-visibility       0.5 + random-float 0.3   ;; curation = visibility boost, not quality
+        set ev-lifespan         4 + random 4
         set ev-creator          nobody
         set ev-topic            topic-i
         ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
@@ -216,7 +220,7 @@ to go
         set ev-attendance-tick  0
         set ev-total-attendance 0
         set ev-visibility       event-visibility + random-float 0.25
-        set ev-lifespan         8 + random 15
+        set ev-lifespan         3 + random 4
         set ev-creator          myself
         ;; Hosts create events for their own niche — depth over breadth
         set ev-topic            host-int
@@ -460,8 +464,11 @@ end
 to behave-inactive
   set ticks-inactive ticks-inactive + 1
 
+  ;; Density-triggered: "my friends are doing things again, I should look"
+  ;; Lowered from 12% → 7% per tick. Even high-density communities don't
+  ;; pull every dormant user back monthly.
   if participation-density > reactivation-threshold [
-    if random-float 1 < 0.12 [
+    if random-float 1 < 0.07 [
       set satisfaction cap 100 (satisfaction + 15)
       set user-state  "passive"
       set ticks-inactive 0
@@ -470,15 +477,21 @@ to behave-inactive
   ]
 
   ;; Platform notification re-engagement
-  ;; Diminishing returns: satisfaction boost is halved if user has been inactive >10 ticks
-  ;; Calibrated against ~7–10% weekly re-engagement decay (industry estimate)
+  ;; Sharp decay: notifications work in the first week, drop fast after,
+  ;; near-useless after a month. Most "we miss you" emails are ignored
+  ;; by users who've been gone 30+ days.
+  ;;   <5 ticks inactive:  full rate
+  ;;   5–20 ticks:         30% rate
+  ;;   >20 ticks:          8% rate
+  ;; Smaller satisfaction boost (+10) and higher reactivation bar (>35)
+  ;; — a notification can prick interest but rarely overcomes weeks of drift.
   if notification-rate > 0 [
-    let effective-rate ifelse-value (ticks-inactive > 10)
-      [ notification-rate * 0.5 ]
-      [ notification-rate ]
-    if random-float 1 < effective-rate [
-      set satisfaction cap 100 (satisfaction + 20)
-      if satisfaction > 25 [
+    let decay-factor ifelse-value (ticks-inactive < 5)
+      [ 1.0 ]
+      [ ifelse-value (ticks-inactive < 20) [ 0.3 ] [ 0.08 ] ]
+    if random-float 1 < (notification-rate * decay-factor) [
+      set satisfaction cap 100 (satisfaction + 10)
+      if satisfaction > 35 [
         set user-state  "passive"
         set ticks-inactive 0
         set ticks-in-state 0
