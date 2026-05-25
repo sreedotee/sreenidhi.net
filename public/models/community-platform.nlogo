@@ -47,6 +47,8 @@ users-own [
   ever-hosted?          ;; true once user became a host (survives state changes)
   ticks-churned         ;; countdown before churned turtle is removed
   user-interest         ;; 0–4: which topic cluster this user prefers
+  social-motive         ;; 0–1: how much this user goes out just to socialize
+  budget                ;; max price they'll pay per event (long-term willingness)
 ]
 
 events-own [
@@ -57,6 +59,7 @@ events-own [
   ev-lifespan            ;; ticks remaining
   ev-creator             ;; turtle or nobody
   ev-topic               ;; 0–4: which topic cluster this event serves
+  ev-price               ;; cost to attend (0 = free)
 ]
 
 ;; ============================================================
@@ -93,6 +96,7 @@ to setup
       set ev-lifespan         8 + random 12
       set ev-creator          nobody
       set ev-topic            random 5
+      ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
     ]
     set total-events-created total-events-created + 1
   ]
@@ -115,6 +119,8 @@ to initialize-new-user
   set ever-hosted?       false
   set ticks-churned      0
   set user-interest      random 5
+  set social-motive      0.2 + random-float 0.6
+  set budget             15 + random 40
 end
 
 ;; ============================================================
@@ -146,6 +152,34 @@ to go
     initialize-new-user
   ]
   set total-users-created total-users-created + arrivals
+
+  ;; 3b. Platform-seeded events — every 7 ticks (~weekly), platform highlights
+  ;;     ONE event PER TOPIC (5 total). Prevents niche starvation: without this,
+  ;;     topics that produce no hosts have no events, their users have nothing
+  ;;     to attend, they churn, the topic dies and never recovers. Per-topic
+  ;;     seeding guarantees every interest has a baseline weekly opportunity.
+  if ticks > 0 and (ticks mod 7) = 0 [
+    let t 0
+    repeat 5 [
+      let topic-i t
+      create-events 1 [
+        setxy random-xcor random-ycor
+        set shape "star"
+        set size 1.5
+        set color yellow
+        set ev-quality          50 + random 40    ;; platform-curated = above-average
+        set ev-attendance-tick  0
+        set ev-total-attendance 0
+        set ev-visibility       0.6 + random-float 0.3
+        set ev-lifespan         10 + random 14
+        set ev-creator          nobody
+        set ev-topic            topic-i
+        ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
+      ]
+      set total-events-created total-events-created + 1
+      set t t + 1
+    ]
+  ]
 
   ;; 4. All non-churned users act
   ask users with [ user-state != "churned" ] [
@@ -186,6 +220,7 @@ to go
         set ev-creator          myself
         ;; Hosts create events for their own niche — depth over breadth
         set ev-topic            host-int
+        ifelse random-float 1 < 0.3 [ set ev-price 0 ] [ set ev-price 5 + random 30 ]
       ]
       set total-events-created total-events-created + 1
     ]
@@ -245,12 +280,13 @@ end
 ;; check could get stuck in "new" state indefinitely. Now they always resolve
 ;; to passive within ~4 ticks — good onboarding just means higher satisfaction on arrival.
 to behave-new
-  let nearby events in-radius 10
+  let my-int user-interest
+  let my-mot social-motive
+  let my-bud budget
+  let nearby (events in-radius 10) with [ ev-price <= my-bud ]
   ifelse any? nearby [
-    let my-int user-interest
     let target max-one-of nearby [
-      ev-quality * ev-visibility *
-      (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+      event-score ev-quality ev-visibility ev-topic my-int my-mot
     ]
     attend target
     ;; onboarding-quality: probability of a great first experience
@@ -276,12 +312,13 @@ end
 ;; (Higher Logic community engagement data, 2023)
 to behave-passive
   if random-float 1 < cap 1.0 (activity-level * (0.3 + participation-density)) [
-    let nearby events in-radius 10
+    let my-int user-interest
+    let my-mot social-motive
+    let my-bud budget
+    let nearby (events in-radius 10) with [ ev-price <= my-bud ]
     if any? nearby [
-      let my-int user-interest
       let target max-one-of nearby [
-        ev-quality * ev-visibility *
-        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+        event-score ev-quality ev-visibility ev-topic my-int my-mot
       ]
       attend target
     ]
@@ -317,12 +354,13 @@ end
 ;; --- ACTIVE: regular attendance, social bonding, host emergence ---
 to behave-active
   if random-float 1 < activity-level [
-    let nearby events in-radius 14
+    let my-int user-interest
+    let my-mot social-motive
+    let my-bud budget
+    let nearby (events in-radius 14) with [ ev-price <= my-bud ]
     if any? nearby [
-      let my-int user-interest
       let target max-one-of nearby [
-        ev-quality * ev-visibility *
-        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+        event-score ev-quality ev-visibility ev-topic my-int my-mot
       ]
       attend target
     ]
@@ -364,12 +402,17 @@ end
 ;; --- HOST: creates events; sensitive to own event attendance ---
 to behave-host
   if random-float 1 < activity-level [
-    let nearby events in-radius 14
+    let my-int user-interest
+    let my-mot social-motive
+    let my-bud budget
+    ;; Filter out own events — attending them would self-inflate the signal
+    ;; update-host-satisfaction reads from ev-attendance-tick.
+    let nearby (events in-radius 14) with [
+      ev-price <= my-bud and ev-creator != myself
+    ]
     if any? nearby [
-      let my-int user-interest
       let target max-one-of nearby [
-        ev-quality * ev-visibility *
-        (ifelse-value (ev-topic = my-int) [ 1.0 ] [ 0.3 ])
+        event-score ev-quality ev-visibility ev-topic my-int my-mot
       ]
       attend target
     ]
@@ -519,13 +562,25 @@ end
 ;; REPORTERS
 ;; ============================================================
 
-;; Clamping helpers — ifelse avoids max/capsyntax issues in Tortoise
+;; Clamping helpers — ifelse avoids max/min list syntax issues in Tortoise
 to-report cap [ hi x ]
   ifelse x > hi [ report hi ] [ report x ]
 end
 
 to-report at-least [ lo x ]
   ifelse x < lo [ report lo ] [ report x ]
+end
+
+;; Event-scoring helper — used by every behave-* routine when picking which
+;; event to attend. Takes the event's quality/visibility/topic and the user's
+;; interest + social motive, returns a numeric score for max-one-of ranking.
+;; Topic weight: 1.0 on-topic; off-topic = 0.2 + motive × 0.6 (recluses ~0.32,
+;; social butterflies ~0.68 — niche-seekers ignore off-topic, butterflies don't).
+to-report event-score [ ev-q ev-v ev-t my-int my-mot ]
+  let topic-weight ifelse-value (ev-t = my-int)
+    [ 1.0 ]
+    [ 0.2 + my-mot * 0.6 ]
+  report ev-q * ev-v * topic-weight
 end
 
 to-report cnt-new
