@@ -1422,22 +1422,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   height: auto;
 }
 
-.cc-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  height: 100%;
-}
-.cc-heading {
-  font-family: var(--serif);
-  font-size: clamp(40px, 5vw, 64px);
-  line-height: 0.8;
-  letter-spacing: -0.05em;
-  color: var(--navy);
-  text-align: right;
-  margin: 0;
-}
-
 .cc-table {
   display: flex;
   flex-direction: column;
@@ -1927,29 +1911,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   flex-direction: column;
   min-height: 0;
 }
-.A-trifecta__head {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 48px;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  flex: 0 0 auto;
-}
-.A-trifecta__eyebrow {
-  font-family: var(--sans);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--navy);
-}
-.A-trifecta__lede {
-  font-family: var(--serif);
-  font-size: clamp(24px, 2.4vw, 36px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--navy);
-  margin: 0;
-}
 .A-trifecta__diagram {
   flex: 1;
   min-height: 0;
@@ -2320,7 +2281,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   .work-carousel { aspect-ratio: 16 / 10; min-height: 0; }
 
   /* Creative Coding table */
-  .cc-heading { text-align: left; font-size: clamp(36px, 7vw, 48px); }
   .cc-table__head { display: none; }
   .cc-row {
     grid-template-columns: 1fr 28px;
@@ -2382,12 +2342,6 @@ body:has(.A-hero).is-scrolled .A-foot {
     min-height: 0;
     padding: 48px 20px 96px;
   }
-  .A-trifecta__head {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .A-trifecta__lede { font-size: clamp(20px, 4vw, 28px); }
   .A-trifecta__diagram { min-height: 220px; }
 
   /* Fixed footer */
@@ -2479,7 +2433,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   .work-index__item { font-size: 16px; }
   .work-carousel { aspect-ratio: 4 / 3; }
 
-  .cc-heading { font-size: clamp(30px, 9vw, 40px); }
   .cc-row { padding: 16px 0; }
   .cc-row__title { font-size: 16px; }
   .cc-row__desc { font-size: 13px; }
@@ -2510,7 +2463,6 @@ body:has(.A-hero).is-scrolled .A-foot {
   .A-testimonials__arrow { width: 36px; height: 36px; }
 
   .A-trifecta { padding: 40px 16px 84px; }
-  .A-trifecta__lede { font-size: clamp(18px, 4.6vw, 22px); }
   .A-trifecta__diagram { min-height: 180px; }
 
   .A-foot { padding: 12px 16px; font-size: 13px; }
