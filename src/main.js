@@ -197,17 +197,22 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
-/* ----- Neural-graph closer (trifecta) — interactive constellation.
-   Per-node magnetic pull toward cursor + slow sine drift; SVG lines re-drawn
-   every frame from current node positions so they stretch and contract live.
-   - Each node has a static rest position (--x / --y as % of graph) and a
-     per-frame offset (--ox / --oy in px) folded into its transform
-   - On rAF: target offset = sine drift (~3px) + cursor pull (up to ~28px when
-     close). current eases toward target via lerp(0.14)
-   - Lines connect each non-center node's current position to the center's
-     current position; both ends shorten so the stroke doesn't slice text
-   - Hovering a node tags its line .is-hot for emphasis
-   - rAF only runs while the graph is intersecting the viewport */
+/* ----- Neural-graph closer (trifecta) — interactive constellation v2.
+   Based on frame-by-frame analysis of synapserstudio.com — see
+   reference/synapser-drift-onPrecision.json. Key observed behaviors:
+     - words drift continuously in straight-ish lines at ~50 px/sec (slow orbit)
+     - cursor entering the area triggers spring-like motion with significant
+       overshoot (damping ratio ~0.4-0.5)
+     - far-away words still move noticeably when cursor enters
+     - settling takes >1 second
+   Implementation matches the character (not the exact pixel paths):
+     - Each non-center node has rest (--x/--y), target offset, current offset,
+       velocity. Verlet-ish spring (stiffness=90, damping=9 → ratio ~0.47).
+     - Target = slow sine drift (±40px) + cursor pull (unit vector toward
+       cursor, magnitude min(120, dist * 0.5) — capped, no hard radius).
+     - Lines recompute every frame from current positions; both ends shortened
+       so the stroke doesn't slice into the text.
+     - rAF runs only while graph intersects viewport. */
 const graphEl = document.querySelector('.A-graph')
 if (graphEl) {
   const svg = graphEl.querySelector('.A-graph__lines')
@@ -216,30 +221,27 @@ if (graphEl) {
   const nodes = allNodes.filter((n) => n !== centerNode)
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
-  // Build per-node state. Rest positions recomputed from the element's --x/--y
-  // each tick so a resize naturally retunes the layout.
+  // Per-node state. ox/oy is the current offset from rest in px; vx/vy is velocity.
   function makeState(node, i) {
     return {
-      node,
-      i,
-      // rest position in graph-local px (filled by tick)
-      rx: 0, ry: 0,
-      // current offset from rest, in px (eased)
-      ox: 0, oy: 0,
-      // independent sine-drift phase
-      phaseX: Math.random() * Math.PI * 2,
+      node, i,
+      rx: 0, ry: 0,           // rest position in graph-local px (filled by tick)
+      ox: 0, oy: 0,           // current offset from rest
+      vx: 0, vy: 0,           // velocity
+      phaseX: Math.random() * Math.PI * 2,  // drift phase (independent per node)
       phaseY: Math.random() * Math.PI * 2,
-      speedX: 0.0006 + Math.random() * 0.0004,
-      speedY: 0.0005 + Math.random() * 0.0004,
-      ampX: 4 + Math.random() * 3,
-      ampY: 3 + Math.random() * 3,
-      // SVG line element (created lazily)
+      driftSpeed: 0.00018 + Math.random() * 0.00008,  // ~30-40 sec period
+      ampX: 32 + Math.random() * 14,   // drift amplitude (much bigger than v1)
+      ampY: 28 + Math.random() * 14,
       line: null,
     }
   }
   const states = nodes.map(makeState)
-  const centerState = { node: centerNode, rx: 0, ry: 0, ox: 0, oy: 0,
-    phaseX: 0, phaseY: 0, speedX: 0, speedY: 0, ampX: 0, ampY: 0 }
+  // Center gets a smaller, slower drift; very gentle cursor pull so it stays the anchor
+  const centerState = {
+    node: centerNode, rx: 0, ry: 0, ox: 0, oy: 0, vx: 0, vy: 0,
+    phaseX: 0, phaseY: 0, driftSpeed: 0.00012, ampX: 8, ampY: 6,
+  }
 
   function pct(node, key) {
     const raw = node.style.getPropertyValue(key).trim()
@@ -263,50 +265,65 @@ if (graphEl) {
   graphEl.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY })
   graphEl.addEventListener('mouseleave', () => { mouseX = mouseY = -99999 })
 
-  // Magnetic pull config — tuned for an inviting-not-aggressive feel
-  const INFLUENCE_R = 220   // px — within this radius, cursor pulls a node
-  const MAX_PULL = 28       // px — pull amount when cursor is right on top
-  const LERP = 0.14         // ease factor — higher = snappier
+  // Spring config — underdamped for visible overshoot (matches synapser feel)
+  const STIFFNESS = 90        // per second² — restoring force per px of offset
+  const DAMPING = 9           // per second — velocity decay (ratio = 9/(2√90) ≈ 0.47)
+  const PULL_FACTOR = 0.5     // 50% of cursor distance contributes to target
+  const PULL_CAP = 120        // px — max pull (no hard radius; far cursors still pull)
+  const CENTER_PULL_SCALE = 0.18  // center moves much less than surrounding nodes
 
-  function targetOffset(s, now, mx, my, vx, vy) {
-    // Cursor pull: shorter distance = stronger pull, toward cursor
-    const ax = vx + s.rx          // node's rest position in viewport coords
-    const ay = vy + s.ry
-    const dx = mx - ax
-    const dy = my - ay
-    const dist = Math.hypot(dx, dy)
-    let tx = 0, ty = 0
-    if (dist < INFLUENCE_R && dist > 0) {
-      const k = 1 - dist / INFLUENCE_R
-      const pull = k * k * MAX_PULL
-      tx += (dx / dist) * pull
-      ty += (dy / dist) * pull
+  function computeTarget(s, now, mx, my, isCenter) {
+    // Slow sine drift baseline — gives words a perpetual life
+    let tx = Math.sin(s.phaseX + now * s.driftSpeed) * s.ampX
+    let ty = Math.cos(s.phaseY + now * s.driftSpeed * 0.83) * s.ampY
+    // Cursor pull — unit vector toward cursor, magnitude capped
+    if (mx !== -99999) {
+      const dx = mx - s.rx
+      const dy = my - s.ry
+      const dist = Math.hypot(dx, dy)
+      if (dist > 0.5) {
+        const mag = Math.min(PULL_CAP, dist * PULL_FACTOR) * (isCenter ? CENTER_PULL_SCALE : 1)
+        tx += (dx / dist) * mag
+        ty += (dy / dist) * mag
+      }
     }
-    // Slow sine drift on top
-    tx += Math.sin(s.phaseX + now * s.speedX) * s.ampX
-    ty += Math.cos(s.phaseY + now * s.speedY) * s.ampY
     return { tx, ty }
+  }
+
+  // Verlet-style integration step
+  function integrate(s, tx, ty, dt) {
+    const ax = (tx - s.ox) * STIFFNESS - s.vx * DAMPING
+    const ay = (ty - s.oy) * STIFFNESS - s.vy * DAMPING
+    s.vx += ax * dt
+    s.vy += ay * dt
+    s.ox += s.vx * dt
+    s.oy += s.vy * dt
   }
 
   let running = false
   let rafId = 0
+  let lastT = 0
   function tick(now) {
     if (!running) { rafId = 0; return }
     const r = graphEl.getBoundingClientRect()
     if (r.width === 0 || r.height === 0) { rafId = requestAnimationFrame(tick); return }
     svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
 
-    // Center node
+    // Real dt (clamped so a tab-switch pause doesn't explode the spring)
+    const dt = Math.min(1 / 30, lastT ? (now - lastT) / 1000 : 1 / 60)
+    lastT = now
+
+    // Cursor coordinates in graph-local space (graph rect)
+    const mxLocal = mouseX === -99999 ? -99999 : mouseX - r.left
+    const myLocal = mouseY === -99999 ? -99999 : mouseY - r.top
+
+    // Center node — slow drift, gentle pull
     centerState.rx = pct(centerNode, '--x') * r.width
     centerState.ry = pct(centerNode, '--y') * r.height
-    const { tx: ctx, ty: cty } = targetOffset(centerState, now, mouseX, mouseY, r.left, r.top)
-    // Center has much weaker pull so it stays as the anchor — quarter strength
-    const ctxd = ctx * 0.25, ctyd = cty * 0.25
-    centerState.ox += (ctxd - centerState.ox) * LERP
-    centerState.oy += (ctyd - centerState.oy) * LERP
-    centerNode.style.setProperty('--ox', `${centerState.ox.toFixed(2)}px`)
-    centerNode.style.setProperty('--oy', `${centerState.oy.toFixed(2)}px`)
-
+    const { tx: ctx, ty: cty } = computeTarget(centerState, now, mxLocal, myLocal, true)
+    integrate(centerState, ctx, cty, dt)
+    centerNode.style.setProperty('--ox', centerState.ox.toFixed(2) + 'px')
+    centerNode.style.setProperty('--oy', centerState.oy.toFixed(2) + 'px')
     const cxNow = centerState.rx + centerState.ox
     const cyNow = centerState.ry + centerState.oy
 
@@ -314,28 +331,25 @@ if (graphEl) {
     for (const s of states) {
       s.rx = pct(s.node, '--x') * r.width
       s.ry = pct(s.node, '--y') * r.height
-      const { tx, ty } = targetOffset(s, now, mouseX, mouseY, r.left, r.top)
-      s.ox += (tx - s.ox) * LERP
-      s.oy += (ty - s.oy) * LERP
-      s.node.style.setProperty('--ox', `${s.ox.toFixed(2)}px`)
-      s.node.style.setProperty('--oy', `${s.oy.toFixed(2)}px`)
+      const { tx, ty } = computeTarget(s, now, mxLocal, myLocal, false)
+      integrate(s, tx, ty, dt)
+      s.node.style.setProperty('--ox', s.ox.toFixed(2) + 'px')
+      s.node.style.setProperty('--oy', s.oy.toFixed(2) + 'px')
 
-      // Redraw the line for this node from current positions
+      // Line endpoints from current node + center positions
       const nx = s.rx + s.ox
       const ny = s.ry + s.oy
       const len = Math.hypot(nx - cxNow, ny - cyNow)
-      const padNear = Math.min(70, len * 0.22)
-      const padFar = Math.min(24, len * 0.10)
-      const t1 = padNear / len
-      const t2 = (len - padFar) / len
-      const x1 = cxNow + (nx - cxNow) * t1
-      const y1 = cyNow + (ny - cyNow) * t1
-      const x2 = cxNow + (nx - cxNow) * t2
-      const y2 = cyNow + (ny - cyNow) * t2
-      s.line.setAttribute('x1', x1.toFixed(2))
-      s.line.setAttribute('y1', y1.toFixed(2))
-      s.line.setAttribute('x2', x2.toFixed(2))
-      s.line.setAttribute('y2', y2.toFixed(2))
+      if (len > 1) {
+        const padNear = Math.min(70, len * 0.22)
+        const padFar = Math.min(24, len * 0.10)
+        const t1 = padNear / len
+        const t2 = (len - padFar) / len
+        s.line.setAttribute('x1', (cxNow + (nx - cxNow) * t1).toFixed(2))
+        s.line.setAttribute('y1', (cyNow + (ny - cyNow) * t1).toFixed(2))
+        s.line.setAttribute('x2', (cxNow + (nx - cxNow) * t2).toFixed(2))
+        s.line.setAttribute('y2', (cyNow + (ny - cyNow) * t2).toFixed(2))
+      }
     }
 
     rafId = requestAnimationFrame(tick)
