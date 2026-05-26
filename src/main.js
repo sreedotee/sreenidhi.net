@@ -197,60 +197,107 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
-/* ----- Neural-graph closer (trifecta) — draw SVG lines from each node to the center,
-   trigger the draw-in stroke animation when the graph scrolls into view, recompute on resize. */
+/* ----- Neural-graph closer (trifecta)
+   - SVG line endpoints come from each node's STATIC --x / --y, not its rendered rect
+     (so the wobble doesn't drag line endpoints around on every frame)
+   - Lines tagged with data-i; matching node also gets data-i — hovering a node
+     promotes its line to .is-hot (full navy stroke, pulse paused)
+   - Mouse parallax: cursor offset within .A-graph drives --mx / --my CSS vars on
+     .A-graph__inner so the whole graph drifts subtly toward the pointer
+   - On scroll-into-view, dash-draw triggers; pulse animation runs persistently after */
 const graphEl = document.querySelector('.A-graph')
 if (graphEl) {
+  const inner = graphEl.querySelector('.A-graph__inner')
   const svg = graphEl.querySelector('.A-graph__lines')
-  const center = graphEl.querySelector('.A-graph__node--center')
   const nodes = [...graphEl.querySelectorAll('.A-graph__node:not(.A-graph__node--center)')]
+  const centerNode = graphEl.querySelector('.A-graph__node--center')
   const SVG_NS = 'http://www.w3.org/2000/svg'
+
+  // tag nodes so we can match a hovered node to its line
+  nodes.forEach((node, i) => { node.dataset.i = i })
+
+  function pct(node, key) {
+    const raw = node.style.getPropertyValue(key).trim()
+    return raw.endsWith('%') ? parseFloat(raw) / 100 : parseFloat(raw)
+  }
 
   function drawLines() {
     const r = graphEl.getBoundingClientRect()
     if (r.width === 0 || r.height === 0) return
     svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
-    // Wipe and redraw — cheap; only fires on layout / resize / scroll-in
     while (svg.firstChild) svg.removeChild(svg.firstChild)
-    const cRect = center.getBoundingClientRect()
-    const cx = cRect.left + cRect.width / 2 - r.left
-    const cy = cRect.top + cRect.height / 2 - r.top
+    const cx = pct(centerNode, '--x') * r.width
+    const cy = pct(centerNode, '--y') * r.height
     const isVisible = graphEl.classList.contains('is-visible')
-    for (const node of nodes) {
-      const n = node.getBoundingClientRect()
-      const nx = n.left + n.width / 2 - r.left
-      const ny = n.top + n.height / 2 - r.top
+    nodes.forEach((node, i) => {
+      const nx = pct(node, '--x') * r.width
+      const ny = pct(node, '--y') * r.height
       const len = Math.hypot(nx - cx, ny - cy)
+      const padNear = Math.min(80, len * 0.22)   // pad near the giant 'Design' word
+      const padFar = Math.min(28, len * 0.10)    // pad at the small word end
+      const t1 = padNear / len
+      const t2 = (len - padFar) / len
+      const x1 = cx + (nx - cx) * t1
+      const y1 = cy + (ny - cy) * t1
+      const x2 = cx + (nx - cx) * t2
+      const y2 = cy + (ny - cy) * t2
+      const drawLen = Math.hypot(x2 - x1, y2 - y1)
       const line = document.createElementNS(SVG_NS, 'line')
-      line.setAttribute('x1', cx)
-      line.setAttribute('y1', cy)
-      line.setAttribute('x2', nx)
-      line.setAttribute('y2', ny)
-      // Stop the line short of the word so the stroke doesn't slice through the text
-      const padding = Math.min(48, len * 0.18)
-      const t = (len - padding) / len
-      line.setAttribute('x2', cx + (nx - cx) * t)
-      line.setAttribute('y2', cy + (ny - cy) * t)
-      line.style.strokeDasharray = len
-      line.style.strokeDashoffset = isVisible ? '0' : len
+      line.setAttribute('x1', x1)
+      line.setAttribute('y1', y1)
+      line.setAttribute('x2', x2)
+      line.setAttribute('y2', y2)
+      line.style.strokeDasharray = drawLen
+      line.style.strokeDashoffset = isVisible ? '0' : drawLen
+      line.dataset.i = i
       svg.appendChild(line)
-    }
+    })
   }
+
+  function setVisible() {
+    graphEl.classList.add('is-visible')
+    drawLines()
+    requestAnimationFrame(() => {
+      svg.querySelectorAll('line').forEach((line) => { line.style.strokeDashoffset = '0' })
+    })
+  }
+
   drawLines()
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(drawLines)
+  }
   window.addEventListener('resize', drawLines)
 
   new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting) {
-        graphEl.classList.add('is-visible')
-        // Trigger the transition by setting dashoffset to 0
-        svg.querySelectorAll('line').forEach((line) => {
-          line.style.strokeDashoffset = '0'
-        })
-      }
-    },
-    { threshold: 0.25 }
+    ([entry]) => { if (entry.isIntersecting) setVisible() },
+    { threshold: 0.2 }
   ).observe(graphEl)
+
+  // Mouse parallax — pointer moves the whole graph ±16px / ±12px
+  graphEl.addEventListener('mousemove', (e) => {
+    const r = graphEl.getBoundingClientRect()
+    const cx = (e.clientX - r.left) / r.width - 0.5   // -0.5 → 0.5
+    const cy = (e.clientY - r.top) / r.height - 0.5
+    inner.style.setProperty('--mx', `${(cx * 32).toFixed(2)}px`)
+    inner.style.setProperty('--my', `${(cy * 24).toFixed(2)}px`)
+  })
+  graphEl.addEventListener('mouseleave', () => {
+    inner.style.setProperty('--mx', '0px')
+    inner.style.setProperty('--my', '0px')
+  })
+
+  // Hovering a word lights up its connecting line
+  nodes.forEach((node) => {
+    const i = node.dataset.i
+    node.addEventListener('mouseenter', () => {
+      const line = svg.querySelector(`line[data-i="${i}"]`)
+      if (line) line.classList.add('is-hot')
+    })
+    node.addEventListener('mouseleave', () => {
+      const line = svg.querySelector(`line[data-i="${i}"]`)
+      if (line) line.classList.remove('is-hot')
+    })
+  })
 }
 
 /* ----- Play thumbnail selector ----- */

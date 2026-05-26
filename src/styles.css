@@ -1891,17 +1891,27 @@ body:has(.A-hero).is-scrolled .A-foot {
   max-width: 720px;
   flex: 0 0 auto;
 }
-/* Neural-graph closer — central "design" node with primary (tech/business/culture)
-   and secondary (lens vocabulary) nodes wired together by SVG lines. JS computes
-   line coords from each node's rendered center; CSS handles draw-in via dashoffset,
-   plus persistent pulse on lines and wobble on nodes. */
+/* Neural-graph closer — central "Design" node with primary (technology / business /
+   culture) and secondary (lens vocabulary) nodes wired together by SVG lines.
+   - JS computes line coords from each node's STATIC --x/--y (so wobble doesn't
+     drag the line endpoints around on every frame)
+   - lines dash-draw on scroll-in, then pulse opacity persistently
+   - nodes wobble independently on staggered loops
+   - mouse parallax on .A-graph__inner shifts the whole graph subtly toward the cursor
+   - hovering a node lights up its line */
 .A-graph {
   position: relative;
   width: 100%;
   flex: 1;
-  min-height: 420px;
-  aspect-ratio: 16 / 9;
+  min-height: 480px;
   margin: 0 auto;
+  overflow: visible;
+}
+.A-graph__inner {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+  transition: transform 0.6s cubic-bezier(.2,.7,.2,1);
 }
 .A-graph__lines {
   position: absolute;
@@ -1912,12 +1922,21 @@ body:has(.A-hero).is-scrolled .A-foot {
   z-index: 0;
 }
 .A-graph__lines line {
-  stroke: rgba(4, 8, 61, 0.22);
+  stroke: rgba(4, 8, 61, 0.28);
   stroke-width: 1;
-  transition: stroke-dashoffset 1.4s cubic-bezier(.7, .2, .2, 1);
+  transition: stroke-dashoffset 1.4s cubic-bezier(.7, .2, .2, 1),
+              stroke-opacity 0.25s ease,
+              stroke 0.25s ease,
+              stroke-width 0.25s ease;
 }
 .A-graph.is-visible .A-graph__lines line {
   animation: graphLinePulse 5s ease-in-out 1.6s infinite;
+}
+.A-graph__lines line.is-hot {
+  stroke: var(--navy);
+  stroke-width: 1.4;
+  stroke-opacity: 1;
+  animation: none;
 }
 @keyframes graphLinePulse {
   0%, 100% { stroke-opacity: 1; }
@@ -1929,37 +1948,44 @@ body:has(.A-hero).is-scrolled .A-foot {
   left: var(--x);
   top: var(--y);
   font-family: var(--serif);
-  font-size: 16px;
-  color: rgba(4, 8, 61, 0.55);
+  font-size: 17px;
+  color: rgba(4, 8, 61, 0.6);
   letter-spacing: -0.01em;
   white-space: nowrap;
   z-index: 1;
   transform: translate(-50%, -50%);
   animation: graphWobble 8s ease-in-out infinite;
   will-change: transform;
+  cursor: default;
+  transition: color 0.25s ease;
+}
+.A-graph__node:hover {
+  color: var(--navy);
 }
 .A-graph__node--primary {
-  font-size: 22px;
-  color: rgba(4, 8, 61, 0.85);
+  font-size: 24px;
+  color: rgba(4, 8, 61, 0.9);
   font-style: italic;
 }
 .A-graph__node--center {
-  font-size: clamp(64px, 11vw, 160px);
+  font-size: clamp(72px, 12vw, 180px);
   font-weight: 400;
   letter-spacing: -0.05em;
   color: var(--navy);
   animation: none;
+  pointer-events: none;
 }
-/* Spread wobble phase across nodes so they drift independently */
+/* Stagger wobble across nodes so they drift independently */
 .A-graph__node:nth-of-type(3n) { animation-duration: 7s; animation-delay: -1.5s; }
 .A-graph__node:nth-of-type(3n+1) { animation-duration: 9s; animation-delay: -3.2s; }
-.A-graph__node:nth-of-type(3n+2) { animation-duration: 8s; animation-delay: -5.4s; }
+.A-graph__node:nth-of-type(3n+2) { animation-duration: 11s; animation-delay: -5.4s; }
 
 @keyframes graphWobble {
-  0%, 100% { transform: translate(-50%, -50%); }
-  25% { transform: translate(calc(-50% + 3px), calc(-50% - 2px)); }
-  50% { transform: translate(calc(-50% - 2px), calc(-50% + 3px)); }
-  75% { transform: translate(calc(-50% + 2px), calc(-50% + 1px)); }
+  0%   { transform: translate(-50%, -50%); }
+  25%  { transform: translate(calc(-50% + 6px), calc(-50% - 4px)); }
+  50%  { transform: translate(calc(-50% - 4px), calc(-50% + 5px)); }
+  75%  { transform: translate(calc(-50% + 3px), calc(-50% + 3px)); }
+  100% { transform: translate(-50%, -50%); }
 }
 
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
