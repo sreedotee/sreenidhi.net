@@ -1367,15 +1367,19 @@ body:has(.A-hero).is-scrolled .A-foot {
 .P-shot--placeholder {
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(4, 8, 61, 0.04),
-    rgba(4, 8, 61, 0.04) 12px,
-    rgba(4, 8, 61, 0.08) 12px,
-    rgba(4, 8, 61, 0.08) 24px
-  );
-  border: 1px dashed rgba(4, 8, 61, 0.25);
+  background: rgba(4, 8, 61, 0.06);
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.P-shot--placeholder__label {
+  font-family: var(--mono, var(--sans));
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  opacity: 0.55;
 }
 .P-shot__caption {
   font-family: var(--sans);
