@@ -197,106 +197,178 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
-/* ----- Neural-graph closer (trifecta)
-   - SVG line endpoints come from each node's STATIC --x / --y, not its rendered rect
-     (so the wobble doesn't drag line endpoints around on every frame)
-   - Lines tagged with data-i; matching node also gets data-i — hovering a node
-     promotes its line to .is-hot (full navy stroke, pulse paused)
-   - Mouse parallax: cursor offset within .A-graph drives --mx / --my CSS vars on
-     .A-graph__inner so the whole graph drifts subtly toward the pointer
-   - On scroll-into-view, dash-draw triggers; pulse animation runs persistently after */
+/* ----- Neural-graph closer (trifecta) — interactive constellation.
+   Per-node magnetic pull toward cursor + slow sine drift; SVG lines re-drawn
+   every frame from current node positions so they stretch and contract live.
+   - Each node has a static rest position (--x / --y as % of graph) and a
+     per-frame offset (--ox / --oy in px) folded into its transform
+   - On rAF: target offset = sine drift (~3px) + cursor pull (up to ~28px when
+     close). current eases toward target via lerp(0.14)
+   - Lines connect each non-center node's current position to the center's
+     current position; both ends shorten so the stroke doesn't slice text
+   - Hovering a node tags its line .is-hot for emphasis
+   - rAF only runs while the graph is intersecting the viewport */
 const graphEl = document.querySelector('.A-graph')
 if (graphEl) {
-  const inner = graphEl.querySelector('.A-graph__inner')
   const svg = graphEl.querySelector('.A-graph__lines')
-  const nodes = [...graphEl.querySelectorAll('.A-graph__node:not(.A-graph__node--center)')]
+  const allNodes = [...graphEl.querySelectorAll('.A-graph__node')]
   const centerNode = graphEl.querySelector('.A-graph__node--center')
+  const nodes = allNodes.filter((n) => n !== centerNode)
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
-  // tag nodes so we can match a hovered node to its line
-  nodes.forEach((node, i) => { node.dataset.i = i })
+  // Build per-node state. Rest positions recomputed from the element's --x/--y
+  // each tick so a resize naturally retunes the layout.
+  function makeState(node, i) {
+    return {
+      node,
+      i,
+      // rest position in graph-local px (filled by tick)
+      rx: 0, ry: 0,
+      // current offset from rest, in px (eased)
+      ox: 0, oy: 0,
+      // independent sine-drift phase
+      phaseX: Math.random() * Math.PI * 2,
+      phaseY: Math.random() * Math.PI * 2,
+      speedX: 0.0006 + Math.random() * 0.0004,
+      speedY: 0.0005 + Math.random() * 0.0004,
+      ampX: 4 + Math.random() * 3,
+      ampY: 3 + Math.random() * 3,
+      // SVG line element (created lazily)
+      line: null,
+    }
+  }
+  const states = nodes.map(makeState)
+  const centerState = { node: centerNode, rx: 0, ry: 0, ox: 0, oy: 0,
+    phaseX: 0, phaseY: 0, speedX: 0, speedY: 0, ampX: 0, ampY: 0 }
 
   function pct(node, key) {
     const raw = node.style.getPropertyValue(key).trim()
     return raw.endsWith('%') ? parseFloat(raw) / 100 : parseFloat(raw)
   }
 
-  function drawLines() {
-    const r = graphEl.getBoundingClientRect()
-    if (r.width === 0 || r.height === 0) return
-    svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
+  // Build the SVG lines once (one per non-center node, tagged by index)
+  function buildLines() {
     while (svg.firstChild) svg.removeChild(svg.firstChild)
-    const cx = pct(centerNode, '--x') * r.width
-    const cy = pct(centerNode, '--y') * r.height
-    const isVisible = graphEl.classList.contains('is-visible')
-    nodes.forEach((node, i) => {
-      const nx = pct(node, '--x') * r.width
-      const ny = pct(node, '--y') * r.height
-      const len = Math.hypot(nx - cx, ny - cy)
-      const padNear = Math.min(80, len * 0.22)   // pad near the giant 'Design' word
-      const padFar = Math.min(28, len * 0.10)    // pad at the small word end
+    states.forEach((s) => {
+      const line = document.createElementNS(SVG_NS, 'line')
+      line.dataset.i = s.i
+      svg.appendChild(line)
+      s.line = line
+    })
+  }
+  buildLines()
+
+  // Pointer tracking — pageless coords, since mousemove also fires on inner children
+  let mouseX = -99999, mouseY = -99999
+  graphEl.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY })
+  graphEl.addEventListener('mouseleave', () => { mouseX = mouseY = -99999 })
+
+  // Magnetic pull config — tuned for an inviting-not-aggressive feel
+  const INFLUENCE_R = 220   // px — within this radius, cursor pulls a node
+  const MAX_PULL = 28       // px — pull amount when cursor is right on top
+  const LERP = 0.14         // ease factor — higher = snappier
+
+  function targetOffset(s, now, mx, my, vx, vy) {
+    // Cursor pull: shorter distance = stronger pull, toward cursor
+    const ax = vx + s.rx          // node's rest position in viewport coords
+    const ay = vy + s.ry
+    const dx = mx - ax
+    const dy = my - ay
+    const dist = Math.hypot(dx, dy)
+    let tx = 0, ty = 0
+    if (dist < INFLUENCE_R && dist > 0) {
+      const k = 1 - dist / INFLUENCE_R
+      const pull = k * k * MAX_PULL
+      tx += (dx / dist) * pull
+      ty += (dy / dist) * pull
+    }
+    // Slow sine drift on top
+    tx += Math.sin(s.phaseX + now * s.speedX) * s.ampX
+    ty += Math.cos(s.phaseY + now * s.speedY) * s.ampY
+    return { tx, ty }
+  }
+
+  let running = false
+  let rafId = 0
+  function tick(now) {
+    if (!running) { rafId = 0; return }
+    const r = graphEl.getBoundingClientRect()
+    if (r.width === 0 || r.height === 0) { rafId = requestAnimationFrame(tick); return }
+    svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
+
+    // Center node
+    centerState.rx = pct(centerNode, '--x') * r.width
+    centerState.ry = pct(centerNode, '--y') * r.height
+    const { tx: ctx, ty: cty } = targetOffset(centerState, now, mouseX, mouseY, r.left, r.top)
+    // Center has much weaker pull so it stays as the anchor — quarter strength
+    const ctxd = ctx * 0.25, ctyd = cty * 0.25
+    centerState.ox += (ctxd - centerState.ox) * LERP
+    centerState.oy += (ctyd - centerState.oy) * LERP
+    centerNode.style.setProperty('--ox', `${centerState.ox.toFixed(2)}px`)
+    centerNode.style.setProperty('--oy', `${centerState.oy.toFixed(2)}px`)
+
+    const cxNow = centerState.rx + centerState.ox
+    const cyNow = centerState.ry + centerState.oy
+
+    // Surrounding nodes
+    for (const s of states) {
+      s.rx = pct(s.node, '--x') * r.width
+      s.ry = pct(s.node, '--y') * r.height
+      const { tx, ty } = targetOffset(s, now, mouseX, mouseY, r.left, r.top)
+      s.ox += (tx - s.ox) * LERP
+      s.oy += (ty - s.oy) * LERP
+      s.node.style.setProperty('--ox', `${s.ox.toFixed(2)}px`)
+      s.node.style.setProperty('--oy', `${s.oy.toFixed(2)}px`)
+
+      // Redraw the line for this node from current positions
+      const nx = s.rx + s.ox
+      const ny = s.ry + s.oy
+      const len = Math.hypot(nx - cxNow, ny - cyNow)
+      const padNear = Math.min(70, len * 0.22)
+      const padFar = Math.min(24, len * 0.10)
       const t1 = padNear / len
       const t2 = (len - padFar) / len
-      const x1 = cx + (nx - cx) * t1
-      const y1 = cy + (ny - cy) * t1
-      const x2 = cx + (nx - cx) * t2
-      const y2 = cy + (ny - cy) * t2
-      const drawLen = Math.hypot(x2 - x1, y2 - y1)
-      const line = document.createElementNS(SVG_NS, 'line')
-      line.setAttribute('x1', x1)
-      line.setAttribute('y1', y1)
-      line.setAttribute('x2', x2)
-      line.setAttribute('y2', y2)
-      line.style.strokeDasharray = drawLen
-      line.style.strokeDashoffset = isVisible ? '0' : drawLen
-      line.dataset.i = i
-      svg.appendChild(line)
-    })
+      const x1 = cxNow + (nx - cxNow) * t1
+      const y1 = cyNow + (ny - cyNow) * t1
+      const x2 = cxNow + (nx - cxNow) * t2
+      const y2 = cyNow + (ny - cyNow) * t2
+      s.line.setAttribute('x1', x1.toFixed(2))
+      s.line.setAttribute('y1', y1.toFixed(2))
+      s.line.setAttribute('x2', x2.toFixed(2))
+      s.line.setAttribute('y2', y2.toFixed(2))
+    }
+
+    rafId = requestAnimationFrame(tick)
   }
 
-  function setVisible() {
+  function start() {
+    if (running) return
+    running = true
     graphEl.classList.add('is-visible')
-    drawLines()
-    requestAnimationFrame(() => {
-      svg.querySelectorAll('line').forEach((line) => { line.style.strokeDashoffset = '0' })
-    })
+    rafId = requestAnimationFrame(tick)
+  }
+  function stop() {
+    running = false
+    if (rafId) cancelAnimationFrame(rafId)
+    rafId = 0
   }
 
-  drawLines()
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(drawLines)
-  }
-  window.addEventListener('resize', drawLines)
-
+  // Watch visibility — kick the rAF loop on, pause when off-screen
   new IntersectionObserver(
-    ([entry]) => { if (entry.isIntersecting) setVisible() },
-    { threshold: 0.2 }
+    ([entry]) => { entry.isIntersecting ? start() : stop() },
+    { threshold: 0 }
   ).observe(graphEl)
 
-  // Mouse parallax — pointer moves the whole graph ±16px / ±12px
-  graphEl.addEventListener('mousemove', (e) => {
-    const r = graphEl.getBoundingClientRect()
-    const cx = (e.clientX - r.left) / r.width - 0.5   // -0.5 → 0.5
-    const cy = (e.clientY - r.top) / r.height - 0.5
-    inner.style.setProperty('--mx', `${(cx * 32).toFixed(2)}px`)
-    inner.style.setProperty('--my', `${(cy * 24).toFixed(2)}px`)
-  })
-  graphEl.addEventListener('mouseleave', () => {
-    inner.style.setProperty('--mx', '0px')
-    inner.style.setProperty('--my', '0px')
+  // Hovering a word lights up its line
+  states.forEach((s) => {
+    s.node.addEventListener('mouseenter', () => s.line.classList.add('is-hot'))
+    s.node.addEventListener('mouseleave', () => s.line.classList.remove('is-hot'))
   })
 
-  // Hovering a word lights up its connecting line
-  nodes.forEach((node) => {
-    const i = node.dataset.i
-    node.addEventListener('mouseenter', () => {
-      const line = svg.querySelector(`line[data-i="${i}"]`)
-      if (line) line.classList.add('is-hot')
-    })
-    node.addEventListener('mouseleave', () => {
-      const line = svg.querySelector(`line[data-i="${i}"]`)
-      if (line) line.classList.remove('is-hot')
-    })
+  window.addEventListener('resize', () => {
+    // Resize is handled implicitly by next tick reading getBoundingClientRect again,
+    // but make sure rAF is queued in case we're paused.
+    if (running && !rafId) rafId = requestAnimationFrame(tick)
   })
 }
 
