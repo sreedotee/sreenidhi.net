@@ -197,6 +197,62 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
+/* ----- Neural-graph closer (trifecta) — draw SVG lines from each node to the center,
+   trigger the draw-in stroke animation when the graph scrolls into view, recompute on resize. */
+const graphEl = document.querySelector('.A-graph')
+if (graphEl) {
+  const svg = graphEl.querySelector('.A-graph__lines')
+  const center = graphEl.querySelector('.A-graph__node--center')
+  const nodes = [...graphEl.querySelectorAll('.A-graph__node:not(.A-graph__node--center)')]
+  const SVG_NS = 'http://www.w3.org/2000/svg'
+
+  function drawLines() {
+    const r = graphEl.getBoundingClientRect()
+    if (r.width === 0 || r.height === 0) return
+    svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
+    // Wipe and redraw — cheap; only fires on layout / resize / scroll-in
+    while (svg.firstChild) svg.removeChild(svg.firstChild)
+    const cRect = center.getBoundingClientRect()
+    const cx = cRect.left + cRect.width / 2 - r.left
+    const cy = cRect.top + cRect.height / 2 - r.top
+    const isVisible = graphEl.classList.contains('is-visible')
+    for (const node of nodes) {
+      const n = node.getBoundingClientRect()
+      const nx = n.left + n.width / 2 - r.left
+      const ny = n.top + n.height / 2 - r.top
+      const len = Math.hypot(nx - cx, ny - cy)
+      const line = document.createElementNS(SVG_NS, 'line')
+      line.setAttribute('x1', cx)
+      line.setAttribute('y1', cy)
+      line.setAttribute('x2', nx)
+      line.setAttribute('y2', ny)
+      // Stop the line short of the word so the stroke doesn't slice through the text
+      const padding = Math.min(48, len * 0.18)
+      const t = (len - padding) / len
+      line.setAttribute('x2', cx + (nx - cx) * t)
+      line.setAttribute('y2', cy + (ny - cy) * t)
+      line.style.strokeDasharray = len
+      line.style.strokeDashoffset = isVisible ? '0' : len
+      svg.appendChild(line)
+    }
+  }
+  drawLines()
+  window.addEventListener('resize', drawLines)
+
+  new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        graphEl.classList.add('is-visible')
+        // Trigger the transition by setting dashoffset to 0
+        svg.querySelectorAll('line').forEach((line) => {
+          line.style.strokeDashoffset = '0'
+        })
+      }
+    },
+    { threshold: 0.25 }
+  ).observe(graphEl)
+}
+
 /* ----- Play thumbnail selector ----- */
 const playSection = document.querySelector('#play')
 if (playSection) {
