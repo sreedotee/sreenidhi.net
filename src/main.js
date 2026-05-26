@@ -327,6 +327,13 @@ if (graphEl) {
     const cxNow = centerState.rx + centerState.ox
     const cyNow = centerState.ry + centerState.oy
 
+    // Measure the "Design" word once per frame so the lines clear its bounding box.
+    // We approximate the word as an ellipse with semi-axes (halfW + breathing, halfH + breathing)
+    // and intersect each line with that ellipse to find a clean starting point.
+    const cRect = centerNode.getBoundingClientRect()
+    const cHalfW = cRect.width / 2 + 18    // breathing room: 18px on the long side
+    const cHalfH = cRect.height / 2 + 10   // 10px on the short side
+
     // Surrounding nodes
     for (const s of states) {
       s.rx = pct(s.node, '--x') * r.width
@@ -339,16 +346,27 @@ if (graphEl) {
       // Line endpoints from current node + center positions
       const nx = s.rx + s.ox
       const ny = s.ry + s.oy
-      const len = Math.hypot(nx - cxNow, ny - cyNow)
+      const dx = nx - cxNow
+      const dy = ny - cyNow
+      const len = Math.hypot(dx, dy)
       if (len > 1) {
-        const padNear = Math.min(70, len * 0.22)
-        const padFar = Math.min(24, len * 0.10)
-        const t1 = padNear / len
-        const t2 = (len - padFar) / len
-        s.line.setAttribute('x1', (cxNow + (nx - cxNow) * t1).toFixed(2))
-        s.line.setAttribute('y1', (cyNow + (ny - cyNow) * t1).toFixed(2))
-        s.line.setAttribute('x2', (cxNow + (nx - cxNow) * t2).toFixed(2))
-        s.line.setAttribute('y2', (cyNow + (ny - cyNow) * t2).toFixed(2))
+        const ux = dx / len
+        const uy = dy / len
+        // Distance from center along the line at which we exit the "Design" ellipse
+        const tNear = 1 / Math.sqrt((ux / cHalfW) ** 2 + (uy / cHalfH) ** 2)
+        // Don't draw if the node is inside the ellipse (would create reversed lines)
+        if (len > tNear + 8) {
+          const padFar = Math.min(24, len * 0.10)
+          const tFar = len - padFar
+          s.line.setAttribute('x1', (cxNow + ux * tNear).toFixed(2))
+          s.line.setAttribute('y1', (cyNow + uy * tNear).toFixed(2))
+          s.line.setAttribute('x2', (cxNow + ux * tFar).toFixed(2))
+          s.line.setAttribute('y2', (cyNow + uy * tFar).toFixed(2))
+          s.line.style.opacity = ''
+        } else {
+          // Hide lines whose endpoint is too close to or inside the center word
+          s.line.style.opacity = '0'
+        }
       }
     }
 
