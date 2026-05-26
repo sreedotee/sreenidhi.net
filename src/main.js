@@ -197,176 +197,398 @@ if (trifectaSection && trifectaFoot) {
   renderFooter()
 }
 
-/* ----- Neural-graph closer (trifecta) — interactive constellation v2.
-   Based on frame-by-frame analysis of synapserstudio.com — see
-   reference/synapser-drift-onPrecision.json. Key observed behaviors:
-     - words drift continuously in straight-ish lines at ~50 px/sec (slow orbit)
-     - cursor entering the area triggers spring-like motion with significant
-       overshoot (damping ratio ~0.4-0.5)
-     - far-away words still move noticeably when cursor enters
-     - settling takes >1 second
-   Implementation matches the character (not the exact pixel paths):
-     - Each non-center node has rest (--x/--y), target offset, current offset,
-       velocity. Verlet-ish spring (stiffness=90, damping=9 → ratio ~0.47).
-     - Target = slow sine drift (±40px) + cursor pull (unit vector toward
-       cursor, magnitude min(120, dist * 0.5) — capped, no hard radius).
-     - Lines recompute every frame from current positions; both ends shortened
-       so the stroke doesn't slice into the text.
-     - rAF runs only while graph intersects viewport. */
+/* ----- Neural-graph closer (trifecta) — ported 1:1 from synapserstudio.com.
+   The minified production chunk (reference/chunks/9b880d591d4ff178.js) revealed
+   it's GSAP-driven canvas + custom boids-style physics. All numeric constants
+   below come straight from the original.
+
+   Architecture:
+     - <canvas> holds the connecting lines (drawn each frame)
+     - Each surrounding word is an absolutely-positioned <div>, moved via transform
+     - A central title element ("Design") sits at the geometric center
+
+   State per word: { x, y, vx, vy, alpha, lineProgress, centerLineAlpha, flashUntil }
+   Initial positions are RANDOM across the canvas (not fixed).
+
+   Modes (currentTarget):
+     - null            → idle drift
+     - <wordId>        → that word is the focus; others pull toward it (or repel
+                         if within 95px); word-word repulsion under 58px
+     - "title"         → title is the focus; all words attract to center;
+                         word-word repulsion under 75px
+
+   Scheduler: every 5-6.5s a random word becomes the target; 1.5s later
+   it's kicked free (random velocity + nearby words pushed outward).
+
+   Velocity damping: vx *= 0.98 each frame when |vx| > 0.3, same for vy.
+
+   Bounding boxes: words bounce off the central title's bbox + 20px breathing,
+   and off the outer canvas walls + 20px. */
 const graphEl = document.querySelector('.A-graph')
 if (graphEl) {
-  const svg = graphEl.querySelector('.A-graph__lines')
-  const allNodes = [...graphEl.querySelectorAll('.A-graph__node')]
-  const centerNode = graphEl.querySelector('.A-graph__node--center')
-  const nodes = allNodes.filter((n) => n !== centerNode)
-  const SVG_NS = 'http://www.w3.org/2000/svg'
+  const canvas = graphEl.querySelector('.A-graph__canvas')
+  const ctx = canvas.getContext('2d')
+  const titleEl = graphEl.querySelector('.A-graph__title')
+  const wordEls = [...graphEl.querySelectorAll('.A-graph__word')]
 
-  // Per-node state. ox/oy is the current offset from rest in px; vx/vy is velocity.
-  function makeState(node, i) {
-    return {
-      node, i,
-      rx: 0, ry: 0,           // rest position in graph-local px (filled by tick)
-      ox: 0, oy: 0,           // current offset from rest
-      vx: 0, vy: 0,           // velocity
-      phaseX: Math.random() * Math.PI * 2,  // drift phase (independent per node)
-      phaseY: Math.random() * Math.PI * 2,
-      driftSpeed: 0.00018 + Math.random() * 0.00008,  // ~30-40 sec period
-      ampX: 32 + Math.random() * 14,   // drift amplitude (much bigger than v1)
-      ampY: 28 + Math.random() * 14,
-      line: null,
+  const words = wordEls.map((el, i) => ({
+    id: i, el, text: el.textContent,
+    x: 0, y: 0, vx: 0, vy: 0,
+    alpha: 0, lineProgress: 0,
+    alphaDelay: Math.random() * 1500,
+    centerLineAlpha: 1,
+    flashUntil: 0,
+  }))
+
+  let currentTarget = null      // null | word id | "title"
+  let titleInteracted = false   // set true when title is hovered; disables auto scheduler
+  let pendingLeaveTimer = null
+  const schedulerTimers = []
+
+  // Cached layout — recomputed on resize and once after fonts load
+  let titleBox = { width: 0, height: 0, yOffset: 0 }   // inflated bbox + breathing
+  const wordBoxes = {}                                  // id → { width, height }
+  let dpr = Math.min(window.devicePixelRatio || 1, 2)
+
+  function measureLayout() {
+    const r = graphEl.getBoundingClientRect()
+    // Canvas backing-store at device resolution; CSS size matches the container
+    canvas.width = Math.max(1, Math.round(r.width * dpr))
+    canvas.height = Math.max(1, Math.round(r.height * dpr))
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+    const tr = titleEl.getBoundingClientRect()
+    const breathing = window.innerWidth < 640 ? 12 : 25
+    titleBox = {
+      width: tr.width + 2 * breathing,
+      height: tr.height + 2 * breathing,
+      yOffset: (tr.top + tr.height / 2) - (r.top + r.height / 2),
+    }
+    for (const w of words) {
+      const wr = w.el.getBoundingClientRect()
+      wordBoxes[w.id] = { width: wr.width, height: wr.height }
     }
   }
-  const states = nodes.map(makeState)
-  // Center gets a smaller, slower drift; very gentle cursor pull so it stays the anchor
-  const centerState = {
-    node: centerNode, rx: 0, ry: 0, ox: 0, oy: 0, vx: 0, vy: 0,
-    phaseX: 0, phaseY: 0, driftSpeed: 0.00012, ampX: 8, ampY: 6,
+
+  function initPositions() {
+    const r = graphEl.getBoundingClientRect()
+    for (const w of words) {
+      w.x = Math.random() * r.width
+      w.y = Math.random() * r.height
+      w.vx = (Math.random() - 0.5) * 0.5
+      w.vy = (Math.random() - 0.5) * 0.5
+      w.alpha = 0
+      w.lineProgress = 0
+      w.centerLineAlpha = 1
+      w.flashUntil = 0
+    }
   }
 
-  function pct(node, key) {
-    const raw = node.style.getPropertyValue(key).trim()
-    return raw.endsWith('%') ? parseFloat(raw) / 100 : parseFloat(raw)
+  // Intro fade-in — power3.inOut over 2s, stagger up to 1.5s
+  let introStart = 0
+  function tickIntro(now) {
+    if (!introStart) return
+    for (const w of words) {
+      const elapsed = Math.max(0, now - introStart - w.alphaDelay)
+      const t = Math.min(1, elapsed / 2000)
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      w.alpha = eased
+      w.lineProgress = eased
+    }
   }
 
-  // Build the SVG lines once (one per non-center node, tagged by index)
-  function buildLines() {
-    while (svg.firstChild) svg.removeChild(svg.firstChild)
-    states.forEach((s) => {
-      const line = document.createElementNS(SVG_NS, 'line')
-      line.dataset.i = s.i
-      svg.appendChild(line)
-      s.line = line
-    })
+  // Release a focused word: push neighbors outward + give the freed word a random velocity
+  function releaseTarget() {
+    const targetId = currentTarget
+    currentTarget = null
+    if (targetId === null || targetId === 'title') return
+    const target = words.find((w) => w.id === targetId)
+    if (!target) return
+    for (const w of words) {
+      const dx = w.x - target.x
+      const dy = w.y - target.y
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1
+      w.vx += (dx / dist) * 2.2
+      w.vy += (dy / dist) * 2.2
+    }
+    const angle = Math.random() * Math.PI * 2
+    const mag = 1.2 + 0.5 * Math.random()
+    target.vx = Math.cos(angle) * mag
+    target.vy = Math.sin(angle) * mag
   }
-  buildLines()
 
-  // Pointer tracking — pageless coords, since mousemove also fires on inner children
-  let mouseX = -99999, mouseY = -99999
-  graphEl.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY })
-  graphEl.addEventListener('mouseleave', () => { mouseX = mouseY = -99999 })
-
-  // Spring config — underdamped for visible overshoot (matches synapser feel)
-  const STIFFNESS = 90        // per second² — restoring force per px of offset
-  const DAMPING = 9           // per second — velocity decay (ratio = 9/(2√90) ≈ 0.47)
-  const PULL_FACTOR = 0.5     // 50% of cursor distance contributes to target
-  const PULL_CAP = 120        // px — max pull (no hard radius; far cursors still pull)
-  const CENTER_PULL_SCALE = 0.18  // center moves much less than surrounding nodes
-
-  function computeTarget(s, now, mx, my, isCenter) {
-    // Slow sine drift baseline — gives words a perpetual life
-    let tx = Math.sin(s.phaseX + now * s.driftSpeed) * s.ampX
-    let ty = Math.cos(s.phaseY + now * s.driftSpeed * 0.83) * s.ampY
-    // Cursor pull — unit vector toward cursor, magnitude capped
-    if (mx !== -99999) {
-      const dx = mx - s.rx
-      const dy = my - s.ry
-      const dist = Math.hypot(dx, dy)
-      if (dist > 0.5) {
-        const mag = Math.min(PULL_CAP, dist * PULL_FACTOR) * (isCenter ? CENTER_PULL_SCALE : 1)
-        tx += (dx / dist) * mag
-        ty += (dy / dist) * mag
+  // Hover handlers
+  function hoverWord(id) {
+    const w = words[id]
+    if (!w || (w.alpha ?? 0) < 0.95) return
+    if (pendingLeaveTimer) { clearTimeout(pendingLeaveTimer); pendingLeaveTimer = null }
+    currentTarget = id
+  }
+  function leaveWord(id) {
+    if (currentTarget !== id) return
+    if (pendingLeaveTimer) clearTimeout(pendingLeaveTimer)
+    pendingLeaveTimer = setTimeout(() => { releaseTarget(); pendingLeaveTimer = null }, 70)
+  }
+  function hoverTitle() {
+    if (pendingLeaveTimer) { clearTimeout(pendingLeaveTimer); pendingLeaveTimer = null }
+    currentTarget = 'title'
+    titleInteracted = true
+  }
+  function leaveTitle() {
+    if (currentTarget !== 'title') return
+    if (pendingLeaveTimer) clearTimeout(pendingLeaveTimer)
+    pendingLeaveTimer = setTimeout(() => {
+      const r = graphEl.getBoundingClientRect()
+      const cx = r.width / 2
+      const cy = r.height / 2
+      for (const w of words) {
+        const dx = w.x - cx
+        const dy = w.y - cy
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1
+        const a = (Math.random() - 0.5) * 1.5
+        const s = Math.cos(a), o = Math.sin(a)
+        w.vx += (dx / dist * s - dy / dist * o) * 7 * (0.8 + 0.8 * Math.random())
+        w.vy += (dx / dist * o + dy / dist * s) * 7 * (0.8 + 0.8 * Math.random())
       }
-    }
-    return { tx, ty }
+      currentTarget = null
+      pendingLeaveTimer = null
+    }, 70)
   }
 
-  // Verlet-style integration step
-  function integrate(s, tx, ty, dt) {
-    const ax = (tx - s.ox) * STIFFNESS - s.vx * DAMPING
-    const ay = (ty - s.oy) * STIFFNESS - s.vy * DAMPING
-    s.vx += ax * dt
-    s.vy += ay * dt
-    s.ox += s.vx * dt
-    s.oy += s.vy * dt
+  // Wire up event listeners
+  wordEls.forEach((el, i) => {
+    el.addEventListener('mouseenter', () => hoverWord(i))
+    el.addEventListener('mouseleave', () => leaveWord(i))
+  })
+  titleEl.addEventListener('mouseenter', hoverTitle)
+  titleEl.addEventListener('mouseleave', leaveTitle)
+
+  // Auto target scheduler — picks a random word every few seconds
+  function scheduleNext(ms) {
+    if (titleInteracted) return
+    const t = setTimeout(pickRandomTarget, ms)
+    schedulerTimers.push(t)
+  }
+  function pickRandomTarget() {
+    if (titleInteracted) return
+    if (currentTarget !== null) { scheduleNext(5000); return }
+    const ready = words.filter((w) => (w.alpha ?? 0) >= 0.95)
+    if (ready.length === 0) { scheduleNext(1500); return }
+    const pick = ready[Math.floor(Math.random() * ready.length)]
+    currentTarget = pick.id
+    scheduleNext(6500)
+    const releaseTimer = setTimeout(() => {
+      if (currentTarget === pick.id && !titleInteracted) releaseTarget()
+    }, 1500)
+    schedulerTimers.push(releaseTimer)
   }
 
+  // Main animation loop
   let running = false
   let rafId = 0
-  let lastT = 0
   function tick(now) {
     if (!running) { rafId = 0; return }
     const r = graphEl.getBoundingClientRect()
-    if (r.width === 0 || r.height === 0) { rafId = requestAnimationFrame(tick); return }
-    svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
+    const W = r.width, H = r.height
+    if (W === 0 || H === 0) { rafId = requestAnimationFrame(tick); return }
+    const cx = W / 2, cy = H / 2
 
-    // Real dt (clamped so a tab-switch pause doesn't explode the spring)
-    const dt = Math.min(1 / 30, lastT ? (now - lastT) / 1000 : 1 / 60)
-    lastT = now
+    tickIntro(now)
+    ctx.clearRect(0, 0, W, H)
 
-    // Cursor coordinates in graph-local space (graph rect)
-    const mxLocal = mouseX === -99999 ? -99999 : mouseX - r.left
-    const myLocal = mouseY === -99999 ? -99999 : mouseY - r.top
+    const target = currentTarget
+    const hasWordTarget = target !== null && target !== 'title'
+    const targetWord = hasWordTarget ? words.find((w) => w.id === target) : null
 
-    // Center node — slow drift, gentle pull
-    centerState.rx = pct(centerNode, '--x') * r.width
-    centerState.ry = pct(centerNode, '--y') * r.height
-    const { tx: ctx, ty: cty } = computeTarget(centerState, now, mxLocal, myLocal, true)
-    integrate(centerState, ctx, cty, dt)
-    centerNode.style.setProperty('--ox', centerState.ox.toFixed(2) + 'px')
-    centerNode.style.setProperty('--oy', centerState.oy.toFixed(2) + 'px')
-    const cxNow = centerState.rx + centerState.ox
-    const cyNow = centerState.ry + centerState.oy
+    for (const word of words) {
+      const isTarget = target === word.id
+      let { x: wx, y: wy, vx, vy } = word
+      const wb = wordBoxes[word.id] || { width: 100, height: 30 }
 
-    // Measure the "Design" word once per frame so the lines clear its bounding box.
-    // We approximate the word as an ellipse with semi-axes (halfW + breathing, halfH + breathing)
-    // and intersect each line with that ellipse to find a clean starting point.
-    const cRect = centerNode.getBoundingClientRect()
-    const cHalfW = cRect.width / 2 + 18    // breathing room: 18px on the long side
-    const cHalfH = cRect.height / 2 + 10   // 10px on the short side
-
-    // Surrounding nodes
-    for (const s of states) {
-      s.rx = pct(s.node, '--x') * r.width
-      s.ry = pct(s.node, '--y') * r.height
-      const { tx, ty } = computeTarget(s, now, mxLocal, myLocal, false)
-      integrate(s, tx, ty, dt)
-      s.node.style.setProperty('--ox', s.ox.toFixed(2) + 'px')
-      s.node.style.setProperty('--oy', s.oy.toFixed(2) + 'px')
-
-      // Line endpoints from current node + center positions
-      const nx = s.rx + s.ox
-      const ny = s.ry + s.oy
-      const dx = nx - cxNow
-      const dy = ny - cyNow
-      const len = Math.hypot(dx, dy)
-      if (len > 1) {
-        const ux = dx / len
-        const uy = dy / len
-        // Distance from center along the line at which we exit the "Design" ellipse
-        const tNear = 1 / Math.sqrt((ux / cHalfW) ** 2 + (uy / cHalfH) ** 2)
-        // Don't draw if the node is inside the ellipse (would create reversed lines)
-        if (len > tNear + 8) {
-          const padFar = Math.min(24, len * 0.10)
-          const tFar = len - padFar
-          s.line.setAttribute('x1', (cxNow + ux * tNear).toFixed(2))
-          s.line.setAttribute('y1', (cyNow + uy * tNear).toFixed(2))
-          s.line.setAttribute('x2', (cxNow + ux * tFar).toFixed(2))
-          s.line.setAttribute('y2', (cyNow + uy * tFar).toFixed(2))
-          s.line.style.opacity = ''
-        } else {
-          // Hide lines whose endpoint is too close to or inside the center word
-          s.line.style.opacity = '0'
+      if (isTarget) {
+        vx *= 0.55
+        vy *= 0.55
+      } else if (hasWordTarget && targetWord) {
+        const dx = targetWord.x - wx
+        const dy = targetWord.y - wy
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1
+        if (dist < 380) {
+          const ux = dx / dist, uy = dy / dist
+          if (dist > 95) {
+            const f = 0.022 * Math.min(1, (380 - dist) / 200)
+            vx += ux * f; vy += uy * f
+          } else {
+            const f = 0.05 * (1 - dist / 95)
+            vx -= ux * f; vy -= uy * f
+          }
         }
+        // Word-word repulsion under 58px
+        for (const other of words) {
+          if (other.id === word.id || other.id === target) continue
+          const ox = wx - other.x, oy = wy - other.y
+          const d2 = ox * ox + oy * oy
+          if (d2 < 3364 && d2 > 1) {
+            const d = Math.sqrt(d2)
+            const f = 0.05 * (1 - d / 58)
+            vx += (ox / d) * f; vy += (oy / d) * f
+          }
+        }
+      } else if (target === 'title') {
+        const dx = cx - wx, dy = cy - wy
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1
+        vx += (dx / dist) * 0.04
+        vy += (dy / dist) * 0.04
+        for (const other of words) {
+          if (other.id === word.id) continue
+          const ox = wx - other.x, oy = wy - other.y
+          const d2 = ox * ox + oy * oy
+          if (d2 < 5625 && d2 > 1) {
+            const d = Math.sqrt(d2)
+            const f = 0.08 * (1 - d / 75)
+            vx += (ox / d) * f; vy += (oy / d) * f
+          }
+        }
+      }
+
+      if (Math.abs(vx) > 0.3) vx *= 0.98
+      if (Math.abs(vy) > 0.3) vy *= 0.98
+
+      wx += vx
+      wy += vy
+
+      // Title bbox collision (push out, invert velocity, flash)
+      if (titleBox.width > 0 && titleBox.height > 0) {
+        const xRange = titleBox.width / 2 + wb.width / 2
+        const yRange = titleBox.height / 2 + wb.height / 2
+        const tdx = wx - cx
+        const tdy = wy - (cy + titleBox.yOffset)
+        if (Math.abs(tdx) < xRange && Math.abs(tdy) < yRange) {
+          const xOver = xRange - Math.abs(tdx)
+          const yOver = yRange - Math.abs(tdy)
+          if (xOver < yOver) {
+            if (tdx > 0) { wx += xOver; vx = Math.abs(vx) }
+            else { wx -= xOver; vx = -Math.abs(vx) }
+          } else {
+            if (tdy > 0) { wy += yOver; vy = Math.abs(vy) }
+            else { wy -= yOver; vy = -Math.abs(vy) }
+          }
+          if (now > (word.flashUntil || 0) + 120) word.flashUntil = now + 240
+        }
+      }
+
+      // Outer wall collision
+      const halfW = wb.width / 2
+      const minX = halfW + 20, maxX = W - halfW - 20
+      if (minX <= maxX) {
+        if (wx <= minX) { wx = minX; vx = Math.max(Math.abs(vx), 0.2) }
+        else if (wx >= maxX) { wx = maxX; vx = -Math.max(Math.abs(vx), 0.2) }
+      } else { wx = W / 2; vx = 0 }
+      const halfH = wb.height / 2
+      const minY = halfH + 20, maxY = H - halfH - 20
+      if (minY <= maxY) {
+        if (wy <= minY) { wy = minY; vy = Math.max(Math.abs(vy), 0.2) }
+        else if (wy >= maxY) { wy = maxY; vy = -Math.max(Math.abs(vy), 0.2) }
+      } else { wy = H / 2; vy = 0 }
+
+      // Write back
+      word.x = wx; word.y = wy; word.vx = vx; word.vy = vy
+
+      // Render the div (with subtle flash jitter when active)
+      let dispX = wx, dispY = wy
+      if (isTarget) {
+        dispX += (Math.random() - 0.5) * 1.6
+        dispY += (Math.random() - 0.5) * 1.6
+      }
+      word.el.style.transform = `translate3d(${dispX}px, ${dispY}px, 0) translate(-50%, -50%)`
+      word.el.style.opacity = word.alpha
+
+      // Line endpoints — clip to title bbox at near end, to word's bbox at far end
+      let M = cx, N = cy, k = wx, S = wy
+      if (titleBox.width > 0) {
+        const e = k - cx
+        const t = S - cy
+        const r2 = titleBox.height / 2
+        const i = titleBox.yOffset
+        const a = Math.min(
+          titleBox.width / 2 / Math.abs(e || 1),
+          t === 0 ? Infinity : (i + Math.sign(t) * r2) / t
+        )
+        if (a < 1) { M = cx + e * a; N = cy + t * a }
+      }
+      const dxe = M - k
+      const dye = N - S
+      const wordClip = Math.min(
+        wb.width / 2 / Math.abs(dxe || 1),
+        wb.height / 2 / Math.abs(dye || 1)
+      )
+      if (wordClip < 1) { k += dxe * wordClip; S += dye * wordClip }
+
+      const T = (k - M) ** 2 + (S - N) ** 2
+      const C = word.lineProgress ?? word.alpha
+
+      // Line opacity hides as a word approaches the current word-target
+      let E = 1
+      if (hasWordTarget && !isTarget && targetWord) {
+        const ddx = wx - targetWord.x
+        const ddy = wy - targetWord.y
+        const dT = Math.sqrt(ddx * ddx + ddy * ddy)
+        if (dT <= 320) E = 0
+        else if (dT < 380) E = (dT - 320) / 60
+      }
+      word.centerLineAlpha += (E - word.centerLineAlpha) * 0.06
+      const R = word.centerLineAlpha
+
+      if (T > 100 && C > 0.01 && R > 0.02) {
+        const flashRem = Math.max(0, (word.flashUntil || 0) - now)
+        const flash = flashRem > 0 ? Math.pow(flashRem / 240, 2) : 0
+        if (flash > 0) {
+          ctx.strokeStyle = `rgba(4, 8, 61, ${(0.7 + 0.3 * flash) * R})`
+          ctx.lineWidth = 0.5 + 0.7 * flash
+        } else {
+          ctx.strokeStyle = `rgba(83, 83, 82, ${R})`
+          ctx.lineWidth = 0.5
+        }
+        ctx.beginPath()
+        ctx.moveTo(M, N)
+        ctx.lineTo(M + (k - M) * C, N + (S - N) * C)
+        ctx.stroke()
+      }
+    }
+
+    // Word-to-target lines (extra lines from each word to the focal word)
+    if (hasWordTarget && targetWord) {
+      const tBox = wordBoxes[targetWord.id] || { width: 80, height: 30 }
+      for (const other of words) {
+        if (other.id === targetWord.id) continue
+        const a = Math.min(1, other.alpha ?? 1)
+        if (a < 0.02) continue
+        const dx = other.x - targetWord.x
+        const dy = other.y - targetWord.y
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1
+        if (dist >= 380) continue
+        const fade = (dist > 320 ? (380 - dist) / 60 : 1) * a * Math.min(1, targetWord.alpha ?? 1) * 0.6
+        if (fade < 0.02) continue
+        const tc = Math.min(
+          tBox.width / 2 / Math.abs(dx || 1),
+          tBox.height / 2 / Math.abs(dy || 1),
+          1
+        )
+        const x1 = targetWord.x + dx * tc
+        const y1 = targetWord.y + dy * tc
+        const oBox = wordBoxes[other.id] || { width: 80, height: 30 }
+        const xc = Math.min(
+          oBox.width / 2 / Math.abs(dx || 1),
+          oBox.height / 2 / Math.abs(dy || 1),
+          1
+        )
+        const x2 = other.x - dx * xc
+        const y2 = other.y - dy * xc
+        ctx.strokeStyle = `rgba(83, 83, 82, ${fade})`
+        ctx.lineWidth = 0.5
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
       }
     }
 
@@ -376,7 +598,12 @@ if (graphEl) {
   function start() {
     if (running) return
     running = true
-    graphEl.classList.add('is-visible')
+    if (!introStart) {
+      measureLayout()
+      initPositions()
+      introStart = performance.now()
+      scheduleNext(3000)
+    }
     rafId = requestAnimationFrame(tick)
   }
   function stop() {
@@ -385,23 +612,17 @@ if (graphEl) {
     rafId = 0
   }
 
-  // Watch visibility — kick the rAF loop on, pause when off-screen
+  // Run while the graph is in view; pause off-screen
   new IntersectionObserver(
     ([entry]) => { entry.isIntersecting ? start() : stop() },
     { threshold: 0 }
   ).observe(graphEl)
 
-  // Hovering a word lights up its line
-  states.forEach((s) => {
-    s.node.addEventListener('mouseenter', () => s.line.classList.add('is-hot'))
-    s.node.addEventListener('mouseleave', () => s.line.classList.remove('is-hot'))
-  })
-
-  window.addEventListener('resize', () => {
-    // Resize is handled implicitly by next tick reading getBoundingClientRect again,
-    // but make sure rAF is queued in case we're paused.
-    if (running && !rafId) rafId = requestAnimationFrame(tick)
-  })
+  // Re-measure on resize and after fonts settle
+  window.addEventListener('resize', measureLayout)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(measureLayout)
+  }
 }
 
 /* ----- Play thumbnail selector ----- */

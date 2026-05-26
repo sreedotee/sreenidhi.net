@@ -36,7 +36,7 @@
     <main class="P-page">
       <section class="P-hero">
         <h1 class="P-hero__title">Whering Redesign</h1>
-        <p class="P-hero__lead">Whering is a wardrobe app I redesigned end-to-end using formal concept analysis. The original product had eight screens, but its concepts overlapped: Canvas and Dress Me did the same job, Calendar and Planner duplicated each other, and Add From Wardrobe appeared three navigation levels deep. The redesign treats those collisions as the real problem to solve, not a styling exercise.</p>
+        <p class="P-hero__lead">Whering is a digital wardrobe app for cataloguing your clothes, building outfits, planning what to wear, and browsing friends' wardrobes. Its positioning is <em>buy less, and better</em>. I led an end-to-end redesign focused on the information architecture, which was fragmented across overlapping surfaces.</p>
         <dl class="P-meta">
           <div><dt>Service</dt><dd>Redesign</dd></div>
           <div><dt>Year</dt><dd>2025</dd></div>
@@ -47,15 +47,38 @@
 
       <div class="P-shots">
         <section class="P-shot"><video src="/og-assets/KssuqBJIb5RltpcQSHQmPkisk.mp4" autoplay muted loop playsinline></video></section>
-        <section class="P-shot"><img src="/og-assets/GbTPlDuuS6OGzLU9XBoiOYwDMg.png" alt="Whering showcase 1" /></section>
       </div>
 
       <section class="P-body">
-        <p class="P-body__para">The redesign collapses the overlapping screens into eight orthogonal concepts — Item, Collection, Outfit, Style, Planner, Event, Discover, Profile — and reroutes navigation around what users actually do. Eight concept synchronizations were mapped formally before any screen was drawn. The final navigation (Discover · Search · Style · Planner · Profile) is the resolved cluster, not the surface inventory of the old app.</p>
+        <p class="P-body__para">The core issue was structural, not visual. Multiple surfaces shared the same job at the same level of the hierarchy. Canvas and Dress Me were both outfit builders. Plan and Planner had overlapping models. Wardrobe, Wishlist, Moodboard, and Lookbook were four containers serving one underlying behavior: grouping items.</p>
       </section>
 
       <div class="P-shots">
-        <section class="P-shot"><img src="/og-assets/k8JGiclVxnv4MefwMmI5GWWZiY.png" alt="Whering showcase 2" /></section>
+        <section class="P-shot"><img src="/og-assets/GbTPlDuuS6OGzLU9XBoiOYwDMg.png" alt="Audit of overlapping surfaces" /></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">Casual and power-user actions also sat side by side in the primary nav, flattening priority. Two key user journeys, creating an outfit and planning one for a specific day, failed under this structure.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot"><img src="/og-assets/k8JGiclVxnv4MefwMmI5GWWZiY.png" alt="Broken user journeys" /></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">I consolidated the surface inventory against a cleaner object model. Canvas and Dress Me merged into Style, a single outfit-building surface. Wardrobe, Wishlist, Moodboard, and Lookbook merged into Collections, one flexible grouping primitive. Outfits from all sources (created, discovered, photographed) now resolve to a single Outfit object.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--placeholder" aria-label="Consolidated object model placeholder"></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">The resulting IA is a five-tab structure (Discover, Search, Style, Planner, Profile) that keeps casual loops at the top level and demotes power-user surfaces one tier down, so the product scales with user depth instead of overwhelming on entry.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--placeholder" aria-label="Final navigation placeholder"></section>
       </div>
     </main>
 
