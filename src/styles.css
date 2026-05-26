@@ -1140,10 +1140,18 @@ body:has(.A-hero).is-scrolled .A-foot {
   position: sticky;
   top: 32px;
   display: flex;
+  flex-direction: row;
   gap: calc(48px - var(--tuck) * 32px);
   align-items: baseline;
   margin-bottom: 64px;
   z-index: 5;
+}
+/* Once the section body has scrolled past the threshold, JS adds .is-tucked
+   and the head re-flows vertically: lede drops underneath the (now-smaller) title. */
+.A-section__head.is-tucked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 .A-section__title {
   font-family: var(--serif);
@@ -1161,7 +1169,7 @@ body:has(.A-hero).is-scrolled .A-foot {
   letter-spacing: -0.02em;
   color: var(--navy);
   max-width: calc(380px - var(--tuck) * 100px);
-  opacity: calc(1 - var(--tuck) * 0.5);
+  opacity: calc(1 - var(--tuck) * 0.25);
   margin: 0;
 }
 
