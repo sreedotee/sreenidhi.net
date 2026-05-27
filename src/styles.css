@@ -1434,7 +1434,7 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 .cc-table__head {
   display: grid;
-  grid-template-columns: 1fr 1fr 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
   gap: 32px;
   padding: 14px 0;
   border-bottom: 1px solid rgba(4, 8, 61, 0.15);
@@ -1448,13 +1448,15 @@ body:has(.A-hero).is-scrolled .A-foot {
 .cc-row {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
   gap: 32px;
   align-items: center;
   padding: 22px 0;
   border-bottom: 1px solid rgba(4, 8, 61, 0.12);
   color: var(--navy);
+  overflow: visible;
 }
+.cc-row > * { min-width: 0; }
 .cc-row:hover { opacity: 1; }
 .cc-row__title {
   font-family: var(--sans);
@@ -1462,6 +1464,9 @@ body:has(.A-hero).is-scrolled .A-foot {
   line-height: 1.3;
   letter-spacing: -0.02em;
   color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cc-row__desc {
   font-family: var(--sans);
@@ -1469,6 +1474,9 @@ body:has(.A-hero).is-scrolled .A-foot {
   line-height: 1.3;
   letter-spacing: -0.02em;
   color: rgba(4, 8, 61, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cc-row__arrow {
   font-family: var(--sans);
@@ -1482,20 +1490,23 @@ body:has(.A-hero).is-scrolled .A-foot {
   color: var(--navy);
 }
 
-/* Preview image — hidden by default, pops into view on row hover */
+/* Hover preview — fixed position to the right of the row, 16:10 aspect.
+   Matches the og Framer site, which anchors preview ~30% from the right
+   of the content area and centers it vertically on the row. */
 .cc-row__preview {
   position: absolute;
   top: 50%;
-  right: 96px;
-  width: 96px;
-  height: 96px;
+  right: 88px;
+  width: 200px;
+  height: 120px;
   object-fit: cover;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%) scale(0.88);
+  transform: translateY(-50%) scale(0.94);
   transition: opacity 0.3s cubic-bezier(.2,.7,.2,1), transform 0.3s cubic-bezier(.2,.7,.2,1);
   z-index: 5;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
+  background: #f5f6f8;
 }
 .cc-row:hover .cc-row__preview {
   opacity: 1;
@@ -2008,7 +2019,8 @@ body:has(.A-hero).is-scrolled .A-foot {
   transition: opacity 0.2s ease;
 }
 .A-foot__social a:hover { opacity: 1; }
-.A-foot__social img { width: 20px; height: 20px; display: block; }
+.A-foot__social img,
+.A-foot__social svg { width: 20px; height: 20px; display: block; color: var(--navy); }
 
 /* ============================================================
    PREVIEW B â€” Hero + dashboard band
@@ -2382,7 +2394,8 @@ body:has(.A-hero).is-scrolled .A-foot {
   /* Fixed footer */
   .A-foot { padding: 14px 20px; font-size: 14px; }
   .A-foot__social { gap: 18px; }
-  .A-foot__social img { width: 18px; height: 18px; }
+  .A-foot__social img,
+  .A-foot__social svg { width: 18px; height: 18px; }
 
   /* About page */
   .A-about { padding: 120px 20px 120px; }
@@ -2501,7 +2514,8 @@ body:has(.A-hero).is-scrolled .A-foot {
 
   .A-foot { padding: 12px 16px; font-size: 13px; }
   .A-foot__social { gap: 14px; }
-  .A-foot__social img { width: 16px; height: 16px; }
+  .A-foot__social img,
+  .A-foot__social svg { width: 16px; height: 16px; }
 
   .A-about { padding: 96px 16px 96px; }
   .A-about__eyebrow, .A-about__phonetic { font-size: 14px; }
