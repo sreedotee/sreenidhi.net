@@ -1491,9 +1491,11 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 
 /* Hover preview — floats next to the cursor, 16:10 aspect, vertically
-   centered on the row. The `left` property is driven by JS in main.js
-   (mousemove sets cursor-relative X), so it tracks the pointer the way
-   the og Framer site does. CSS handles the fade and scale on hover. */
+   centered on the row. The transform (translate X + Y centering) is driven
+   by JS in main.js, which lerps toward the cursor each frame so the
+   movement feels fluid the way the og Framer site does. CSS only handles
+   the opacity fade on hover; transform must NOT have a CSS transition or
+   it'll fight the rAF loop and stutter. */
 .cc-row__preview {
   position: absolute;
   top: 50%;
@@ -1503,16 +1505,15 @@ body:has(.A-hero).is-scrolled .A-foot {
   object-fit: cover;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%) scale(0.94);
-  transition: opacity 0.22s cubic-bezier(.2,.7,.2,1), transform 0.22s cubic-bezier(.2,.7,.2,1);
-  will-change: transform, left, opacity;
+  transform: translate3d(0, -50%, 0);
+  transition: opacity 0.22s cubic-bezier(.2,.7,.2,1);
+  will-change: transform, opacity;
   z-index: 5;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   background: #f5f6f8;
 }
 .cc-row:hover .cc-row__preview {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
 }
 
 /* ----- Play: central image + thumbnail strip ----- */

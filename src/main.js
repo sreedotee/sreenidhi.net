@@ -625,34 +625,47 @@ if (graphEl) {
   }
 }
 
-/* ----- Creative Coding hover preview — tracks the cursor's X position.
-   The og Framer site floats the preview noticeably to the right of the
-   cursor, vertically centered on the row. CSS handles the fade/scale via
-   the .cc-row:hover rule; this block sets `left` on mousemove (snapped on
-   enter so there's no jump from the initial 0 position). */
+/* ----- Creative Coding hover preview — follows the cursor with easing.
+   Replicates the og Framer site's motion: the preview floats just right of
+   the cursor, vertically centered on the row, and trails it with a lerp so
+   the movement feels fluid instead of snapped. Position is driven through
+   translate3d for GPU acceleration; CSS owns the opacity fade only (no
+   transform transition or it'll fight the rAF loop). */
 const ccRows = [...document.querySelectorAll('.cc-row')]
-const CC_PREVIEW_OFFSET = 24 // px from cursor to the preview's left edge
+const CC_OFFSET = 32      // px from cursor to the preview's left edge
+const CC_SMOOTH = 0.18    // lerp factor per frame (lower = lazier follow)
 ccRows.forEach((row) => {
   const preview = row.querySelector('.cc-row__preview')
   if (!preview) return
+  let targetX = 0
+  let currentX = 0
   let rafId = 0
-  let pendingX = 0
-  function flush() {
+  let inside = false
+
+  function paint() {
     rafId = 0
-    preview.style.left = `${pendingX}px`
+    currentX += (targetX - currentX) * CC_SMOOTH
+    // Snap when close enough so we stop burning frames.
+    if (Math.abs(targetX - currentX) < 0.3) currentX = targetX
+    preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
+    if (inside && currentX !== targetX) rafId = requestAnimationFrame(paint)
   }
-  function track(e) {
-    const r = row.getBoundingClientRect()
-    pendingX = e.clientX - r.left + CC_PREVIEW_OFFSET
-    if (!rafId) rafId = requestAnimationFrame(flush)
-  }
-  // Snap on entry so the preview doesn't fade in at left: 0 then jump.
+
   row.addEventListener('mouseenter', (e) => {
     const r = row.getBoundingClientRect()
-    preview.style.left = `${e.clientX - r.left + CC_PREVIEW_OFFSET}px`
+    targetX = e.clientX - r.left + CC_OFFSET
+    currentX = targetX // snap on entry so the fade-in doesn't slide
+    preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
+    inside = true
   })
-  row.addEventListener('mousemove', track)
+  row.addEventListener('mousemove', (e) => {
+    if (!inside) return
+    const r = row.getBoundingClientRect()
+    targetX = e.clientX - r.left + CC_OFFSET
+    if (!rafId) rafId = requestAnimationFrame(paint)
+  })
   row.addEventListener('mouseleave', () => {
+    inside = false
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
   })
 })
