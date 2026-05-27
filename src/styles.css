@@ -1160,13 +1160,10 @@ body:has(.A-hero).is-scrolled .A-foot {
   margin-bottom: 64px;
   z-index: 5;
 }
-/* Once the section body has scrolled past the threshold, JS adds .is-tucked
-   and the head re-flows vertically: lede drops underneath the (now-smaller) title. */
-.A-section__head.is-tucked {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-}
+/* Previously this rule flipped the head from row to column at tuck > 0.7,
+   which causes a layout snap because flex-direction can't be transitioned.
+   Removed so the head shrinks continuously in row form, driven entirely by
+   the --tuck variable interpolating font-size/gap/max-width below. */
 .A-section__title {
   font-family: var(--serif);
   font-size: calc(60px - var(--tuck) * 38px);

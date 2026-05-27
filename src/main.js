@@ -38,8 +38,6 @@ function update() {
     const raw = (START - top) / (START - END)
     const tuck = Math.max(0, Math.min(1, raw))
     section.style.setProperty('--tuck', tuck.toFixed(3))
-    const head = section.querySelector('.A-section__head')
-    if (head) head.classList.toggle('is-tucked', tuck > 0.7)
   }
 }
 
