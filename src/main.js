@@ -661,11 +661,16 @@ if (tCard) {
 }
 
 /* ----- Album-grid cell cycling on /about/
-   Ports the GridCell "images" mode from the OG Framer component. Each cell
-   has its OWN image pool by data-mode (photos vs albums) — they're not a
-   shared pool. Each cell stacks two <img>s and crossfades through its pool.
-   Starting index is random per cell; interval is jittered so cells don't
-   pulse in sync. Pauses when scrolled off-screen. */
+   Ports the GridCell "images" mode from the OG Framer component exactly.
+   - INTERVAL = 2500ms, DURATION = 420ms (OG defaults, no jitter)
+   - Single <img> per cell, not crossfade: fade out → swap src → fade in
+     (the OG uses one img and toggles opacity 1→0, then changes src and
+     toggles 0→1, which produces a deliberate sequential fade)
+   - Each cell has its OWN pool keyed by data-mode (photos / albums)
+   - Starting image is randomized per cell so the two cells aren't on
+     the same image; their timers start when constructed (close together
+     but not in lockstep), so they fade at the same RATE but independently.
+   - Pauses when scrolled off-screen */
 const POOLS = {
   photos: [
     '/photos/photo-1.webp',
@@ -688,43 +693,49 @@ const POOLS = {
 }
 const cyclingCells = document.querySelectorAll('.album[data-mode="photos"], .album[data-mode="albums"]')
 if (cyclingCells.length) {
-  const BASE_INTERVAL = 2500  // OG default
-  const JITTER = 1200         // ms — randomize so cells don't sync
+  const INTERVAL = 2500   // OG default (verified from Framer inspector)
+  const DURATION = 420    // OG default fade duration
 
   cyclingCells.forEach((cell) => {
     const pool = POOLS[cell.dataset.mode]
     if (!pool || pool.length === 0) return
 
-    const a = document.createElement('img')
-    const b = document.createElement('img')
-    a.className = 'album__img'
-    b.className = 'album__img'
-    a.draggable = false; b.draggable = false
-    a.alt = ''; b.alt = ''
-    cell.appendChild(a); cell.appendChild(b)
+    const img = document.createElement('img')
+    img.className = 'album__img'
+    img.draggable = false
+    img.alt = ''
+    cell.appendChild(img)
 
     let idx = Math.floor(Math.random() * pool.length)
-    a.src = pool[idx]
-    a.style.opacity = '1'
-    let front = a, back = b
+    img.src = pool[idx]
+    img.style.opacity = '1'
 
-    const interval = BASE_INTERVAL + Math.random() * JITTER
-    let timer = null
+    let intervalId = null
+    let swapTimeout = null
 
-    function next() {
-      idx = (idx + 1) % pool.length
-      back.src = pool[idx]
-      requestAnimationFrame(() => {
-        back.style.opacity = '1'
-        front.style.opacity = '0'
-        const swap = front; front = back; back = swap
-      })
+    function cycle() {
+      // Phase 1: fade current image out
+      img.style.opacity = '0'
+      // Phase 2 (after fade completes): swap src and fade new image in
+      swapTimeout = setTimeout(() => {
+        idx = (idx + 1) % pool.length
+        img.src = pool[idx]
+        img.style.opacity = '1'
+        swapTimeout = null
+      }, DURATION)
     }
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !timer) timer = setInterval(next, interval)
-        else if (!entry.isIntersecting && timer) { clearInterval(timer); timer = null }
+        if (entry.isIntersecting && !intervalId) {
+          intervalId = setInterval(cycle, INTERVAL)
+        } else if (!entry.isIntersecting && intervalId) {
+          clearInterval(intervalId)
+          if (swapTimeout) { clearTimeout(swapTimeout); swapTimeout = null }
+          intervalId = null
+          // Make sure the image stays visible if we paused mid-fade
+          img.style.opacity = '1'
+        }
       },
       { threshold: 0 }
     )
