@@ -662,35 +662,49 @@ if (tCard) {
 
 /* ----- Album-grid cell cycling on /about/
    Ports the GridCell "images" mode from the OG Framer component. Each cell
-   marked data-mode="cycle" gets two stacked <img>s that crossfade through
-   the ALBUM_POOL on an interval. Each cell starts at a random index and on a
-   slightly randomized interval so they don't pulse in sync. */
-const albumCells = document.querySelectorAll('.album[data-mode="cycle"]')
-if (albumCells.length) {
-  const ALBUM_POOL = [
+   has its OWN image pool by data-mode (photos vs albums) — they're not a
+   shared pool. Each cell stacks two <img>s and crossfades through its pool.
+   Starting index is random per cell; interval is jittered so cells don't
+   pulse in sync. Pauses when scrolled off-screen. */
+const POOLS = {
+  photos: [
+    '/photos/photo-1.webp',
+    '/photos/photo-2.webp',
+    '/photos/photo-3.webp',
+    '/photos/photo-4.webp',
+    '/photos/photo-5.webp',
+  ],
+  albums: [
     '/albums/album-1.webp',
     '/albums/album-2.webp',
     '/albums/album-3.webp',
     '/albums/album-4.webp',
-  ]
+    '/albums/album-5.webp',
+    '/albums/album-6.webp',
+    '/albums/album-7.webp',
+    '/albums/album-8.webp',
+    '/albums/album-9.webp',
+  ],
+}
+const cyclingCells = document.querySelectorAll('.album[data-mode="photos"], .album[data-mode="albums"]')
+if (cyclingCells.length) {
   const BASE_INTERVAL = 2500  // OG default
-  const DURATION = 420        // OG default
-  const JITTER = 1200         // ms — each cell's interval offset by 0-1.2s
+  const JITTER = 1200         // ms — randomize so cells don't sync
 
-  albumCells.forEach((cell) => {
+  cyclingCells.forEach((cell) => {
+    const pool = POOLS[cell.dataset.mode]
+    if (!pool || pool.length === 0) return
+
     const a = document.createElement('img')
     const b = document.createElement('img')
     a.className = 'album__img'
     b.className = 'album__img'
-    a.draggable = false
-    b.draggable = false
-    a.alt = ''
-    b.alt = ''
-    cell.appendChild(a)
-    cell.appendChild(b)
+    a.draggable = false; b.draggable = false
+    a.alt = ''; b.alt = ''
+    cell.appendChild(a); cell.appendChild(b)
 
-    let idx = Math.floor(Math.random() * ALBUM_POOL.length)
-    a.src = ALBUM_POOL[idx]
+    let idx = Math.floor(Math.random() * pool.length)
+    a.src = pool[idx]
     a.style.opacity = '1'
     let front = a, back = b
 
@@ -698,28 +712,19 @@ if (albumCells.length) {
     let timer = null
 
     function next() {
-      idx = (idx + 1) % ALBUM_POOL.length
-      back.src = ALBUM_POOL[idx]
-      // Wait a frame so the new src takes effect before opacity transition
+      idx = (idx + 1) % pool.length
+      back.src = pool[idx]
       requestAnimationFrame(() => {
         back.style.opacity = '1'
         front.style.opacity = '0'
-        // Swap roles after the crossfade finishes
-        const swap = front
-        front = back
-        back = swap
+        const swap = front; front = back; back = swap
       })
     }
 
-    // Only run cycling while the cell is in view — saves work scrolled out
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !timer) {
-          timer = setInterval(next, interval)
-        } else if (!entry.isIntersecting && timer) {
-          clearInterval(timer)
-          timer = null
-        }
+        if (entry.isIntersecting && !timer) timer = setInterval(next, interval)
+        else if (!entry.isIntersecting && timer) { clearInterval(timer); timer = null }
       },
       { threshold: 0 }
     )

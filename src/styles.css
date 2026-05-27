@@ -815,41 +815,32 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 .about-photo span { font-family: var(--sans); font-size: 12px; color: var(--navy); }
 
-/* Album grid on /about/ — ports the music section from sreedotee.framer.website:
-   4×4 of square cells with a 2px gap, light-gray placeholder for empties, italic
-   serif "i love music" label above and "in no particular order." caption below. */
+/* Album grid on /about/ — ports the GridCell-driven music section from
+   sreedotee.framer.website. 4×4 of square cells, 2px gap. Each cell has a
+   mode (data-mode): 'photos' / 'albums' = JS-driven image carousel through
+   that pool; 'text' = label cell with text + data-align (top/center/bottom);
+   no mode = gray empty placeholder (#f0f0f0). */
 .album-section {
   padding: 80px 40px 120px;
   max-width: var(--max);
   margin: 0 auto;
 }
-.album-section__label,
-.album-section__caption {
-  font-family: var(--serif);
-  font-size: 16px;
-  font-style: italic;
-  color: var(--navy);
-  text-align: right;
-}
-.album-section__label { margin-bottom: 16px; }
-.album-section__caption { margin-top: 16px; }
-
 .album-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2px;
 }
-
 .album {
   position: relative;
   aspect-ratio: 1;
   background: rgb(240, 240, 240);
   overflow: hidden;
 }
-/* Cycling cells stack two <img>s and crossfade between them — matches the OG
-   Framer GridCell fade transition (420ms cubic-bezier(0.4, 0, 0.2, 1)). */
-.album__img,
-.album > img {
+/* Image-mode cells (photos / albums) stack two <img>s and crossfade between
+   them — matches the OG Framer GridCell fade transition (420ms cubic-bezier). */
+.album[data-mode="photos"],
+.album[data-mode="albums"] { background: transparent; }
+.album__img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -860,8 +851,21 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   will-change: opacity;
   transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Static (non-cycle) image cells show their <img> at full opacity */
-.album:not([data-mode]) > img { opacity: 1; }
+/* Text-mode cells: white background, italic serif copy, alignable top/center/bottom */
+.album[data-mode="text"] {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.album[data-mode="text"][data-align="top"] { justify-content: flex-start; }
+.album[data-mode="text"][data-align="center"] { justify-content: center; }
+.album[data-mode="text"][data-align="bottom"] { justify-content: flex-end; }
 
 /* /contact/ */
 

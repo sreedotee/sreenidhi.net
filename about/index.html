@@ -47,32 +47,32 @@
         </div>
       </div>
 
+      <!-- Music grid ported from sreedotee.framer.website. 4×4 = 16 cells.
+           Each cell has a mode: 'photos' / 'albums' = cycle that pool;
+           'text' = label cell with alignment; otherwise gray placeholder. -->
       <section class="album-section">
-        <div class="album-section__label">i love music</div>
         <div class="album-grid">
-          <!-- 4x4 = 16 cells. data-mode: 'cycle' = rotates through album pool;
-               anything else = empty gray placeholder.                       -->
-          <div class="album" data-mode="cycle"></div>
+          <!-- Row 0 -->
+          <div class="album" data-mode="photos"></div>
+          <div class="album" data-mode="text" data-align="bottom">(01) I'm Sree</div>
+          <div class="album"></div>
+          <div class="album"></div>
+          <!-- Row 1 -->
           <div class="album"></div>
           <div class="album"></div>
           <div class="album"></div>
-
-          <div class="album"></div>
-          <div class="album"></div>
-          <div class="album" data-mode="cycle"></div>
-          <div class="album"></div>
-
+          <div class="album" data-mode="text" data-align="top">i love music</div>
+          <!-- Row 2 -->
           <div class="album"></div>
           <div class="album"></div>
           <div class="album"></div>
-          <div class="album" data-mode="cycle"></div>
-
-          <div class="album"></div>
-          <div class="album" data-mode="cycle"></div>
+          <div class="album" data-mode="albums"></div>
+          <!-- Row 3 -->
           <div class="album"></div>
           <div class="album"></div>
+          <div class="album"></div>
+          <div class="album" data-mode="text" data-align="bottom">in no particular order.</div>
         </div>
-        <div class="album-section__caption">in no particular order.</div>
       </section>
     </main>
 
