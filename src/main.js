@@ -158,42 +158,6 @@ if (workSection) {
   render(false)
 }
 
-/* ----- Trifecta reveal: footer tracks the trifecta's top edge as user scrolls into it.
-   - target is computed from scroll position (where the footer should sit)
-   - current is lerped toward target each frame so the motion has weight/resistance
-   - --lift CSS var is driven from the current lift distance so the shadow grows with it ----- */
-const trifectaSection = document.querySelector('#trifecta')
-const trifectaFoot = document.querySelector('.A-foot')
-if (trifectaSection && trifectaFoot) {
-  let targetY = 0
-  let currentY = 0
-
-  const recomputeTarget = () => {
-    const trifectaTop = trifectaSection.getBoundingClientRect().top
-    const vh = window.innerHeight
-    const fh = trifectaFoot.offsetHeight
-    const defaultTop = vh - fh
-    const targetTop = Math.max(0, Math.min(defaultTop, trifectaTop))
-    targetY = targetTop - defaultTop // 0 at rest, negative when lifted
-  }
-
-  const renderFooter = () => {
-    // ease toward target — 0.11 ≈ moderate resistance (lower = heavier feel)
-    currentY += (targetY - currentY) * 0.11
-    if (Math.abs(currentY - targetY) < 0.3) currentY = targetY
-    trifectaFoot.style.transform = `translateY(${currentY}px)`
-    // hairline grows progressively across the full pull range (rest → fully-lifted)
-    const maxLift = Math.max(1, window.innerHeight - trifectaFoot.offsetHeight)
-    const liftIntensity = Math.min(Math.abs(currentY) / maxLift, 1)
-    trifectaFoot.style.setProperty('--lift', liftIntensity.toFixed(3))
-    requestAnimationFrame(renderFooter)
-  }
-
-  window.addEventListener('scroll', recomputeTarget, { passive: true })
-  window.addEventListener('resize', recomputeTarget, { passive: true })
-  recomputeTarget()
-  renderFooter()
-}
 
 /* ----- Neural-graph closer (trifecta) — ported 1:1 from synapserstudio.com.
    The minified production chunk (reference/chunks/9b880d591d4ff178.js) revealed
