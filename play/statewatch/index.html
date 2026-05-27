@@ -52,7 +52,7 @@
       /* Inline SVG artifacts */
       .P-shot--svg {
         width: 100%;
-        aspect-ratio: 16 / 9;
+        aspect-ratio: 1600 / 720;
         background: #ffffff;
         overflow: hidden;
       }
@@ -137,7 +137,7 @@ source of truth my code references.</section>
 
       <div class="P-shots">
         <section class="P-shot P-shot--svg">
-          <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagram-title">
+          <svg viewBox="0 0 1600 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagram-title">
             <title id="diagram-title">The verified checkout state machine — 14 states across cart, coupon, payment, and outcome clusters, plus parallel session and network regions.</title>
             <defs>
               <pattern id="sw-dotgrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -165,8 +165,8 @@ source of truth my code references.</section>
               .sw-parallel-name { font-family: 'Geist', sans-serif; font-size: 11px; fill: #04083d; }
             </style>
 
-            <rect class="sw-bg" width="1600" height="900"/>
-            <rect width="1600" height="900" fill="url(#sw-dotgrid)"/>
+            <rect class="sw-bg" width="1600" height="720"/>
+            <rect width="1600" height="720" fill="url(#sw-dotgrid)"/>
 
             <text class="sw-header-tag" x="60" y="50">VERIFIED MACHINE · 14 STATES · 28 EVENTS · 9 INVARIANTS HOLD</text>
             <text class="sw-header-title" x="60" y="82">Checkout, after Alloy verification</text>
@@ -278,7 +278,7 @@ source of truth my code references.</section>
             <path class="sw-edge" d="M 440 354 L 440 364" marker-end="url(#sw-arrow)"/>
 
             <!-- Bottom legend -->
-            <g transform="translate(60 770)">
+            <g transform="translate(60 640)">
               <rect class="sw-state" x="0" y="0" width="28" height="14" rx="7"/>
               <text class="sw-edge-label" x="38" y="10">user-facing state</text>
               <rect class="sw-state-inflight" x="160" y="0" width="28" height="14" rx="7"/>
@@ -290,7 +290,7 @@ source of truth my code references.</section>
             </g>
 
             <!-- Footer note -->
-            <text class="sw-edge-label" x="60" y="850" style="font-size: 11px;">14 atomic states + 2 parallel regions · 28 events · 9 invariants verified by Alloy</text>
+            <text class="sw-edge-label" x="60" y="682" style="font-size: 11px;">14 atomic states + 2 parallel regions · 28 events · 9 invariants verified by Alloy</text>
           </svg>
         </section>
       </div>
