@@ -625,48 +625,73 @@ if (graphEl) {
   }
 }
 
-/* ----- Creative Coding hover preview — follows the cursor with easing.
-   Replicates the og Framer site's motion: the preview floats just right of
-   the cursor, vertically centered on the row, and trails it with a lerp so
-   the movement feels fluid instead of snapped. Position is driven through
-   translate3d for GPU acceleration; CSS owns the opacity fade only (no
-   transform transition or it'll fight the rAF loop). */
+/* ----- Creative Coding hover preview — spring-physics cursor follow.
+   Matches the og Framer site: preview floats ~225px to the right of the
+   cursor, vertically centered on the row, and trails the cursor through
+   a spring simulation (Framer Motion uses the same model). CSS owns the
+   opacity fade only; transform is JS-driven so it doesn't fight a CSS
+   transition. */
 const ccRows = [...document.querySelectorAll('.cc-row')]
-const CC_OFFSET = 32      // px from cursor to the preview's left edge
-const CC_SMOOTH = 0.18    // lerp factor per frame (lower = lazier follow)
+const CC_OFFSET = 225          // matches og Framer offset captured in inspector
+const SPRING_STIFFNESS = 320
+const SPRING_DAMPING = 30
+const SPRING_MASS = 1
 ccRows.forEach((row) => {
   const preview = row.querySelector('.cc-row__preview')
   if (!preview) return
   let targetX = 0
   let currentX = 0
+  let velocity = 0
   let rafId = 0
   let inside = false
+  let lastTs = 0
 
-  function paint() {
+  function step(ts) {
     rafId = 0
-    currentX += (targetX - currentX) * CC_SMOOTH
-    // Snap when close enough so we stop burning frames.
-    if (Math.abs(targetX - currentX) < 0.3) currentX = targetX
+    if (!lastTs) lastTs = ts
+    let dt = (ts - lastTs) / 1000
+    lastTs = ts
+    if (dt > 0.05) dt = 0.05 // clamp huge frame gaps (tab switch, etc.)
+
+    // Spring: F = -k(x - x_target) - c*v, a = F / m
+    const spring = -SPRING_STIFFNESS * (currentX - targetX)
+    const damper = -SPRING_DAMPING * velocity
+    const accel = (spring + damper) / SPRING_MASS
+    velocity += accel * dt
+    currentX += velocity * dt
+
     preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
-    if (inside && currentX !== targetX) rafId = requestAnimationFrame(paint)
+
+    const settled = Math.abs(currentX - targetX) < 0.1 && Math.abs(velocity) < 0.1
+    if (inside && !settled) rafId = requestAnimationFrame(step)
+    else if (settled) {
+      currentX = targetX
+      velocity = 0
+      preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
+    }
   }
 
   row.addEventListener('mouseenter', (e) => {
     const r = row.getBoundingClientRect()
     targetX = e.clientX - r.left + CC_OFFSET
-    currentX = targetX // snap on entry so the fade-in doesn't slide
-    preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
+    currentX = targetX
+    velocity = 0
     inside = true
+    preview.style.transform = `translate3d(${currentX}px, -50%, 0)`
   })
   row.addEventListener('mousemove', (e) => {
     if (!inside) return
     const r = row.getBoundingClientRect()
     targetX = e.clientX - r.left + CC_OFFSET
-    if (!rafId) rafId = requestAnimationFrame(paint)
+    if (!rafId) {
+      lastTs = 0
+      rafId = requestAnimationFrame(step)
+    }
   })
   row.addEventListener('mouseleave', () => {
     inside = false
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0 }
+    velocity = 0
   })
 })
 
