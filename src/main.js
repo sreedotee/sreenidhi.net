@@ -659,3 +659,70 @@ if (tCard) {
   }))
   tRender()
 }
+
+/* ----- Album-grid cell cycling on /about/
+   Ports the GridCell "images" mode from the OG Framer component. Each cell
+   marked data-mode="cycle" gets two stacked <img>s that crossfade through
+   the ALBUM_POOL on an interval. Each cell starts at a random index and on a
+   slightly randomized interval so they don't pulse in sync. */
+const albumCells = document.querySelectorAll('.album[data-mode="cycle"]')
+if (albumCells.length) {
+  const ALBUM_POOL = [
+    '/albums/album-1.webp',
+    '/albums/album-2.webp',
+    '/albums/album-3.webp',
+    '/albums/album-4.webp',
+  ]
+  const BASE_INTERVAL = 2500  // OG default
+  const DURATION = 420        // OG default
+  const JITTER = 1200         // ms — each cell's interval offset by 0-1.2s
+
+  albumCells.forEach((cell) => {
+    const a = document.createElement('img')
+    const b = document.createElement('img')
+    a.className = 'album__img'
+    b.className = 'album__img'
+    a.draggable = false
+    b.draggable = false
+    a.alt = ''
+    b.alt = ''
+    cell.appendChild(a)
+    cell.appendChild(b)
+
+    let idx = Math.floor(Math.random() * ALBUM_POOL.length)
+    a.src = ALBUM_POOL[idx]
+    a.style.opacity = '1'
+    let front = a, back = b
+
+    const interval = BASE_INTERVAL + Math.random() * JITTER
+    let timer = null
+
+    function next() {
+      idx = (idx + 1) % ALBUM_POOL.length
+      back.src = ALBUM_POOL[idx]
+      // Wait a frame so the new src takes effect before opacity transition
+      requestAnimationFrame(() => {
+        back.style.opacity = '1'
+        front.style.opacity = '0'
+        // Swap roles after the crossfade finishes
+        const swap = front
+        front = back
+        back = swap
+      })
+    }
+
+    // Only run cycling while the cell is in view — saves work scrolled out
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !timer) {
+          timer = setInterval(next, interval)
+        } else if (!entry.isIntersecting && timer) {
+          clearInterval(timer)
+          timer = null
+        }
+      },
+      { threshold: 0 }
+    )
+    io.observe(cell)
+  })
+}
