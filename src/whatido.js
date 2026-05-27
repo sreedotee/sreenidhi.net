@@ -81,7 +81,6 @@ document.getElementById('app').innerHTML = /* html */ `
       <div class="section__head">
         <div>
           <div class="eyebrow">(04) TOOLS I USE</div>
-          <span class="phonetic">/tuːlz aɪ juːz/</span>
         </div>
       </div>
     </div>
