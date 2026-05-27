@@ -1358,10 +1358,18 @@ body:has(.A-hero).is-scrolled .A-foot {
   flex-direction: column;
   gap: 16px;
 }
+.P-shot {
+  width: 100%;
+  background: rgba(4, 8, 61, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
 .P-shot img,
 .P-shot video {
   width: 100%;
-  height: auto;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
   display: block;
 }
 .P-shot--placeholder {
