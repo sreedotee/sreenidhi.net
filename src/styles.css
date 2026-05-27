@@ -815,42 +815,44 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 .about-photo span { font-family: var(--sans); font-size: 12px; color: var(--navy); }
 
-.about-music {
-  padding: 80px 40px;
+/* Album grid on /about/ — ports the music section from sreedotee.framer.website:
+   4×4 of square cells with a 2px gap, light-gray placeholder for empties, italic
+   serif "i love music" label above and "in no particular order." caption below. */
+.album-section {
+  padding: 80px 40px 120px;
   max-width: var(--max);
   margin: 0 auto;
 }
-
-.about-music__head {
-  display: flex;
-  justify-content: flex-end;
-  font-family: var(--sans);
-  font-size: 15px;
-  margin-bottom: 24px;
+.album-section__label,
+.album-section__caption {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--navy);
+  text-align: right;
 }
+.album-section__label { margin-bottom: 16px; }
+.album-section__caption { margin-top: 16px; }
 
 .album-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 2px;
 }
 
 .album {
   aspect-ratio: 1;
-  background: var(--paper);
-  border-radius: 0;
+  background: rgb(240, 240, 240);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-.about-music__caption {
-  margin-top: 16px;
-  text-align: right;
-  font-family: var(--sans);
-  font-size: 14px;
-  color: var(--navy);
+.album img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* /contact/ */
