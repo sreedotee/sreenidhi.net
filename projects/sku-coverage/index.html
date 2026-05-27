@@ -36,25 +36,41 @@
     <main class="P-page">
       <section class="P-hero">
         <h1 class="P-hero__title">SKU Coverage B2B Design</h1>
-        <p class="P-hero__lead">SKU Coverage is a B2B internal tool I designed in 2025 for evaluating how retail product data is represented across an inventory pipeline. The operator's question is simple — where are we missing imagery, descriptions, attributes — and the tool's job is to answer it without ceremony.</p>
+        <p class="P-hero__lead">SKU Coverage is a B2B SaaS dashboard for managing AI-generated product imagery at scale. It's built for fashion and e-commerce teams that produce visual assets across many SKUs and channels, and need a single place to see what's ready, what's in flight, and what's costing what. The product sits at the intersection of digital asset management and AI workflow ops. The design is currently in active development.</p>
         <dl class="P-meta">
           <div><dt>Service</dt><dd>B2B Design</dd></div>
           <div><dt>Year</dt><dd>2025</dd></div>
           <div><dt>Credits</dt><dd>Sreenidhi</dd></div>
-          <div><dt>Link</dt><dd><a href="#" target="_blank" rel="noreferrer">Live site ↗</a></dd></div>
+          <div><dt>Status</dt><dd>Work in progress</dd></div>
         </dl>
       </section>
 
       <div class="P-shots">
-        <section class="P-shot"><img src="/og-assets/7Ql70vlkfOIWBKufurqilnPCVVY.png" alt="SKU Coverage showcase 1" /></section>
+        <section class="P-shot P-shot--placeholder" aria-label="SKU Coverage overview, work in progress"><span class="P-shot--placeholder__label">Work in progress</span></section>
       </div>
 
       <section class="P-body">
-        <p class="P-body__para">B2B tools usually fail by hiding their state behind layers of UI. Here, the visualization of coverage gaps is the primary affordance — operators see the system's status in a single screen and act on it directly, no navigation tax.</p>
+        <p class="P-body__para">Teams using a tool like this aren't generating one image at a time. They're shipping hundreds of looks per launch, across product shots, model imagery, lifestyle scenes, and channel-specific crops. Without a coordination layer, this work scatters across Slack threads, shared drives, and individual generation tools. The dashboard consolidates that scatter into one source of truth: per-SKU asset coverage across channels, status, and ownership.</p>
       </section>
 
       <div class="P-shots">
-        <section class="P-shot"><img src="/og-assets/VmJcjighQyddpbh6g4gA6EzrLs.png" alt="SKU Coverage showcase 2" /></section>
+        <section class="P-shot P-shot--placeholder" aria-label="Coverage view, work in progress"><span class="P-shot--placeholder__label">Work in progress</span></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">The product is structured around a few core objects. SKUs are the products, Assets are the generated images grouped by channel and use case, Workflows are the pipelines that produce them, Models are the trained AI models the workflows draw from, and Credits are the generation budget. Each object has its own surface for filtering and drilling in, and they cross-reference, so an operator can move from a missing asset back to the workflow that should have produced it without losing context.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--placeholder" aria-label="Object model and cross-references, work in progress"><span class="P-shot--placeholder__label">Work in progress</span></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">B2B tools at this density fail when they try to surface everything at once. I built the IA around the operator's most common starting question, which is some version of <em>what's blocking the next launch?</em>. The default views answer that first, and let the operator drill from there into specific SKUs, models, or workflows. The denser admin surfaces (model management, credit reconciliation, settings) live one level deeper so they're available without crowding the daily flow.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--placeholder" aria-label="Drill-in surfaces, work in progress"><span class="P-shot--placeholder__label">Work in progress</span></section>
       </div>
     </main>
 
