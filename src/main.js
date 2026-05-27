@@ -158,6 +158,26 @@ if (workSection) {
   render(false)
 }
 
+/* ----- Trifecta reveal: footer translateY tracks the trifecta top edge 1:1 as user scrolls.
+   Direct mapping — no lerp lag — so the motion feels like pulling paper rather than a weighted object. ----- */
+const trifectaSection = document.querySelector('#trifecta')
+const trifectaFoot = document.querySelector('.A-foot')
+if (trifectaSection && trifectaFoot) {
+  const update = () => {
+    const trifectaTop = trifectaSection.getBoundingClientRect().top
+    const vh = window.innerHeight
+    const fh = trifectaFoot.offsetHeight
+    const defaultTop = vh - fh
+    const targetTop = Math.max(0, Math.min(defaultTop, trifectaTop))
+    const y = targetTop - defaultTop // 0 at rest, negative when lifted
+    trifectaFoot.style.transform = `translateY(${y}px)`
+    const liftIntensity = Math.min(Math.abs(y) / Math.max(1, defaultTop), 1)
+    trifectaFoot.style.setProperty('--lift', liftIntensity.toFixed(3))
+  }
+  window.addEventListener('scroll', update, { passive: true })
+  window.addEventListener('resize', update, { passive: true })
+  update()
+}
 
 /* ----- Neural-graph closer (trifecta) — ported 1:1 from synapserstudio.com.
    The minified production chunk (reference/chunks/9b880d591d4ff178.js) revealed
