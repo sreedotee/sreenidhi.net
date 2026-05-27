@@ -361,6 +361,494 @@ feature happy paths always misses. Caught in seconds.</span></section>
       </div>
 
       <section class="P-body">
+        <p class="P-body__para">The 11 states in the verified machine map to 11 screens. Not wireframes — not comps — screens that exist because the machine exists. When you add a state, you add a frame. When Alloy rejects a state, no frame gets built for it.</p>
+      </section>
+
+      <div class="P-shot" style="width:100%;aspect-ratio:1600/2200;">
+      <svg viewBox="0 0 1600 2200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" role="img" aria-label="11 mobile UI frames, one per verified checkout state">
+        <!-- ─── shared defs ─── -->
+        <defs>
+          <clipPath id="screen-clip"><rect x="0" y="0" width="316" height="558" rx="0"/></clipPath>
+          <!-- phone body shadow -->
+          <filter id="phone-shadow" x="-5%" y="-3%" width="110%" height="110%">
+            <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#0B1524" flood-opacity="0.18"/>
+          </filter>
+          <!-- card shadow -->
+          <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#0B1524" flood-opacity="0.07"/>
+          </filter>
+          <!-- spinner path for processing / coupon validating -->
+          <style>
+            .fr-label { font: 600 11px/1 'Inter','Helvetica Neue',Arial,sans-serif; fill:#6B7480; text-anchor:middle; }
+            .fr-stateId { font: 500 10px/1 monospace; fill:#3B5BDB; text-anchor:middle; }
+            .spin-arc { fill:none; stroke:#3B5BDB; stroke-width:4; stroke-linecap:round; stroke-dasharray:50 94; }
+            .spin-track { fill:none; stroke:#E3E6EA; stroke-width:4; }
+          </style>
+        </defs>
+
+        <!-- ═══════════════════════════════════════
+             ROW 1:  cart · reviewing · paymentEntry · processing
+             y-origin 60, frame height 590+label area ≈ 630
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 1: cart ── -->
+        <g transform="translate(56,60)" filter="url(#phone-shadow)">
+          <!-- phone body -->
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <!-- notch -->
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <!-- screen -->
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <!-- status bar -->
+          <rect x="12" y="36" width="316" height="20" rx="0" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <!-- top bar -->
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Cart</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- item 1: Linen crew tee -->
+          <rect x="12" y="108" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="118" width="44" height="44" rx="8" fill="#E7F5FF"/>
+          <text x="78" y="134" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Linen crew tee</text>
+          <text x="78" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$38.00</text>
+          <!-- qty stepper -->
+          <rect x="245" y="128" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">1</text>
+          <text x="307" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- item 2: Canvas tote -->
+          <rect x="12" y="184" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="194" width="44" height="44" rx="8" fill="#FFF3BF"/>
+          <text x="78" y="210" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Canvas tote</text>
+          <text x="78" y="226" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$24.00</text>
+          <rect x="245" y="204" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">2</text>
+          <text x="307" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- item 3: Enamel mug -->
+          <rect x="12" y="260" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="270" width="44" height="44" rx="8" fill="#FFE3E3"/>
+          <text x="78" y="286" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Enamel mug</text>
+          <text x="78" y="302" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$16.00</text>
+          <rect x="245" y="280" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">1</text>
+          <text x="307" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- subtotal -->
+          <line x1="22" y1="344" x2="328" y2="344" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="362" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480">Subtotal</text>
+          <text x="328" y="362" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="end">$102.00</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Review order</text>
+          <!-- home indicator -->
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <!-- label -->
+        <text x="226" y="696" class="fr-label">cart</text>
+        <text x="226" y="709" class="fr-stateId">state.cart</text>
+
+        <!-- ── FRAME 2: reviewing ── -->
+        <g transform="translate(436,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <!-- top bar with back -->
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- items card condensed -->
+          <rect x="12" y="108" width="316" height="90" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="126" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524">Items</text>
+          <rect x="22" y="132" width="28" height="28" rx="6" fill="#E7F5FF"/>
+          <text x="56" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Linen crew tee × 1</text>
+          <text x="310" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$38.00</text>
+          <rect x="22" y="162" width="28" height="14" rx="3" fill="#FFF3BF"/>
+          <text x="56" y="173" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Canvas tote × 2</text>
+          <text x="310" y="173" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$48.00</text>
+          <rect x="22" y="183" width="28" height="10" rx="3" fill="#FFE3E3"/>
+          <text x="56" y="192" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Enamel mug × 1</text>
+          <text x="310" y="192" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$16.00</text>
+          <!-- ship to card -->
+          <rect x="12" y="206" width="316" height="54" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="224" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524">Ship to</text>
+          <text x="22" y="240" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Sreenidhi · 14 Maple St, Austin TX 78701</text>
+          <text x="316" y="224" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#3B5BDB" text-anchor="end">Change</text>
+          <!-- totals card -->
+          <rect x="12" y="268" width="316" height="106" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="288" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Subtotal</text>
+          <text x="316" y="288" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$102.00</text>
+          <text x="22" y="306" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Shipping</text>
+          <text x="316" y="306" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$6.00</text>
+          <text x="22" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Tax</text>
+          <text x="316" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$8.64</text>
+          <line x1="22" y1="332" x2="316" y2="332" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="350" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524">Total</text>
+          <text x="316" y="350" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="end">$116.64</text>
+          <!-- apply coupon link -->
+          <text x="170" y="390" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#3B5BDB" text-anchor="middle">Apply coupon</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="696" class="fr-label">reviewing</text>
+        <text x="606" y="709" class="fr-stateId">state.reviewing</text>
+
+        <!-- ── FRAME 3: paymentEntry ── -->
+        <g transform="translate(816,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- card form -->
+          <rect x="12" y="108" width="316" height="200" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <!-- card number -->
+          <text x="22" y="128" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Card number</text>
+          <rect x="22" y="134" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#3B5BDB" stroke-width="2"/>
+          <text x="32" y="157" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524" letter-spacing="2">4242 4242 4242 4242</text>
+          <!-- expiry + cvc row -->
+          <text x="22" y="188" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Expiry</text>
+          <rect x="22" y="194" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="217" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">12 / 28</text>
+          <text x="182" y="188" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">CVC</text>
+          <rect x="182" y="194" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="192" y="217" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">•••</text>
+          <!-- name -->
+          <text x="22" y="248" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Name on card</text>
+          <rect x="22" y="254" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="277" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Sreenidhi</text>
+          <!-- billing address -->
+          <rect x="12" y="316" width="316" height="44" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="328" width="16" height="16" rx="4" fill="#3B5BDB"/>
+          <text x="44" y="340" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Same as shipping</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="696" class="fr-label">paymentEntry</text>
+        <text x="986" y="709" class="fr-stateId">state.paymentEntry</text>
+
+        <!-- ── FRAME 4: processing ── -->
+        <g transform="translate(1196,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- centered spinner card -->
+          <rect x="50" y="240" width="240" height="150" rx="16" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <!-- spinner ring -->
+          <circle cx="170" cy="288" r="24" class="spin-track"/>
+          <circle cx="170" cy="288" r="24" class="spin-arc"/>
+          <text x="170" y="318" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Processing payment</text>
+          <text x="170" y="334" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Don't close this window</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="1366" y="696" class="fr-label">processing</text>
+        <text x="1366" y="709" class="fr-stateId">state.processing</text>
+
+        <!-- ═══════════════════════════════════════
+             ROW 2:  threeDSecure · declined · stockProblemDuringPayment · success
+             y-origin 730
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 5: threeDSecure ── -->
+        <g transform="translate(56,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed bg -->
+          <rect x="12" y="100" width="316" height="494" fill="#0B1524" opacity="0.4"/>
+          <!-- bottom sheet -->
+          <rect x="12" y="340" width="316" height="254" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="352" x2="190" y2="352" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="378" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#0B1524" text-anchor="middle">Your Bank · Verified by Visa</text>
+          <text x="170" y="398" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">We sent a code to •••• 4242</text>
+          <!-- OTP boxes -->
+          <rect x="30" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="74" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="118" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#3B5BDB" stroke-width="2"/>
+          <rect x="162" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="206" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="250" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="48" y="433" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#0B1524" text-anchor="middle">3</text>
+          <text x="92" y="433" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#0B1524" text-anchor="middle">7</text>
+          <rect x="28" y="458" width="284" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="480" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Verify</text>
+          <text x="170" y="512" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="226" y="1366" class="fr-label">threeDSecure</text>
+        <text x="226" y="1379" class="fr-stateId">state.threeDSecure</text>
+
+        <!-- ── FRAME 6: declined ── -->
+        <g transform="translate(436,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- error banner -->
+          <rect x="12" y="108" width="316" height="58" rx="10" fill="#FFF0F0" stroke="#E03131" stroke-width="1.5"/>
+          <rect x="12" y="108" width="4" height="58" rx="2" fill="#E03131"/>
+          <text x="26" y="128" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#E03131">⚠ Card declined</text>
+          <text x="26" y="148" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Insufficient funds. Try another card.</text>
+          <!-- card form (retry) -->
+          <rect x="12" y="174" width="316" height="200" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="194" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Card number</text>
+          <rect x="22" y="200" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E03131" stroke-width="2"/>
+          <text x="32" y="223" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524" letter-spacing="2">4242 4242 4242 4242</text>
+          <text x="22" y="254" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Expiry</text>
+          <rect x="22" y="260" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="283" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">12 / 28</text>
+          <text x="182" y="254" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">CVC</text>
+          <rect x="182" y="260" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="192" y="283" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">•••</text>
+          <text x="22" y="314" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Name on card</text>
+          <rect x="22" y="320" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="343" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Sreenidhi</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="1366" class="fr-label">declined</text>
+        <text x="606" y="1379" class="fr-stateId">state.declined</text>
+
+        <!-- ── FRAME 7: stockProblemDuringPayment ── -->
+        <g transform="translate(816,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed bg -->
+          <rect x="12" y="100" width="316" height="494" fill="#0B1524" opacity="0.4"/>
+          <!-- dialog -->
+          <rect x="30" y="230" width="280" height="190" rx="16" fill="#FFFFFF"/>
+          <text x="170" y="268" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="20" text-anchor="middle">⚠️</text>
+          <text x="170" y="292" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Item no longer available</text>
+          <text x="170" y="310" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Canvas tote sold out.</text>
+          <text x="170" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Remove it to continue.</text>
+          <rect x="42" y="336" width="256" height="32" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="357" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">Remove &amp; continue</text>
+          <text x="170" y="400" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="1366" class="fr-label">stockProblem</text>
+        <text x="986" y="1379" class="fr-stateId">state.stockProblemDuringPayment</text>
+
+        <!-- ── FRAME 8: success ── -->
+        <g transform="translate(1196,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Order placed</text>
+          <!-- success check circle -->
+          <circle cx="170" cy="210" r="36" fill="#EBFBEE"/>
+          <text x="170" y="223" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="28" fill="#2F9E44" text-anchor="middle">✓</text>
+          <text x="170" y="270" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="600" fill="#0B1524" text-anchor="middle">Payment confirmed</text>
+          <text x="170" y="292" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">Order #SW-4821</text>
+          <!-- summary card -->
+          <rect x="22" y="308" width="296" height="80" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="330" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480">3 items · Total paid</text>
+          <text x="306" y="330" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="end">$116.64</text>
+          <text x="32" y="370" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Receipt emailed to sreenidhi.dev@gmail.com</text>
+          <!-- bottom bar: 2 buttons -->
+          <rect x="12" y="522" width="316" height="72" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="522" x2="328" y2="522" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="530" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="552" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">View receipt</text>
+          <rect x="22" y="571" width="296" height="16" rx="6" fill="none"/>
+          <text x="170" y="583" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#3B5BDB" text-anchor="middle">Continue shopping</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="1366" y="1366" class="fr-label">success</text>
+        <text x="1366" y="1379" class="fr-stateId">state.success</text>
+
+        <!-- ═══════════════════════════════════════
+             ROW 3:  couponEntering · couponValidating · couponInvalid  (+ note card)
+             y-origin 1400
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 9: couponEntering ── -->
+        <g transform="translate(56,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed reviewing bg -->
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <!-- coupon bottom sheet -->
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#3B5BDB" stroke-width="2"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#0B1524" letter-spacing="2">GIFT20</text>
+          <rect x="22" y="502" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="524" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Apply</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="226" y="2036" class="fr-label">couponEntering</text>
+        <text x="226" y="2049" class="fr-stateId">state.couponEntering</text>
+
+        <!-- ── FRAME 10: couponValidating ── -->
+        <g transform="translate(436,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1" opacity="0.7"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" letter-spacing="2" opacity="0.6">GIFT20</text>
+          <!-- spinner button -->
+          <rect x="22" y="502" width="296" height="34" rx="10" fill="#3B5BDB" opacity="0.7"/>
+          <circle cx="148" cy="519" r="8" class="spin-track"/>
+          <circle cx="148" cy="519" r="8" class="spin-arc"/>
+          <text x="164" y="524" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#FFFFFF">Checking…</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle" opacity="0.4">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="2036" class="fr-label">couponValidating</text>
+        <text x="606" y="2049" class="fr-stateId">state.couponValidating</text>
+
+        <!-- ── FRAME 11: couponInvalid ── -->
+        <g transform="translate(816,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#E03131">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#FFF0F0" stroke="#E03131" stroke-width="2"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#0B1524" letter-spacing="2">GIFT20</text>
+          <text x="22" y="500" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#E03131">Coupon code is invalid.</text>
+          <rect x="22" y="510" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="532" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Try again</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="2036" class="fr-label">couponInvalid</text>
+        <text x="986" y="2049" class="fr-stateId">state.couponInvalid</text>
+
+        <!-- ── NOTE CARD (col 4, row 3) ── -->
+        <rect x="1196" y="1400" width="340" height="620" rx="16" fill="#F1F3F5" stroke="#E3E6EA" stroke-width="1.5"/>
+        <text x="1366" y="1660" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">+3 more states</text>
+        <text x="1366" y="1682" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">networkError</text>
+        <text x="1366" y="1698" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">sessionLost</text>
+        <text x="1366" y="1714" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">receipt</text>
+        <text x="1366" y="1738" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">omitted — no distinct UI</text>
+        <text x="1366" y="1752" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">beyond existing variants</text>
+
+      </svg>
+      </div>
+
+      <section class="P-body">
         <p class="P-body__para">Why this matters. When someone adds a feature, they extend the machine and re-run Alloy. The previously-verified invariants protect the verified core — if the extension breaks something already proven, Alloy says so. Anyone on the team can ask the spec questions: how many happy paths exist, can a user reach this state without verifying their email, what's the shortest path to an error. The chart is interrogable. States and their UI frames live in the same artifact — when the flow changes, the diagram changes, the verification re-runs, the frames are re-attached. Stale documentation is the eternal problem. This one stays current because it is the truth, not derivative of it.</p>
       </section>
 
