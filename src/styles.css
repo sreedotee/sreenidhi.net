@@ -1362,8 +1362,6 @@ body:has(.A-hero).is-scrolled .A-foot {
 .P-shot video {
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
   display: block;
 }
 .P-shot--placeholder {
