@@ -2059,60 +2059,47 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 
 /* ============================================================
-   Big footer — Adjaycent style, animated gradient + 3 cols
+   Big footer — Adjaycent style: white top fading to deep blue
    ============================================================ */
-@keyframes A-bigfoot-flow {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 .A-bigfoot {
-  background: linear-gradient(-45deg, #5a9ad4, #7cb8e8, #c8e4f8, #a4cff0, #edf6ff, #7cb8e8, #5a9ad4);
-  background-size: 400% 400%;
-  animation: A-bigfoot-flow 14s ease infinite;
-  padding: 56px max(32px, calc((100% - 1320px) / 2)) 80px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 32px;
-  align-items: end;
-  min-height: 44vh;
+  background: linear-gradient(to bottom,
+    #ffffff    0%,
+    #edf6ff   20%,
+    #a4cff0   55%,
+    #5a9ad4   80%,
+    #2d6ea0  100%
+  );
+  min-height: 52vh;
+  padding: 36px max(32px, calc((100% - 1320px) / 2)) 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
 }
 
-.A-bigfoot__col {
+.A-bigfoot__top {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
-.A-bigfoot__col:last-child { align-items: flex-end; }
-
-.A-bigfoot__col a { color: inherit; }
-.A-bigfoot__col a:hover { color: #fff; }
-
-.A-bigfoot__name {
-  font-family: var(--serif);
-  font-size: clamp(28px, 3.2vw, 48px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-  font-weight: 400;
-  text-transform: none;
+.A-bigfoot__bottom {
+  text-align: center;
 }
 
-.A-bigfoot__label {
+.A-bigfoot__top span,
+.A-bigfoot__top a,
+.A-bigfoot__bottom span,
+.A-bigfoot__bottom a {
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.85);
 }
+
+.A-bigfoot__top a:hover,
+.A-bigfoot__bottom a:hover { color: #fff; }
 
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
