@@ -515,18 +515,23 @@ function initGraph(graphEl) {
       word.el.style.transform = `translate3d(${dispX}px, ${dispY}px, 0) translate(-50%, -50%)`
       word.el.style.opacity = word.alpha
 
-      // Line endpoints — clip to title bbox at near end, to word's bbox at far end
-      let M = cx, N = cy, k = wx, S = wy
+      // Line endpoints — anchor near end at title center, clip to bbox edge, far end clips to word bbox
+      const TX = cx
+      const TY = cy + (titleBox.yOffset || 0)
+      let M = TX, N = TY, k = wx, S = wy
       if (titleBox.width > 0) {
-        const e = k - cx
-        const t = S - cy
-        const r2 = titleBox.height / 2
-        const i = titleBox.yOffset
-        const a = Math.min(
-          titleBox.width / 2 / Math.abs(e || 1),
-          t === 0 ? Infinity : (i + Math.sign(t) * r2) / t
-        )
-        if (a < 1) { M = cx + e * a; N = cy + t * a }
+        const dx = k - TX
+        const dy = S - TY
+        const halfW = titleBox.width / 2
+        const halfH = titleBox.height / 2
+        let tx = Infinity, ty = Infinity
+        if (dx > 0) tx = halfW / dx
+        else if (dx < 0) tx = -halfW / dx
+        if (dy > 0) ty = halfH / dy
+        else if (dy < 0) ty = -halfH / dy
+        const a = Math.min(tx, ty, 1)
+        M = TX + dx * a
+        N = TY + dy * a
       }
       const dxe = M - k
       const dye = N - S
