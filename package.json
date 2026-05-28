@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "lenis": "^1.3.23",
-    "puppeteer": "^25.0.4"
+    "puppeteer": "^25.0.4",
+    "three": "^0.184.0"
   }
 }

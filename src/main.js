@@ -64,6 +64,15 @@ window.addEventListener('scroll', onScroll, { passive: true })
 window.addEventListener('resize', onScroll, { passive: true })
 update()
 
+/* ----- Active nav link — marks current page with aria-current so CSS can expand brackets ----- */
+document.querySelectorAll('.A-topbar__center a, .A-topbar__right a').forEach(a => {
+  const href = a.getAttribute('href')
+  if (!href || href.startsWith('mailto:') || href.includes('.pdf')) return
+  const path = window.location.pathname
+  const active = href === '/' ? path === '/' : path.startsWith(href)
+  if (active) a.setAttribute('aria-current', 'page')
+})
+
 /* ----- Selected Work carousel (auto only, seamless forward loop) ----- */
 const workSection = document.querySelector('#work')
 if (workSection) {

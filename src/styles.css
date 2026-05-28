@@ -1017,15 +1017,54 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   gap: 2px;
 }
 
-.A-topbar__center a { color: var(--navy); opacity: 0.5; }
-.A-topbar__center a:hover { opacity: 1; }
-
 .A-topbar__right {
   display: flex;
   justify-content: flex-end;
 }
-.A-topbar__right a { color: var(--navy); opacity: 0.5; }
-.A-topbar__right a:hover { opacity: 1; }
+
+.A-topbar__center a,
+.A-topbar__right a {
+  color: var(--navy);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.A-topbar__center a::before,
+.A-topbar__right a::before {
+  content: '(';
+  display: inline-block;
+  margin-right: 5px;
+  transition: margin-right 0.25s ease;
+}
+
+.A-topbar__center a::after,
+.A-topbar__right a::after {
+  content: ')';
+  display: inline-block;
+  margin-left: 5px;
+  transition: margin-left 0.25s ease;
+}
+
+.A-topbar__center a:hover,
+.A-topbar__right a:hover,
+.A-topbar__center a[aria-current="page"],
+.A-topbar__right a[aria-current="page"] {
+  opacity: 1;
+}
+
+.A-topbar__center a:hover::before,
+.A-topbar__right a:hover::before,
+.A-topbar__center a[aria-current="page"]::before,
+.A-topbar__right a[aria-current="page"]::before {
+  margin-right: 12px;
+}
+
+.A-topbar__center a:hover::after,
+.A-topbar__right a:hover::after,
+.A-topbar__center a[aria-current="page"]::after,
+.A-topbar__right a[aria-current="page"]::after {
+  margin-left: 12px;
+}
 
 /* On pages with the silk hero, keep the fixed footer hidden until the hero is scrolled past. */
 body:has(.A-hero) .A-foot {

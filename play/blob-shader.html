@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blob</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#ebebef; }
+  canvas { display:block; }
+</style>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Thin-Film Fresnel LUT — direct port of DerSchmale/threejs-thin-film-iridescence
+// Returns a DataTexture (size×1) where x = NdotV, rgb = iridescent colour (sqrt-gamma)
+// Usage in shader: vec3 c = texture2D(lut, vec2(NdotV*0.99, 0.5)).rgb; c *= c;
+// ─────────────────────────────────────────────────────────────────────────────
+function thinFilmLUT(filmThickness = 400, nFilm = 1.33, nBase = 1.5, size = 128) {
+  const data = new Uint8Array(size * 4);
+
+  const fresnelRefl = (n1, n2, cos1, cos2, R, phi) => {
+    const sin1Sq = 1 - cos1 * cos1;
+    const ratio  = n1 / n2;
+    if (ratio * ratio * sin1Sq > 1) {
+      R.x = R.y = 1;
+      const rr = ratio * ratio;
+      phi.x = 2 * Math.atan(-rr * Math.sqrt(sin1Sq - 1/rr) / cos1);
+      phi.y = 2 * Math.atan(-Math.sqrt(sin1Sq - 1/rr) / cos1);
+    } else {
+      const rp = (n2*cos1 - n1*cos2) / (n2*cos1 + n1*cos2);
+      const rs = (n1*cos1 - n2*cos2) / (n1*cos1 + n2*cos2);
+      phi.x = rp < 0 ? Math.PI : 0;
+      phi.y = rs < 0 ? Math.PI : 0;
+      R.x = rp*rp; R.y = rs*rs;
+    }
+  };
+
+  // CIE 1931 colour matching functions (Wyman et al.)
+  const xFit = l => { const t1=(l-442)*((l<442)?.0624:.0374), t2=(l-599.8)*((l<599.8)?.0264:.0323), t3=(l-501.1)*((l<501.1)?.049:.0382); return .362*Math.exp(-.5*t1*t1)+1.056*Math.exp(-.5*t2*t2)-.065*Math.exp(-.5*t3*t3); };
+  const yFit = l => { const t1=(l-568.8)*((l<568.8)?.0213:.0247), t2=(l-530.9)*((l<530.9)?.0613:.0322); return .821*Math.exp(-.5*t1*t1)+.286*Math.exp(-.5*t2*t2); };
+  const zFit = l => { const t1=(l-437)*((l<437)?.0845:.0278), t2=(l-459)*((l<459)?.0385:.0725); return 1.217*Math.exp(-.5*t1*t1)+.681*Math.exp(-.5*t2*t2); };
+
+  const rr  = 1/(nFilm*nFilm);
+  const rrB = (nFilm*nFilm)/(nBase*nBase);
+  const R12={x:0,y:0}, T12={x:0,y:0}, R23={x:0,y:0};
+  const phi12={x:0,y:0}, phi21={x:0,y:0}, phi23={x:0,y:0};
+  const Rbi={x:0,y:0}, Tto={x:0,y:0}, Rst={x:0,y:0};
+  const RbiSq={x:0,y:0}, R12s={x:0,y:0}, Rstt={x:0,y:0};
+
+  for (let i = 0; i < size; i++) {
+    const ci  = i / size;
+    const ct  = Math.sqrt(Math.max(0, 1 - rr*(1-ci*ci)));
+    const ct2 = Math.sqrt(Math.max(0, 1 - rrB*(1-ct*ct)));
+
+    const pd   = 2*nFilm*filmThickness*ct;
+    const pd2p = 2*Math.PI*pd;
+
+    fresnelRefl(1, nFilm, ci, ct, R12, phi12);
+    T12.x=1-R12.x; T12.y=1-R12.y;
+    phi21.x=Math.PI-phi12.x; phi21.y=Math.PI-phi12.y;
+    fresnelRefl(nFilm, nBase, ct, ct2, R23, phi23);
+
+    Rbi.x=Math.sqrt(R23.x*R12.x); Rbi.y=Math.sqrt(R23.y*R12.y);
+    Tto.x=Math.sqrt(T12.x*T12.x); Tto.y=Math.sqrt(T12.y*T12.y);
+    Rst.x=(T12.x*T12.x*R23.x)/(1-R23.x*R12.x);
+    Rst.y=(T12.y*T12.y*R23.y)/(1-R23.y*R12.y);
+    RbiSq.x=Rbi.x*Rbi.x; RbiSq.y=Rbi.y*Rbi.y;
+    R12s.x=R12.x+Rst.x; R12s.y=R12.y+Rst.y;
+    Rstt.x=Rst.x-Tto.x; Rstt.y=Rst.y-Tto.y;
+
+    let X=0,Y=0,Z=0,tX=0,tY=0,tZ=0;
+    for (let j = 0; j < 64; j++) {
+      const wl = 380 + j/63*400;
+      const dp = pd2p/wl;
+      const cpx=Math.cos(dp+phi23.x+phi21.x), cpy=Math.cos(dp+phi23.y+phi21.y);
+      const vx=R12s.x+2*(Rbi.x*cpx-RbiSq.x)/(1-2*Rbi.x*cpx+RbiSq.x)*Rstt.x;
+      const vy=R12s.y+2*(Rbi.y*cpy-RbiSq.y)/(1-2*Rbi.y*cpy+RbiSq.y)*Rstt.y;
+      const v=.5*(vx+vy);
+      const wx=xFit(wl), wy=yFit(wl), wz=zFit(wl);
+      tX+=wx; tY+=wy; tZ+=wz;
+      X+=wx*v; Y+=wy*v; Z+=wz*v;
+    }
+    X/=tX; Y/=tY; Z/=tZ;
+
+    let r=Math.max(0,Math.min(1, 3.2406*X-1.5372*Y-0.4986*Z));
+    let g=Math.max(0,Math.min(1,-0.9689*X+1.8758*Y+0.0415*Z));
+    let b=Math.max(0,Math.min(1, 0.0557*X-0.2040*Y+1.0570*Z));
+
+    // store as sqrt (gamma), shader squares it back
+    const k=i*4;
+    data[k]  =Math.floor(Math.sqrt(r)*255);
+    data[k+1]=Math.floor(Math.sqrt(g)*255);
+    data[k+2]=Math.floor(Math.sqrt(b)*255);
+    data[k+3]=255;
+  }
+
+  const tex = new THREE.DataTexture(data, size, 1, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.minFilter = tex.magFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+// Two LUTs at different film thicknesses → blended by noise → color patches
+// 380nm: blue/pink/violet;  560nm: yellow/green/orange
+const lut1 = thinFilmLUT(380, 1.38, 1.5, 128);
+const lut2 = thinFilmLUT(560, 1.38, 1.5, 128);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Renderer
+// ─────────────────────────────────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xebebef);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+const env   = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environment = env;
+
+const camera = new THREE.PerspectiveCamera(36, innerWidth/innerHeight, 0.1, 100);
+camera.position.z = 5;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Noise GLSL — injected into both vertex and fragment
+// ─────────────────────────────────────────────────────────────────────────────
+const NOISE = /* glsl */`
+const float _F3=0.3333333, _G3=0.1666667;
+vec3 _r3(vec3 c){float j=4096.*sin(dot(c,vec3(17.,59.4,15.)));vec3 r;r.z=fract(512.*j);j*=.125;r.x=fract(512.*j);j*=.125;r.y=fract(512.*j);return r-.5;}
+float _s3(vec3 p){
+  vec3 s=floor(p+dot(p,vec3(_F3))); vec3 x=p-s+dot(s,vec3(_G3));
+  vec3 e=step(vec3(0.),x-x.yzx); vec3 i1=e*(1.-e.zxy); vec3 i2=1.-e.zxy*(1.-e);
+  vec3 x1=x-i1+_G3,x2=x-i2+2.*_G3,x3=x-1.+3.*_G3;
+  vec4 w,d;
+  w.x=dot(x,x);w.y=dot(x1,x1);w.z=dot(x2,x2);w.w=dot(x3,x3);
+  w=max(.6-w,0.); d.x=dot(_r3(s),x);d.y=dot(_r3(s+i1),x1);d.z=dot(_r3(s+i2),x2);d.w=dot(_r3(s+1.),x3);
+  w*=w;w*=w;d*=w; return dot(d,vec4(52.));
+}
+float _fbm(vec3 p){return _s3(p)*.65+_s3(p*2.+vec3(31.7))*.35;}
+`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vertex shader — gentle displacement preserving correct normals
+// ─────────────────────────────────────────────────────────────────────────────
+const vert = /* glsl */`
+${NOISE}
+uniform float uTime;
+uniform float uAmp;
+
+varying vec3 vN;
+varying vec3 vViewPos;
+varying vec3 vPos;
+
+float disp(vec3 p){ return _fbm(p*0.85 + uTime*0.04); }
+
+void main(){
+  // Displaced position
+  float d0 = disp(position) * uAmp;
+  vec3 dp = position + normal * d0;
+
+  // Finite-difference normal recomputation
+  const float e = 0.007;
+  vec3 t1 = normalize(abs(normal.x)>abs(normal.z)?vec3(-normal.y,normal.x,0.):vec3(0.,-normal.z,normal.y));
+  vec3 t2 = normalize(cross(normal,t1));
+  vec3 d1 = (position+t1*e) + normal*(disp(position+t1*e)*uAmp) - dp;
+  vec3 d2 = (position+t2*e) + normal*(disp(position+t2*e)*uAmp) - dp;
+  vec3 dn = normalize(cross(d1,d2));
+
+  vN       = normalize(normalMatrix * dn);
+  vec4 mv  = modelViewMatrix * vec4(dp, 1.0);
+  vViewPos = -mv.xyz;
+  vPos     = dp;
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fragment shader — thin-film iridescence (dual-LUT) + glass base + fresnel
+// ─────────────────────────────────────────────────────────────────────────────
+const frag = /* glsl */`
+${NOISE}
+uniform sampler2D uLUT1;   // thin-film LUT at 380 nm
+uniform sampler2D uLUT2;   // thin-film LUT at 560 nm
+uniform float uTime;
+uniform float uBoost;      // iridescence intensity
+
+varying vec3 vN;
+varying vec3 vViewPos;
+varying vec3 vPos;
+
+void main(){
+  vec3 n  = normalize(vN);
+  vec3 v  = normalize(vViewPos);
+  float NdotV = clamp(abs(dot(n,v)), 0.0, 1.0);
+
+  // Sample both LUTs — index by NdotV (DerSchmale method)
+  vec3 a1 = texture2D(uLUT1, vec2(NdotV*0.99, 0.5)).rgb; a1 *= a1; // undo sqrt gamma
+  vec3 a2 = texture2D(uLUT2, vec2(NdotV*0.99, 0.5)).rgb; a2 *= a2;
+
+  // Blend LUTs by slow noise → creates colour patches like varying soap-film thickness
+  float blend = _fbm(vPos*1.8 + uTime*0.012) * 0.5 + 0.5;
+  vec3 airy = mix(a1, a2, blend);
+
+  // Glass / milky base — gradient from environment
+  float up  = n.y * 0.5 + 0.5;
+  vec3 base = mix(vec3(0.74,0.76,0.80), vec3(0.96,0.96,0.98), up);
+
+  // Iridescence mask: strongest at grazing, zero face-on
+  float rim = pow(1.0 - NdotV, 1.5);
+  vec3 col  = mix(base, airy * 1.6, rim * uBoost);
+
+  // Tight specular highlight
+  vec3  h    = normalize(v + normalize(vec3(0.3, 1.0, 0.6)));
+  float spec = pow(max(dot(n,h), 0.0), 240.0) * 0.7;
+  col += vec3(1.0) * spec;
+
+  // Fresnel rim — bright white
+  float fr = pow(1.0 - NdotV, 4.5);
+  col = mix(col, vec3(0.98, 0.99, 1.0), fr * 0.85);
+
+  col = clamp(col, 0.0, 1.0);
+  float alpha = mix(0.78, 1.0, fr + spec);
+  gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
+}
+`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mesh
+// ─────────────────────────────────────────────────────────────────────────────
+const geo = new THREE.SphereGeometry(1.65, 192, 192);
+const mat = new THREE.ShaderMaterial({
+  vertexShader:   vert,
+  fragmentShader: frag,
+  uniforms: {
+    uTime:  { value: 0 },
+    uAmp:   { value: 0.18 },
+    uBoost: { value: 0.82 },
+    uLUT1:  { value: lut1 },
+    uLUT2:  { value: lut2 },
+  },
+  transparent: true,
+});
+
+const blob = new THREE.Mesh(geo, mat);
+scene.add(blob);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Interaction + loop
+// ─────────────────────────────────────────────────────────────────────────────
+let mx=0, my=0, lx=0, ly=0;
+window.addEventListener('mousemove', e => {
+  mx =  (e.clientX/innerWidth  - 0.5) * 0.4;
+  my = -(e.clientY/innerHeight - 0.5) * 0.4;
+});
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const clock = new THREE.Clock();
+(function loop(){
+  requestAnimationFrame(loop);
+  const t = clock.getElapsedTime();
+  mat.uniforms.uTime.value = t;
+
+  blob.scale.setScalar(1 + Math.sin(t*0.45)*0.014 + Math.sin(t*0.73)*0.006);
+  blob.position.y = Math.sin(t*0.38)*0.07 + Math.sin(t*0.59)*0.025;
+
+  lx += (mx-lx)*0.028; ly += (my-ly)*0.028;
+  blob.rotation.x =  ly;
+  blob.rotation.y =  lx + t*0.018;
+
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
