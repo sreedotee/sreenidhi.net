@@ -16,10 +16,10 @@
   --navy-dim: #04083d80;
   --navy-ghost: #04083d22;
   --white: #ffffff;
-  --paper: #f5f6f8;
-  --silk-blue-1: #cfdcf6;
-  --silk-blue-2: #e8f1ff;
-  --silk-blue-3: #b6c8ee;
+  --paper: #f0f7ff;
+  --silk-blue-1: #c8e4f8;
+  --silk-blue-2: #edf6ff;
+  --silk-blue-3: #a4cff0;
   --silk-blue-4: #ffffff;
 
   --max: 1320px;
@@ -74,14 +74,14 @@ body { padding-bottom: 60px; }
   position: absolute;
   top: 0; right: 0;
   width: 1px; height: 100%;
-  background: linear-gradient(to bottom, transparent 0%, rgba(208,211,220,0.35) 20%, rgba(248,249,251,0.45) 50%, rgba(200,202,212,0.35) 80%, transparent 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(190,215,235,0.35) 20%, rgba(230,244,255,0.45) 50%, rgba(185,210,232,0.35) 80%, transparent 100%);
 }
 .col-grid__col:first-child::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
   width: 1px; height: 100%;
-  background: linear-gradient(to bottom, transparent 0%, rgba(208,211,220,0.35) 20%, rgba(248,249,251,0.45) 50%, rgba(200,202,212,0.35) 80%, transparent 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(190,215,235,0.35) 20%, rgba(230,244,255,0.45) 50%, rgba(185,210,232,0.35) 80%, transparent 100%);
 }
 
 a { color: inherit; text-decoration: none; transition: opacity .25s ease; }

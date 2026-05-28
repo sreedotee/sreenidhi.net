@@ -219,7 +219,7 @@ void main() {
   float dotDist = length(cellUV) * 2.0;
   float dotMask = smoothstep(0.5 + 0.08, 0.5 - 0.08, dotDist);
   float hl = pow(clamp(1.0 - dotDist / 0.5, 0.0, 1.0), 2.0);
-  vec3 dotCol = mix(vec3(0.48, 0.51, 0.58), vec3(0.97, 0.97, 1.0), hl);
+  vec3 dotCol = mix(vec3(0.44, 0.60, 0.74), vec3(0.93, 0.97, 1.0), hl);
   col = mix(col, dotCol, dotMask * 0.3);
 
   fragColor = vec4(col, 1.0);
@@ -228,11 +228,11 @@ void main() {
 // Uniforms captured from OG (reference/silk/uniforms.json)
 const PARAMS = {
   colors: new Float32Array([
-    0.4627, 0.6157, 0.8471, 1, // #769DD8
-    0.6784, 0.8549, 0.9686, 1, // #ADDAF7
-    0.7098, 0.8627, 0.9608, 1, // #B5DCF5
-    0.3882, 0.5451, 0.7961, 1, // #638BCB
-    0.9765, 1.0,    1.0,    1, // #F9FFFF
+    0.4863, 0.7216, 0.9098, 1, // #7cb8e8 — bright sky blue
+    0.6431, 0.8118, 0.9412, 1, // #a4cff0 — light sky / glass
+    0.7843, 0.8941, 0.9725, 1, // #c8e4f8 — very light sky
+    0.3529, 0.6039, 0.8314, 1, // #5a9ad4 — vivid sky (darkest)
+    0.9294, 0.9647, 1.0,    1, // #edf6ff — sky white
     0, 0, 0, 0,
     0, 0, 0, 0,
     0, 0, 0, 0,
