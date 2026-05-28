@@ -55,7 +55,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { padding-bottom: 0; }
+body { padding-bottom: 56px; }
 
 /* Column grid overlay — injected via JS; same padding formula as content so lines stay in sync at all viewports */
 .col-grid {
@@ -2060,7 +2060,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #7cb8e8  100%
   );
   min-height: 20vh;
-  padding: 0;
+  padding: 0 0 56px 0;
   position: relative;
 }
 /* Live A-graph instance in bigfoot */
@@ -2097,19 +2097,21 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 }
 
 .A-bigfoot__foot {
-  position: absolute;
-  bottom: 24px;
-  left: 32px;
-  right: 32px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: var(--sans);
   font-size: 16px;
-  color: rgba(4, 8, 61, 0.6);
+  color: var(--navy);
   letter-spacing: -0.01em;
-  z-index: 2;
+  z-index: 50;
 }
+.A-bigfoot__socials a { display: inline-flex; }
 .A-bigfoot__year { color: inherit; }
 .A-bigfoot__socials {
   display: flex;
