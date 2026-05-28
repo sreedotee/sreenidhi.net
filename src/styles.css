@@ -2083,11 +2083,12 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 .A-bigfoot__caption {
   position: absolute;
   left: 50%;
-  bottom: 8px;
+  bottom: 14px;
   transform: translateX(-50%);
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -2097,7 +2098,8 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   left: auto;
   transform: none;
   color: var(--navy);
-  font-size: clamp(22px, 2.4vw, 34px);
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height: 0.9;
 }
 .A-bigfoot__synthesis {
   font-family: var(--serif);
