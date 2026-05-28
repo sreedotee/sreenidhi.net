@@ -245,7 +245,7 @@ const PARAMS = {
   turbAmp: 0,
   turbFreq: 2,
   turbIter: 9,
-  waveFreq: 4.5,
+  waveFreq: 1.5,
   distBias: 0,
   jellify: 0,
   ditherMode: 1,

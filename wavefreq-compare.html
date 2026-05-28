@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wave Freq Compare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; font-family: 'Geist Mono', monospace; }
+    .header {
+      padding: 14px 24px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: calc(100vh - 40px);
+    }
+    .card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .card + .card { border-left: 1px solid rgba(255,255,255,0.08); }
+    .card:nth-child(3), .card:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.08); }
+    .card:hover { border-color: rgba(255,255,255,0.3); z-index: 1; }
+    .card.picked { border-color: #fff; z-index: 2; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .label {
+      position: absolute;
+      bottom: 16px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .card.picked .label { color: #fff; }
+    .tick {
+      position: absolute;
+      top: 12px; left: 12px;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 4;
+    }
+    .card.picked .tick { opacity: 1; }
+    .strip {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 10px 24px;
+      background: rgba(0,0,0,0.8);
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .strip span { color: #fff; }
+  </style>
+</head>
+<body>
+<div class="header">Wave Freq Compare — click to pick</div>
+<div class="grid">
+  <div class="card" onclick="pick(this,'2.5')"><canvas id="c1"></canvas><div class="tick">✓</div><div class="label">waveFreq 2.5</div></div>
+  <div class="card" onclick="pick(this,'2.0')"><canvas id="c2"></canvas><div class="tick">✓</div><div class="label">waveFreq 2.0 — current</div></div>
+  <div class="card" onclick="pick(this,'1.5')"><canvas id="c3"></canvas><div class="tick">✓</div><div class="label">waveFreq 1.5</div></div>
+  <div class="card" onclick="pick(this,'1.0')"><canvas id="c4"></canvas><div class="tick">✓</div><div class="label">waveFreq 1.0</div></div>
+</div>
+<div class="strip">Selected → <span id="chosen">click a card</span></div>
+
+<script>
+function pick(card, val) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('picked'))
+  card.classList.add('picked')
+  document.getElementById('chosen').textContent = 'waveFreq ' + val + ' — tell Claude: "use ' + val + '"'
+}
+
+const VERT = `#version 300 es
+precision highp float;
+in vec2 a_position; in vec2 a_texCoord; out vec2 v_uv;
+void main(){ v_uv=a_texCoord; gl_Position=vec4(a_position,0,1); }`
+
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv; out vec4 fragColor;
+uniform vec4 u_colors[8]; uniform int u_colors_length;
+uniform float u_seed,u_speed,u_scale,u_turbIter,u_waveFreq,u_exposure,u_contrast,u_saturation,u_time;
+uniform vec2 u_resolution;
+const float TAU=6.28318530,GA=2.3999632;
+uvec3 h3(uvec3 v){v=v*1664525u+1013904223u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;v^=v>>16u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;return v;}
+vec3 rnd(float s){uvec3 u=uvec3(floatBitsToUint(s),floatBitsToUint(s*1.5+7.31),floatBitsToUint(s*2.7+13.37));u=h3(u);return vec3(u)/float(0xFFFFFFFFu);}
+vec3 lin(vec3 c){return pow(c,vec3(2.2));}
+vec3 srgb(vec3 c){return pow(clamp(c,0.,1.),vec3(.4545));}
+vec3 toOk(vec3 c){float l=.4122*c.r+.5363*c.g+.0514*c.b,m=.2119*c.r+.6807*c.g+.1074*c.b,s=.0883*c.r+.2817*c.g+.6300*c.b;l=pow(max(l,0.),.333);m=pow(max(m,0.),.333);s=pow(max(s,0.),.333);return vec3(.2105*l+.7936*m-.0041*s,1.9780*l-2.4286*m+.4506*s,.0259*l+.7828*m-.8087*s);}
+vec3 fromOk(vec3 c){float l=c.x+.3963*c.y+.2158*c.z,m=c.x-.1056*c.y-.0639*c.z,s=c.x-.0895*c.y-1.2915*c.z;l=l*l*l;m=m*m*m;s=s*s*s;return vec3(4.0767*l-3.3077*m+.2310*s,-1.2684*l+2.6098*m-.3413*s,-.0042*l-.7034*m+1.7076*s);}
+vec3 mixOk(vec3 a,vec3 b,float t){
+  vec3 la=vec3(a.x,length(a.yz),atan(a.z,a.y)),lb=vec3(b.x,length(b.yz),atan(b.z,b.y));
+  if(la.y<.05)la.z=lb.z;if(lb.y<.05)lb.z=la.z;
+  float dh=lb.z-la.z;if(dh>3.14159)dh-=TAU;if(dh<-3.14159)dh+=TAU;
+  vec3 lc=vec3(mix(la.x,lb.x,t),mix(la.y,lb.y,t),la.z+dh*t);
+  return vec3(lc.x,lc.y*cos(lc.z),lc.y*sin(lc.z));
+}
+vec3 pal(float t){
+  int n=u_colors_length; if(n<2)return lin(u_colors[0].rgb);
+  float seg=1./float(n-1); t=clamp(t,0.,1.);
+  int i=min(int(floor(t/seg)),n-2); float lt=clamp((t-float(i)*seg)/seg,0.,1.);
+  return fromOk(mixOk(toOk(lin(u_colors[i].rgb)),toOk(lin(u_colors[i+1].rgb)),lt));
+}
+void main(){
+  vec2 fc=v_uv*u_resolution,r=u_resolution;
+  vec2 p=(fc*2.-r)/r.y;
+  float t=u_time*.3;
+  vec3 s0=rnd(u_seed),s1=rnd(u_seed+100.);
+  float sa=u_seed*GA; vec2 sp=(s1.xy-.5)*TAU;
+  p=mat2(cos(sa),-sin(sa),sin(sa),cos(sa))*p;
+  float tv=0.,tw=0.; int ti=int(u_turbIter);
+  for(float i=0.;i<4.;i++){
+    float eph=i/4.; vec2 q=p*u_scale;
+    float a=sp.x,d=sp.y;
+    for(int j=2;j<13;j++){
+      if(j>=ti)break; float fj=float(j),t1=t*u_speed;
+      q+=sin(q.yx/2.*fj+t1+vec2(a,d)+s0.xy*fj)/fj;
+      a+=cos(fj+d*1.2+q.x*2.-t1+s1.z);
+      d+=sin(fj*q.y+a+s0.z+t1+s1.y);
+    }
+    float v=.5+.5*sin(length(q.yx+vec2(a,d)*.2)*u_waveFreq+i*i+s0.x);
+    float w=smoothstep(0.,.5,eph)*smoothstep(1.,.5,eph);
+    tv+=v*w; tw+=w;
+  }
+  float val=clamp((tv/tw-.3)/.4,0.,1.);
+  vec3 col=pal(val)*u_exposure;
+  vec3 lab=toOk(col); float C=length(lab.yz),h2=atan(lab.z,lab.y);
+  lab.x=clamp((lab.x-.5)*u_contrast+.5,0.,1.); C*=u_saturation;
+  col=fromOk(vec3(lab.x,C*cos(h2),C*sin(h2)));
+  fragColor=vec4(srgb(clamp(col,0.,1.)),1.);
+}`
+
+const COLORS = [
+  0.4863,0.7216,0.9098,1,
+  0.6431,0.8118,0.9412,1,
+  0.7843,0.8941,0.9725,1,
+  0.3529,0.6039,0.8314,1,
+  0.9294,0.9647,1.0,1,
+  0,0,0,0, 0,0,0,0, 0,0,0,0,
+]
+
+function run(id, waveFreq) {
+  const cv = document.getElementById(id)
+  const gl = cv.getContext('webgl2', {antialias:false,premultipliedAlpha:false})
+  if(!gl) return
+  const mk=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s}
+  const pg=gl.createProgram()
+  gl.attachShader(pg,mk(gl.VERTEX_SHADER,VERT))
+  gl.attachShader(pg,mk(gl.FRAGMENT_SHADER,FRAG))
+  gl.linkProgram(pg); gl.useProgram(pg)
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf)
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,0,0,1,-1,1,0,-1,1,0,1,-1,1,0,1,1,-1,1,0,1,1,1,1]),gl.STATIC_DRAW)
+  const p0=gl.getAttribLocation(pg,'a_position'),p1=gl.getAttribLocation(pg,'a_texCoord')
+  gl.enableVertexAttribArray(p0); gl.vertexAttribPointer(p0,2,gl.FLOAT,false,16,0)
+  gl.enableVertexAttribArray(p1); gl.vertexAttribPointer(p1,2,gl.FLOAT,false,16,8)
+  const u=n=>gl.getUniformLocation(pg,n)
+  gl.uniform4fv(u('u_colors'),new Float32Array(COLORS))
+  gl.uniform1i(u('u_colors_length'),5)
+  gl.uniform1f(u('u_seed'),689); gl.uniform1f(u('u_speed'),.79); gl.uniform1f(u('u_scale'),.28)
+  gl.uniform1f(u('u_turbIter'),9); gl.uniform1f(u('u_waveFreq'),waveFreq)
+  gl.uniform1f(u('u_exposure'),1.1); gl.uniform1f(u('u_contrast'),1.1); gl.uniform1f(u('u_saturation'),1)
+  const res=u('u_resolution'),tim=u('u_time')
+  const dpr=Math.min(devicePixelRatio||1,2)
+  let w=0,h=0
+  function resize(){const r=cv.getBoundingClientRect(),nw=Math.floor(r.width*dpr),nh=Math.floor(r.height*dpr);if(nw===w&&nh===h)return;w=nw;h=nh;cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(res,w,h)}
+  const t0=performance.now(); let on=true
+  function f(now){if(!on)return;resize();gl.uniform1f(tim,(now-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,6);requestAnimationFrame(f)}
+  requestAnimationFrame(f)
+  new IntersectionObserver(([e])=>{on=e.isIntersecting;if(on)requestAnimationFrame(f)},{threshold:0}).observe(cv)
+  window.addEventListener('resize',resize)
+}
+
+setTimeout(()=>run('c1',2.5),0)
+setTimeout(()=>run('c2',2.0),100)
+setTimeout(()=>run('c3',1.5),200)
+setTimeout(()=>run('c4',1.0),300)
+</script>
+</body>
+</html>
