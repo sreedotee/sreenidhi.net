@@ -2059,7 +2059,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #a4cff0   75%,
     #7cb8e8  100%
   );
-  min-height: 48vh;
+  min-height: 32vh;
   padding: 72px max(32px, calc((100% - 1320px) / 2));
   display: flex;
   flex-direction: column;
@@ -2085,7 +2085,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 }
 .A-bigfoot__title-group {
   position: absolute;
-  top: 65%;
+  top: 82%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -2104,10 +2104,11 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 }
 .A-bigfoot__synthesis {
   font-family: var(--serif);
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  font-size: clamp(14px, 1.4vw, 20px);
+  letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
+  font-style: italic;
 }
 
 .A-bigfoot__top {
