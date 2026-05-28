@@ -2080,13 +2080,12 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   font-size: 15px;
 }
 .A-bigfoot .A-graph__title {
-  color: var(--navy);
+  color: #ffffff;
   font-size: clamp(26px, 3vw, 42px);
-  top: 78%;
 }
 .A-bigfoot__synthesis {
   position: absolute;
-  top: calc(78% + clamp(20px, 2.2vw, 30px) + 8px);
+  top: calc(50% + clamp(18px, 2vw, 28px) + 8px);
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--serif);
