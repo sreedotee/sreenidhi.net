@@ -2104,10 +2104,10 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 16px;
   color: rgba(4, 8, 61, 0.6);
-  letter-spacing: 0.03em;
+  letter-spacing: -0.01em;
   z-index: 2;
 }
 .A-bigfoot__year { color: inherit; }
