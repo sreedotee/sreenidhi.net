@@ -2101,6 +2101,20 @@ body:has(.A-hero).is-scrolled .A-foot {
 .A-bigfoot__top a:hover,
 .A-bigfoot__bottom a:hover { color: #fff; }
 
+.A-bigfoot__socials {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.A-bigfoot__socials svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: rgba(255,255,255,0.75);
+  transition: color 0.2s;
+}
+.A-bigfoot__socials a:hover svg { color: #fff; }
+
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
   position: fixed;
