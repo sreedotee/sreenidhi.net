@@ -2096,6 +2096,35 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   pointer-events: none;
 }
 
+.A-bigfoot__foot {
+  position: absolute;
+  bottom: 20px;
+  left: max(32px, calc((100% - 1320px) / 2));
+  right: max(32px, calc((100% - 1320px) / 2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: rgba(4, 8, 61, 0.5);
+  letter-spacing: 0.04em;
+  z-index: 2;
+}
+.A-bigfoot__year { color: inherit; }
+.A-bigfoot__socials {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.A-bigfoot__socials svg {
+  width: 18px;
+  height: 18px;
+  color: rgba(4, 8, 61, 0.5);
+  display: block;
+  transition: color 0.2s;
+}
+.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.9); }
+
 .A-bigfoot__top {
   display: flex;
   justify-content: space-between;
@@ -2602,7 +2631,6 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 /* Phones */
 @media (max-width: 640px) {
-  body { padding-bottom: 56px; }
   .col-grid { display: none; }
 
   .A-topbar {
