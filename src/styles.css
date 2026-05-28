@@ -2060,20 +2060,16 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #7cb8e8  100%
   );
   min-height: 32vh;
-  padding: 72px max(32px, calc((100% - 1320px) / 2));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  padding: 0;
   position: relative;
 }
 /* Live A-graph instance in bigfoot */
 .A-bigfoot__graph {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  flex-shrink: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
 }
 .A-bigfoot .A-graph__word {
   color: rgba(4, 8, 61, 0.45);
@@ -2083,32 +2079,22 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   color: rgba(4, 8, 61, 0.65);
   font-size: 15px;
 }
-.A-bigfoot__title-group {
-  position: absolute;
-  top: 82%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  pointer-events: none;
-}
 .A-bigfoot .A-graph__title {
-  position: static;
-  top: auto;
-  left: auto;
-  transform: none;
   color: var(--navy);
   font-size: clamp(26px, 3vw, 42px);
+  top: 78%;
 }
 .A-bigfoot__synthesis {
+  position: absolute;
+  top: calc(78% + clamp(20px, 2.2vw, 30px) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--serif);
   font-size: clamp(14px, 1.4vw, 20px);
   letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
-  font-style: italic;
+  pointer-events: none;
 }
 
 .A-bigfoot__top {
