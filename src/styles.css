@@ -2066,6 +2066,17 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   justify-content: space-between;
   position: relative;
 }
+.A-bigfoot::after {
+  content: '';
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
 
 .A-bigfoot__top {
   display: flex;
