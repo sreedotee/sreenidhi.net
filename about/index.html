@@ -35,41 +35,58 @@
 
     <main class="A-about">
       <div class="A-about__inner">
-        <header class="A-about__head">
-          <div class="A-about__eyebrow">ABOUT</div>
-        </header>
-
-        <p class="A-about__bigprose">I pay attention to how software influences behavior over time. Defaults, incentives, and interfaces quietly shape what people do, often more than intention. My work turns those patterns into products and systems built for clarity, use, and return.</p>
-
         <div class="A-about__body">
           <p>I'm Sreenidhi, a designer whose interest in design began with a fascination for people and software, and the way each continually shapes the other.</p>
           <p>I'm especially interested in how culture, technology, and human behavior shape one another over time. I carry that lens into my work, creating things informed by both craft and curiosity.</p>
         </div>
       </div>
 
-      <!-- Music grid ported from sreedotee.framer.website. 4×4 = 16 cells.
-           Each cell has a mode: 'photos' / 'albums' = cycle that pool;
-           'text' = label cell with alignment; otherwise gray placeholder. -->
+      <!-- Artifact grid. 4×4 = 16 cells, hairline borders share edges (no gap).
+           Cell modes:
+             'artifact' = labelled mono card: (num) + name on top, content at bottom
+             'photos' / 'albums' = JS-driven image cycle through that pool
+             'text'  = italic serif closer phrase, data-align top|center|bottom
+             no mode = empty cell (just border lines — negative space) -->
       <section class="album-section">
         <div class="album-grid">
           <!-- Row 0 -->
+          <div class="album" data-mode="artifact">
+            <span class="album__num">(01)</span>
+            <span class="album__name">Who</span>
+            <div class="album__content">Sreenidhi,<br>designer.</div>
+          </div>
           <div class="album" data-mode="photos"></div>
-          <div class="album" data-mode="text" data-align="bottom">(01) I'm Sree</div>
           <div class="album"></div>
-          <div class="album"></div>
+          <div class="album" data-mode="artifact">
+            <span class="album__num">(02)</span>
+            <span class="album__name">Now playing</span>
+            <div class="album__content">Gunfighter<br>Ballads<br>— Marty Robbins.</div>
+          </div>
           <!-- Row 1 -->
           <div class="album"></div>
-          <div class="album"></div>
-          <div class="album"></div>
-          <div class="album" data-mode="text" data-align="top">i love music</div>
-          <!-- Row 2 -->
-          <div class="album"></div>
-          <div class="album"></div>
+          <div class="album" data-mode="artifact">
+            <span class="album__num">(03)</span>
+            <span class="album__name">Focus</span>
+            <div class="album__content">Software,<br>behavior,<br>culture —<br>how they<br>shape each<br>other.</div>
+          </div>
           <div class="album"></div>
           <div class="album" data-mode="albums"></div>
+          <!-- Row 2 -->
+          <div class="album" data-mode="artifact">
+            <span class="album__num">(04)</span>
+            <span class="album__name">Practice</span>
+            <div class="album__content">Clarity,<br>use,<br>and return.</div>
+          </div>
+          <div class="album"></div>
+          <div class="album"></div>
+          <div class="album"></div>
           <!-- Row 3 -->
           <div class="album"></div>
-          <div class="album"></div>
+          <div class="album" data-mode="artifact">
+            <span class="album__num">(05)</span>
+            <span class="album__name">Elsewhere</span>
+            <div class="album__content"><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn ↗</a><br><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram ↗</a><br><a href="mailto:sreenidhi.dev@gmail.com">Email ↗</a></div>
+          </div>
           <div class="album"></div>
           <div class="album" data-mode="text" data-align="bottom">in no particular order.</div>
         </div>
