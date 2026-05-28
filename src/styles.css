@@ -1055,11 +1055,12 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 .A-topbar__name a { color: #ffffff; }
 
 .A-topbar__center {
-  grid-column: 4 / 5;
+  grid-column: 4;
+  justify-self: end;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  gap: 2px;
+  gap: 12px;
 }
 
 .A-topbar__right {
@@ -1249,6 +1250,10 @@ body:has(.A-hero).is-scrolled .A-foot {
   max-width: calc(380px - var(--tuck) * 100px);
   opacity: calc(1 - var(--tuck) * 0.25);
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .A-section__inner { position: relative; z-index: 1; }
