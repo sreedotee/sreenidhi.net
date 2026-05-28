@@ -860,31 +860,34 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 .about-photo span { font-family: var(--sans); font-size: 12px; color: var(--navy); }
 
-/* Album grid on /about/ — ports the GridCell-driven music section from
-   sreedotee.framer.website. 4×4 of square cells, 2px gap. Each cell has a
-   mode (data-mode): 'photos' / 'albums' = JS-driven image carousel through
-   that pool; 'text' = label cell with text + data-align (top/center/bottom);
-   no mode = gray empty placeholder (#f0f0f0). */
+/* Artifact grid on /about/ — 4×4 of square cells joined by hairline borders
+   (JK / COVID Art Museum pattern: container has top+left, each cell adds
+   right+bottom — no double borders, no gap). Cell modes:
+     'artifact'       — labelled mono card: (num) + name pinned top, content bottom
+     'photos'/'albums'— JS-driven image cycle (crossfade through pool)
+     'text'           — italic serif closer phrase, data-align top|center|bottom
+     no mode          — empty cell (border-only negative space) */
 .album-section {
-  padding: 80px 40px 120px;
+  padding: 80px 0 120px;
   max-width: var(--max);
   margin: 0 auto;
 }
 .album-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+  border-top: 1px solid var(--navy-ghost);
+  border-left: 1px solid var(--navy-ghost);
 }
 .album {
   position: relative;
   aspect-ratio: 1;
-  background: rgb(240, 240, 240);
+  background: transparent;
+  border-right: 1px solid var(--navy-ghost);
+  border-bottom: 1px solid var(--navy-ghost);
   overflow: hidden;
 }
 /* Image-mode cells (photos / albums) stack two <img>s and crossfade between
    them — matches the OG Framer GridCell fade transition (420ms cubic-bezier). */
-.album[data-mode="photos"],
-.album[data-mode="albums"] { background: transparent; }
 .album__img {
   position: absolute;
   inset: 0;
@@ -896,12 +899,11 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   will-change: opacity;
   transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Text-mode cells: white background, italic serif copy, alignable top/center/bottom */
+/* Text-mode cells: italic serif closer phrase, alignable top/center/bottom */
 .album[data-mode="text"] {
-  background: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 12px 14px;
+  padding: 14px 16px;
   font-family: var(--serif);
   font-style: italic;
   font-size: 16px;
@@ -911,6 +913,50 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 .album[data-mode="text"][data-align="top"] { justify-content: flex-start; }
 .album[data-mode="text"][data-align="center"] { justify-content: center; }
 .album[data-mode="text"][data-align="bottom"] { justify-content: flex-end; }
+
+/* Artifact-mode cells: small sans label pinned to top (two stacked lines —
+   (num) then name, like House of Alignment's itinerary cards), body block
+   at bottom. All Geist sans — matches the site's type system. */
+.album[data-mode="artifact"] {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  font-family: var(--sans);
+  color: var(--navy);
+}
+.album__num {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: var(--navy-dim);
+}
+.album__name {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--navy);
+  margin-bottom: auto;
+}
+.album__content {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  margin-top: auto;
+}
+.album__content a {
+  color: var(--navy);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.album__content a:hover { color: var(--navy-dim); }
 
 /* /contact/ */
 
@@ -2123,15 +2169,16 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   letter-spacing: -0.01em;
   z-index: 50;
 }
+.A-bigfoot__year { color: inherit; }
 .A-bigfoot__socials {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: center;
 }
 .A-bigfoot__socials a { display: inline-flex; }
 .A-bigfoot__socials svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   color: var(--navy);
   display: block;
   transition: opacity 0.2s;
@@ -2141,63 +2188,6 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 /* Hide grid lines when bigfoot is visible — body class toggled via JS */
 body.is-bigfoot-visible .col-grid { opacity: 0; transition: opacity 0.3s; }
-.A-bigfoot__year { color: inherit; }
-.A-bigfoot__socials {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-}
-.A-bigfoot__socials svg {
-  width: 22px;
-  height: 22px;
-  color: rgba(4, 8, 61, 0.6);
-  display: block;
-  transition: color 0.2s;
-}
-.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.95); }
-
-.A-bigfoot__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.A-bigfoot__bottom {
-  text-align: center;
-}
-
-.A-bigfoot__top span,
-.A-bigfoot__top a,
-.A-bigfoot__bottom span,
-.A-bigfoot__bottom a {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(4, 8, 61, 0.55);
-}
-
-.A-bigfoot__bottom span,
-.A-bigfoot__bottom a {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.A-bigfoot__top a:hover { color: rgba(4, 8, 61, 0.9); }
-.A-bigfoot__bottom a:hover { color: #fff; }
-
-.A-bigfoot__socials {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.A-bigfoot__socials svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-  color: rgba(4, 8, 61, 0.45);
-  transition: color 0.2s;
-}
-.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.9); }
 
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
@@ -2742,7 +2732,7 @@ body.is-bigfoot-visible .col-grid { opacity: 0; transition: opacity 0.3s; }
 
   .about-photo { flex-wrap: wrap; }
   .about-photo img { width: 140px; }
-  .album-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .album-grid { grid-template-columns: 1fr 1fr; }
 
   .play-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
 
