@@ -1272,12 +1272,13 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 }
 
 .A-hero__intro {
+  grid-column: 1 / 4;
   font-family: var(--sans);
   font-size: 20px;
   line-height: 26px;
   letter-spacing: -0.03em;
   color: var(--navy);
-  max-width: 620px;
+  max-width: none;
 }
 
 .A-hero__intro p { margin-bottom: 16px; }
