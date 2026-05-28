@@ -2058,6 +2058,62 @@ body:has(.A-hero).is-scrolled .A-foot {
   z-index: 2;
 }
 
+/* ============================================================
+   Big footer — Adjaycent style, animated gradient + 3 cols
+   ============================================================ */
+@keyframes A-bigfoot-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.A-bigfoot {
+  background: linear-gradient(-45deg, #5a9ad4, #7cb8e8, #c8e4f8, #a4cff0, #edf6ff, #7cb8e8, #5a9ad4);
+  background-size: 400% 400%;
+  animation: A-bigfoot-flow 14s ease infinite;
+  padding: 56px max(32px, calc((100% - 1320px) / 2)) 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  align-items: end;
+  min-height: 44vh;
+  position: relative;
+}
+
+.A-bigfoot__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+.A-bigfoot__col:last-child { align-items: flex-end; }
+
+.A-bigfoot__col a { color: inherit; }
+.A-bigfoot__col a:hover { color: #fff; }
+
+.A-bigfoot__name {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.2vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.A-bigfoot__label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
   position: fixed;

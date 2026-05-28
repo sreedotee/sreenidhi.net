@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pick a palette</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #111;
+      font-family: 'Geist', sans-serif;
+      min-height: 100vh;
+    }
+
+    .header {
+      padding: 18px 28px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 0;
+    }
+
+    .card {
+      position: relative;
+      height: calc(50vh - 20px);
+      min-height: 280px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.4); z-index: 1; }
+    .card.picked { border-color: #fff; z-index: 2; }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.9) 100%);
+      pointer-events: none;
+    }
+
+    .content {
+      position: absolute;
+      inset: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .h1 {
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #04083d;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(4,8,61,0.45);
+      margin-bottom: 4px;
+    }
+
+    .tick {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .card.picked .tick { opacity: 1; }
+
+    .pill {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(4,8,61,0.12);
+      color: rgba(4,8,61,0.5);
+      padding: 2px 7px;
+      pointer-events: none;
+    }
+    .card.current .pill { background: #04083d; color: #fff; }
+
+    /* bottom strip */
+    .strip {
+      padding: 14px 28px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .strip span { color: #fff; font-size: 14px; font-family: 'Geist', sans-serif; }
+
+    /* second row */
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">Pick a palette — click to select, then tell me the name</div>
+
+<div class="grid">
+  <div class="card current" id="c1" onclick="pick(this, 'Sky Blue')">
+    <canvas id="cv1"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Sky Blue</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+    <div class="pill">Current</div>
+  </div>
+
+  <div class="card" id="c2" onclick="pick(this, 'Original Cornflower')">
+    <canvas id="cv2"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Original Cornflower</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+    <div class="pill">Original</div>
+  </div>
+
+  <div class="card" id="c3" onclick="pick(this, 'Deep Ocean')">
+    <canvas id="cv3"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Deep Ocean</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+  </div>
+
+  <div class="card" id="c4" onclick="pick(this, 'Twilight')">
+    <canvas id="cv4"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Twilight</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+  </div>
+</div>
+
+<div class="strip" id="strip">
+  Selected → <span id="chosen">nothing yet — click a card above or below</span>
+</div>
+
+<div class="grid2">
+  <div class="card" id="c5" onclick="pick(this, 'Teal Cyan')">
+    <canvas id="cv5"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Teal Cyan</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+  </div>
+
+  <div class="card" id="c6" onclick="pick(this, 'Electric Sky')">
+    <canvas id="cv6"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Electric Sky</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+  </div>
+
+  <div class="card" id="c7" onclick="pick(this, 'Soap Bubble')">
+    <canvas id="cv7"></canvas>
+    <div class="fade"></div>
+    <div class="content">
+      <div class="tag">Soap Bubble</div>
+      <div class="h1">Attention is currency.<br>I make things that earn it.</div>
+    </div>
+    <div class="tick">✓</div>
+  </div>
+</div>
+
+<script>
+function pick(card, name) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('picked'))
+  card.classList.add('picked')
+  document.getElementById('chosen').textContent = name + ' — tell Claude: "apply ' + name + '"'
+}
+
+// ── Shader ──
+const VERT = `#version 300 es
+precision highp float;
+in vec2 a_position; in vec2 a_texCoord; out vec2 v_uv;
+void main(){ v_uv=a_texCoord; gl_Position=vec4(a_position,0,1); }`
+
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv; out vec4 fragColor;
+uniform vec4 u_colors[8]; uniform int u_colors_length;
+uniform float u_seed,u_speed,u_scale,u_turbIter,u_waveFreq,u_exposure,u_contrast,u_saturation,u_time;
+uniform vec2 u_resolution;
+const float TAU=6.28318530,GA=2.3999632;
+uvec3 h3(uvec3 v){v=v*1664525u+1013904223u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;v^=v>>16u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;return v;}
+vec3 rnd(float s){uvec3 u=uvec3(floatBitsToUint(s),floatBitsToUint(s*1.5+7.31),floatBitsToUint(s*2.7+13.37));u=h3(u);return vec3(u)/float(0xFFFFFFFFu);}
+vec3 lin(vec3 c){return pow(c,vec3(2.2));}
+vec3 srgb(vec3 c){return pow(clamp(c,0.,1.),vec3(.4545));}
+vec3 toOk(vec3 c){float l=.4122*c.r+.5363*c.g+.0514*c.b,m=.2119*c.r+.6807*c.g+.1074*c.b,s=.0883*c.r+.2817*c.g+.6300*c.b;l=pow(max(l,0.),.333);m=pow(max(m,0.),.333);s=pow(max(s,0.),.333);return vec3(.2105*l+.7936*m-.0041*s,1.9780*l-2.4286*m+.4506*s,.0259*l+.7828*m-.8087*s);}
+vec3 fromOk(vec3 c){float l=c.x+.3963*c.y+.2158*c.z,m=c.x-.1056*c.y-.0639*c.z,s=c.x-.0895*c.y-1.2915*c.z;l=l*l*l;m=m*m*m;s=s*s*s;return vec3(4.0767*l-3.3077*m+.2310*s,-1.2684*l+2.6098*m-.3413*s,-.0042*l-.7034*m+1.7076*s);}
+vec3 mixOk(vec3 a,vec3 b,float t){
+  vec3 la=vec3(a.x,length(a.yz),atan(a.z,a.y)),lb=vec3(b.x,length(b.yz),atan(b.z,b.y));
+  if(la.y<.05)la.z=lb.z;if(lb.y<.05)lb.z=la.z;
+  float dh=lb.z-la.z;if(dh>3.14159)dh-=TAU;if(dh<-3.14159)dh+=TAU;
+  vec3 lc=vec3(mix(la.x,lb.x,t),mix(la.y,lb.y,t),la.z+dh*t);
+  return vec3(lc.x,lc.y*cos(lc.z),lc.y*sin(lc.z));
+}
+vec3 pal(float t){
+  int n=u_colors_length; if(n<2)return lin(u_colors[0].rgb);
+  float seg=1./float(n-1); t=clamp(t,0.,1.);
+  int i=min(int(floor(t/seg)),n-2); float lt=clamp((t-float(i)*seg)/seg,0.,1.);
+  return fromOk(mixOk(toOk(lin(u_colors[i].rgb)),toOk(lin(u_colors[i+1].rgb)),lt));
+}
+void main(){
+  vec2 fc=v_uv*u_resolution,r=u_resolution;
+  vec2 p=(fc*2.-r)/r.y;
+  float t=u_time*.3;
+  vec3 s0=rnd(u_seed),s1=rnd(u_seed+100.);
+  float sa=u_seed*GA; vec2 sp=(s1.xy-.5)*TAU;
+  p=mat2(cos(sa),-sin(sa),sin(sa),cos(sa))*p;
+  float tv=0.,tw=0.; int ti=int(u_turbIter);
+  for(float i=0.;i<4.;i++){
+    float eph=i/4.; vec2 q=p*u_scale;
+    float a=sp.x,d=sp.y;
+    for(int j=2;j<13;j++){
+      if(j>=ti)break; float fj=float(j),t1=t*u_speed;
+      q+=sin(q.yx/2.*fj+t1+vec2(a,d)+s0.xy*fj)/fj;
+      a+=cos(fj+d*1.2+q.x*2.-t1+s1.z);
+      d+=sin(fj*q.y+a+s0.z+t1+s1.y);
+    }
+    float v=.5+.5*sin(length(q.yx+vec2(a,d)*.2)*u_waveFreq+i*i+s0.x);
+    float w=smoothstep(0.,.5,eph)*smoothstep(1.,.5,eph);
+    tv+=v*w; tw+=w;
+  }
+  float val=clamp((tv/tw-.3)/.4,0.,1.);
+  vec3 col=pal(val)*u_exposure;
+  vec3 lab=toOk(col); float C=length(lab.yz),h=atan(lab.z,lab.y);
+  lab.x=clamp((lab.x-.5)*u_contrast+.5,0.,1.); C*=u_saturation;
+  col=fromOk(vec3(lab.x,C*cos(h),C*sin(h)));
+  col=clamp(col,0.,1.);
+  fragColor=vec4(srgb(col),1.);
+}`
+
+const PALETTES = {
+  cv1:[.4863,.7216,.9098,1, .6431,.8118,.9412,1, .7843,.8941,.9725,1, .3529,.6039,.8314,1, .9294,.9647,1,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv2:[.4627,.6157,.8471,1, .6784,.8549,.9686,1, .7098,.8627,.9608,1, .3882,.5451,.7961,1, .9765,1,1,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv3:[.1765,.4314,.6275,1, .3490,.6196,.7843,1, .4784,.7216,.8510,1, .0980,.2549,.4706,1, .8000,.9216,.9608,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv4:[.3451,.3765,.7176,1, .5333,.6000,.8784,1, .6863,.7373,.9255,1, .2235,.2588,.5961,1, .9020,.9098,.9804,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv5:[.0000,.4824,.6588,1, .0000,.7059,.8471,1, .2824,.7922,.9098,1, .5647,.8784,.9412,1, .8784,.9686,1,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv6:[.0980,.4627,.8235,1, .2588,.6471,.9608,1, .5647,.7922,.9765,1, .8902,.9490,.9922,1, .9804,.9961,1,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+  cv7:[.0000,.5961,.7216,1, .3373,.7843,.8745,1, .6588,.8941,.9412,1, .8314,.9412,.9765,1, .9608,.9882,1,1, 0,0,0,0,0,0,0,0,0,0,0,0],
+}
+
+function run(id, colors) {
+  const cv = document.getElementById(id)
+  const gl = cv.getContext('webgl2', {antialias:false,premultipliedAlpha:false})
+  if(!gl) return
+  const mk = (t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s}
+  const vs=mk(gl.VERTEX_SHADER,VERT), fs=mk(gl.FRAGMENT_SHADER,FRAG)
+  const pg=gl.createProgram(); gl.attachShader(pg,vs); gl.attachShader(pg,fs); gl.linkProgram(pg); gl.useProgram(pg)
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf)
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,0,0,1,-1,1,0,-1,1,0,1,-1,1,0,1,1,-1,1,0,1,1,1,1]),gl.STATIC_DRAW)
+  const p0=gl.getAttribLocation(pg,'a_position'),p1=gl.getAttribLocation(pg,'a_texCoord')
+  gl.enableVertexAttribArray(p0); gl.vertexAttribPointer(p0,2,gl.FLOAT,false,16,0)
+  gl.enableVertexAttribArray(p1); gl.vertexAttribPointer(p1,2,gl.FLOAT,false,16,8)
+  const u=n=>gl.getUniformLocation(pg,n)
+  gl.uniform4fv(u('u_colors'),new Float32Array(colors))
+  gl.uniform1i(u('u_colors_length'),5)
+  gl.uniform1f(u('u_seed'),689); gl.uniform1f(u('u_speed'),.79); gl.uniform1f(u('u_scale'),.28)
+  gl.uniform1f(u('u_turbIter'),9); gl.uniform1f(u('u_waveFreq'),4.5)
+  gl.uniform1f(u('u_exposure'),1.1); gl.uniform1f(u('u_contrast'),1.1); gl.uniform1f(u('u_saturation'),1)
+  const res=u('u_resolution'), tim=u('u_time')
+  const dpr=Math.min(devicePixelRatio||1,2)
+  let w=0,h=0
+  function resize(){const r=cv.getBoundingClientRect(),nw=Math.floor(r.width*dpr),nh=Math.floor(r.height*dpr);if(nw===w&&nh===h)return;w=nw;h=nh;cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(res,w,h)}
+  const t0=performance.now()
+  let on=true
+  function f(now){if(!on)return;resize();gl.uniform1f(tim,(now-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,6);requestAnimationFrame(f)}
+  requestAnimationFrame(f)
+  new IntersectionObserver(([e])=>{on=e.isIntersecting;if(on)requestAnimationFrame(f)},{threshold:0}).observe(cv)
+  window.addEventListener('resize',resize)
+}
+
+Object.entries(PALETTES).forEach(([id,cols],i)=>setTimeout(()=>run(id,cols),i*100))
+</script>
+</body>
+</html>

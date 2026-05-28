@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Soap Bubble Shader</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #06060e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    gap: 10px;
+  }
+  canvas {
+    border-radius: 6px;
+    box-shadow: 0 0 60px rgba(80,120,255,0.12), 0 0 20px rgba(0,0,0,0.6);
+  }
+  .label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+<canvas id="c" width="480" height="360"></canvas>
+<div class="label">soap bubble shader</div>
+<script>
+const canvas = document.getElementById('c');
+const gl = canvas.getContext('webgl');
+if (!gl) { document.body.textContent = 'WebGL not supported'; }
+
+// ---- Picture texture: colorful iridescent background ----
+function makePicture() {
+  const w = 1024, h = 512;
+  const tc = document.createElement('canvas');
+  tc.width = w; tc.height = h;
+  const ctx = tc.getContext('2d');
+
+  ctx.fillStyle = '#07071a';
+  ctx.fillRect(0, 0, w, h);
+
+  const blobs = [
+    { x: 180, y: 140, r: 280, h0: 210, h1: 250 },
+    { x: 620, y: 260, r: 320, h0: 270, h1: 310 },
+    { x: 820, y: 90,  r: 220, h0: 150, h1: 190 },
+    { x: 380, y: 420, r: 260, h0:  20, h1:  60 },
+    { x:  90, y: 390, r: 210, h0: 310, h1: 350 },
+    { x: 940, y: 390, r: 200, h0:  60, h1: 100 },
+    { x: 500, y: 120, r: 180, h0: 120, h1: 160 },
+  ];
+  for (const b of blobs) {
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+    g.addColorStop(0,   `hsla(${b.h0}, 85%, 65%, 0.55)`);
+    g.addColorStop(0.6, `hsla(${b.h1}, 80%, 45%, 0.25)`);
+    g.addColorStop(1,   `hsla(${b.h1}, 80%, 30%, 0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  for (let i = 0; i < 700; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    const r = Math.random() * 2.2 + 0.3;
+    const hue = Math.random() * 360;
+    const a = Math.random() * 0.75 + 0.1;
+    ctx.fillStyle = `hsla(${hue}, 100%, 85%, ${a})`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return tc;
+}
+
+// ---- Shaders ----
+const VS = `
+attribute vec2 a_pos;
+attribute vec2 a_uv;
+varying vec2 vUv;
+void main() {
+  vUv = a_uv;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+const FS = `
+precision highp float;
+varying vec2 vUv;
+uniform vec2  iResolution;
+uniform float uSmooth;
+uniform float ballradius;
+uniform float metaPow;
+uniform float densityMin;
+uniform float densityMax;
+uniform float densityEvolution;
+uniform float rotationSpeed;
+uniform vec2  moveSpeed;
+uniform float distortion;
+uniform float nstrenght;
+uniform float nsize;
+uniform sampler2D picture;
+uniform float iGlobalTime;
+uniform vec2  centerMove;
+
+float sat(float x) { return clamp(x, 0.0, 1.0); }
+
+vec2 rotuv(vec2 uv, float angle, vec2 center) {
+  return mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * (uv - center) + center;
+}
+
+float hash(float n) {
+  return fract(sin(dot(vec2(n, n), vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float metaBall(vec2 uv) {
+  return length(fract(uv) - vec2(0.5));
+}
+
+float metaNoiseRaw(vec2 uv, float density) {
+  float v  = 0.99;
+  float r0 = 0.3;
+  float s0 = mod(iGlobalTime * (r0 - 0.5) * rotationSpeed, 600.0);
+  vec2  f0 = iGlobalTime * moveSpeed * r0;
+  vec2 uv0 = rotuv(uv * (1.0 + r0 * v), r0 * 360.0 + s0, centerMove) + f0;
+  float mb0 = sat(metaBall(uv0) * density);
+
+  for (int i = 0; i < 5; i++) {
+    float inc = float(i) + 1.0;
+    float r1  = 0.3 * inc;
+    float s1  = mod(iGlobalTime * (r1 - 0.5) * rotationSpeed, 600.0);
+    vec2  f1  = iGlobalTime * r1 * moveSpeed;
+    vec2  c1  = vec2(hash(31.2 * inc), hash(90.2 * inc)) * 100.0 + s1;
+    vec2 uv1  = rotuv(uv * (1.0 + r1 * v), r1 * 360.0 + s1, centerMove) - mb0 * distortion + f1;
+    float mb1 = sat(metaBall(uv1) * density);
+    mb0 *= mb1;
+  }
+  return pow(mb0, metaPow);
+}
+
+float metaNoise(vec2 uv) {
+  float density = mix(densityMin, densityMax, sin(iGlobalTime * densityEvolution) * 0.5 + 0.5);
+  return 1.0 - smoothstep(ballradius, ballradius + uSmooth, metaNoiseRaw(uv, density));
+}
+
+vec4 calcNormals(vec2 uv, float s) {
+  float ox = nsize * s / iResolution.x * 10.0;
+  float oy = nsize * s / iResolution.y * 10.0;
+  float X = (metaNoise(uv - vec2(ox, 0.0)) - metaNoise(uv + vec2(ox, 0.0))) * nstrenght;
+  float Y = (metaNoise(uv - vec2(0.0, oy)) - metaNoise(uv + vec2(0.0, oy))) * nstrenght;
+  float Z = 1.0 - sat(dot(vec2(X, Y), vec2(X, Y)));
+  float c = abs(X + Y);
+  return normalize(vec4(X, Y, Z, c));
+}
+
+void main() {
+  vec2 uv  = vUv;
+  vec2 uv2 = uv;
+  uv2.x *= iResolution.x / iResolution.y;
+  uv2   *= vec2(1.0, 0.75);
+  uv2   += iGlobalTime * moveSpeed;
+
+  vec4 n   = calcNormals(uv2, smoothstep(0.0, 0.5, 1.0));
+  vec4 tex = texture2D(picture, uv + n.xy * -0.4);
+  vec3 col = tex.xyz;
+  gl_FragColor = vec4(n.w * col + col, 1.0);
+}`;
+
+// ---- Compile ----
+function mkShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+
+const prog = gl.createProgram();
+gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+  throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+// ---- Quad geometry ----
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1,-1, 0,0,
+   1,-1, 1,0,
+  -1, 1, 0,1,
+   1, 1, 1,1,
+]), gl.STATIC_DRAW);
+
+const aPos = gl.getAttribLocation(prog, 'a_pos');
+const aUv  = gl.getAttribLocation(prog, 'a_uv');
+gl.enableVertexAttribArray(aPos);
+gl.enableVertexAttribArray(aUv);
+gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 16, 0);
+gl.vertexAttribPointer(aUv,  2, gl.FLOAT, false, 16, 8);
+
+// ---- Texture ----
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, makePicture());
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.generateMipmap(gl.TEXTURE_2D);
+
+// ---- Uniforms (values from uniforms.txt) ----
+const U = n => gl.getUniformLocation(prog, n);
+gl.uniform2f(U('iResolution'),      canvas.width, canvas.height);
+gl.uniform1f(U('uSmooth'),          0.3);
+gl.uniform1f(U('ballradius'),       0.0);
+gl.uniform1f(U('metaPow'),          3.0);
+gl.uniform1f(U('densityMin'),       2.4);
+gl.uniform1f(U('densityMax'),       2.9);
+gl.uniform1f(U('densityEvolution'), 0.4);
+gl.uniform1f(U('rotationSpeed'),    0.0);
+gl.uniform2f(U('moveSpeed'),        0.0, -0.01);
+gl.uniform1f(U('distortion'),       0.05);
+gl.uniform1f(U('nstrenght'),        1.0);
+gl.uniform1f(U('nsize'),            1.0);
+gl.uniform1i(U('picture'),          0);
+gl.uniform2f(U('centerMove'),       0.0, 0.0008);
+const uTime = U('iGlobalTime');
+
+// ---- Render loop ----
+const t0 = performance.now();
+(function loop() {
+  gl.uniform1f(uTime, (performance.now() - t0) / 1000);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
