@@ -55,7 +55,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { padding-bottom: 56px; }
+body { padding-bottom: 0; }
 
 /* Column grid overlay — injected via JS; same padding formula as content so lines stay in sync at all viewports */
 .col-grid {
@@ -2060,7 +2060,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #7cb8e8  100%
   );
   min-height: 20vh;
-  padding: 0 0 56px 0;
+  padding: 0;
   position: relative;
 }
 /* Live A-graph instance in bigfoot */
