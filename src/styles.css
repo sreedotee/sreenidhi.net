@@ -55,8 +55,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { padding-bottom: 60px; }
-body:has(.A-bigfoot) { padding-bottom: 0; }
+body { padding-bottom: 0; }
 
 /* Column grid overlay — injected via JS; same padding formula as content so lines stay in sync at all viewports */
 .col-grid {

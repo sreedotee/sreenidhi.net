@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Silk A/B</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fff; overflow: hidden; width: 100vw; height: 100vh; font-family: 'Geist', sans-serif; }
+
+    .stage { position: relative; width: 100vw; height: 100vh; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+    /* bottom fade like real hero */
+    .stage::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 55%, rgba(255,255,255,0.95) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: start;
+      padding: 14px 32px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .nav__name { grid-column: 1 / 4; color: #fff; font-family: 'Geist', sans-serif; font-size: 20px; letter-spacing: -0.03em; }
+    .nav__center {
+      grid-column: 4;
+      justify-self: end;
+      display: flex;
+      gap: 12px;
+    }
+    .nav__center a, .nav__resume {
+      color: #04083d;
+      background: rgba(255,255,255,0.55);
+      padding: 3px 10px;
+      font-size: 11px;
+    }
+    .nav__resume {
+      position: absolute;
+      right: 32px; top: 14px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── Hero content ── */
+    .hero-content {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      padding: 48px 32px 64px;
+    }
+    .hero-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      row-gap: 56px;
+      align-items: start;
+    }
+    .hero-grid > div:first-child { grid-column: 1 / -1; }
+    .hero-h1 {
+      font-family: 'Geist', sans-serif;
+      font-size: clamp(48px, 6.7vw, 96px);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: #04083d;
+      font-weight: 400;
+    }
+    .hero-intro {
+      font-size: 20px;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+      color: #04083d;
+      max-width: 420px;
+    }
+    .hero-intro p { margin-bottom: 16px; }
+    .ctas { display: flex; gap: 12px; margin-top: 12px; }
+    .btn-text { font-size: 20px; letter-spacing: -0.03em; color: #04083d; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      background: rgba(4,8,61,0.55);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+    .btn-pill::before { content: '['; display: inline-block; margin-right: 5px; }
+    .btn-pill::after  { content: ']'; display: inline-block; margin-left: 5px; }
+
+    /* ── Controls ── */
+    .label {
+      position: fixed;
+      bottom: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(4,8,61,0.6);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      border: none;
+      cursor: pointer;
+      font-size: 22px;
+      color: rgba(4,8,61,0.7);
+      padding: 18px 22px;
+      transition: background 0.15s;
+    }
+    .arrow:hover { background: rgba(255,255,255,1); }
+    .arrow--left  { left: 20px; }
+    .arrow--right { right: 20px; }
+    .dots {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(4,8,61,0.2); transition: background 0.2s; }
+    .dot.active { background: rgba(4,8,61,0.6); }
+  </style>
+</head>
+<body>
+
+<div class="stage">
+  <canvas id="cv"></canvas>
+
+  <!-- Nav -->
+  <div class="nav">
+    <div class="nav__name">Sreenidhi</div>
+    <div class="nav__center">
+      <a>[ About ]</a>
+      <a>[ Contact ]</a>
+    </div>
+    <div class="nav__resume">[ Resume ]</div>
+  </div>
+
+  <!-- Hero text -->
+  <div class="hero-content">
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-h1">Attention is currency.<br>I make things that earn it.</h1>
+      </div>
+      <div class="hero-intro">
+        <p>Hello, I'm Sreenidhi. I'm a designer interested in how technology, business, and culture shape each other, and how design works between them.</p>
+        <div class="ctas">
+          <span class="btn-text"><span>↳</span> Let's Talk</span>
+          <span class="btn-pill">View work</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="label" id="label">A — Original · waveFreq 4.5</div>
+<button class="arrow arrow--left"  onclick="prev()">←</button>
+<button class="arrow arrow--right" onclick="next()">→</button>
+<div class="dots">
+  <div class="dot active" id="dot0"></div>
+  <div class="dot"        id="dot1"></div>
+</div>
+
+<script>
+const VARIANTS = [
+  { label: 'A — Original · waveFreq 4.5', waveFreq: 4.5 },
+  { label: 'B — Current  · waveFreq 2.5', waveFreq: 2.5 },
+]
+let current = 0, setFreq = null
+
+function show(idx) {
+  current = (idx + VARIANTS.length) % VARIANTS.length
+  document.getElementById('label').textContent = VARIANTS[current].label
+  VARIANTS.forEach((_, i) => document.getElementById('dot'+i).classList.toggle('active', i === current))
+  if (setFreq) setFreq(VARIANTS[current].waveFreq)
+}
+function next() { show(current + 1) }
+function prev() { show(current - 1) }
+document.addEventListener('keydown', e => { if(e.key==='ArrowRight')next(); if(e.key==='ArrowLeft')prev() })
+
+// ── Shader (identical params to live site, only waveFreq changes) ──
+const VERT = `#version 300 es
+precision highp float;
+in vec2 a_position; in vec2 a_texCoord; out vec2 v_uv;
+void main(){ v_uv=a_texCoord; gl_Position=vec4(a_position,0,1); }`
+
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv; out vec4 fragColor;
+uniform vec4 u_colors[8]; uniform int u_colors_length;
+uniform float u_seed,u_speed,u_scale,u_turbAmp,u_turbFreq,u_turbIter,u_waveFreq,u_distBias;
+uniform float u_jellify,u_ditherMode,u_dither,u_exposure,u_contrast,u_saturation,u_time;
+uniform vec2 u_resolution; uniform float u_pixelRatio;
+const float TAU=6.28318530,GA=2.3999632;
+uvec3 h3(uvec3 v){v=v*1664525u+1013904223u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;v^=v>>16u;v.x+=v.y*v.z;v.y+=v.z*v.x;v.z+=v.x*v.y;return v;}
+vec3 rnd(float s){uvec3 u=uvec3(floatBitsToUint(s),floatBitsToUint(s*1.5+7.31),floatBitsToUint(s*2.7+13.37));u=h3(u);return vec3(u)/float(0xFFFFFFFFu);}
+vec3 lin(vec3 c){return pow(c,vec3(2.2));}
+vec3 srgb(vec3 c){return pow(clamp(c,0.,1.),vec3(.4545));}
+vec3 toOk(vec3 c){float l=.4122*c.r+.5363*c.g+.0514*c.b,m=.2119*c.r+.6807*c.g+.1074*c.b,s=.0883*c.r+.2817*c.g+.6300*c.b;l=pow(max(l,0.),.333);m=pow(max(m,0.),.333);s=pow(max(s,0.),.333);return vec3(.2105*l+.7936*m-.0041*s,1.9780*l-2.4286*m+.4506*s,.0259*l+.7828*m-.8087*s);}
+vec3 fromOk(vec3 c){float l=c.x+.3963*c.y+.2158*c.z,m=c.x-.1056*c.y-.0639*c.z,s=c.x-.0895*c.y-1.2915*c.z;l=l*l*l;m=m*m*m;s=s*s*s;return vec3(4.0767*l-3.3077*m+.2310*s,-1.2684*l+2.6098*m-.3413*s,-.0042*l-.7034*m+1.7076*s);}
+vec3 mOk(vec3 a,vec3 b,float t){vec3 la=vec3(a.x,length(a.yz),atan(a.z,a.y)),lb=vec3(b.x,length(b.yz),atan(b.z,b.y));if(la.y<.05)la.z=lb.z;if(lb.y<.05)lb.z=la.z;float dh=lb.z-la.z;if(dh>3.14159)dh-=TAU;if(dh<-3.14159)dh+=TAU;vec3 lc=vec3(mix(la.x,lb.x,t),mix(la.y,lb.y,t),la.z+dh*t);return vec3(lc.x,lc.y*cos(lc.z),lc.y*sin(lc.z));}
+vec3 pal(float t){int n=u_colors_length;if(n<2)return lin(u_colors[0].rgb);float seg=1./float(n-1);t=clamp(t,0.,1.);int i=min(int(floor(t/seg)),n-2);float lt=clamp((t-float(i)*seg)/seg,0.,1.);return fromOk(mOk(toOk(lin(u_colors[i].rgb)),toOk(lin(u_colors[i+1].rgb)),lt));}
+float IGN(vec2 uv){return fract(52.9829189*fract(dot(uv,vec2(0.06711056,0.00583715))));}
+void main(){
+  vec2 fc=v_uv*u_resolution,r=u_resolution;
+  vec2 p=(fc*2.-r)/r.y;
+  float dither=IGN(floor(fc/u_pixelRatio));
+  float t=u_time*.3;
+  vec3 s0=rnd(u_seed),s1=rnd(u_seed+100.);
+  float sa=u_seed*GA;vec2 sp=(s1.xy-.5)*TAU;
+  p=mat2(cos(sa),-sin(sa),sin(sa),cos(sa))*p;
+  float tv=0.,tw=0.;int ti=int(u_turbIter);
+  float freq=1./max(u_turbFreq,.01);
+  for(float i=0.;i<4.;i++){
+    float eph=i/4.;vec2 q=p*u_scale;
+    float a=sp.x,d=sp.y;
+    for(int j=2;j<13;j++){
+      if(j>=ti)break;float fj=float(j),t1=t*u_speed;
+      q+=u_turbAmp*sin(q.yx/freq*fj+t1+vec2(a,d)+s0.xy*fj)/fj;
+      a+=cos(fj+d*1.2+q.x*2.-t1+s1.z);d+=sin(fj*q.y+a+s0.z+t1+s1.y);
+    }
+    float v=.5+.5*sin(length(q.yx+vec2(a,d)*.2)*u_waveFreq+i*i+s0.x);
+    float w=smoothstep(0.,.5,eph)*smoothstep(1.,.5,eph);tv+=v*w;tw+=w;
+  }
+  float val=clamp((tv/tw-.3)/.4,0.,1.);
+  val=pow(val,exp(-u_distBias));
+  val=clamp(val+(dither-.5)*u_dither,0.,1.);
+  vec3 col=pal(val)*u_exposure;
+  vec3 lab=toOk(col);float C=length(lab.yz),h2=atan(lab.z,lab.y);
+  lab.x=clamp((lab.x-.5)*u_contrast+.5,0.,1.);C*=u_saturation;
+  col=fromOk(vec3(lab.x,C*cos(h2),C*sin(h2)));
+  fragColor=vec4(srgb(clamp(col,0.,1.)),1.);
+}`
+
+const COLORS=[.4863,.7216,.9098,1,.6431,.8118,.9412,1,.7843,.8941,.9725,1,.3529,.6039,.8314,1,.9294,.9647,1,1,0,0,0,0,0,0,0,0,0,0,0,0]
+
+const cv=document.getElementById('cv')
+const gl=cv.getContext('webgl2',{antialias:false,premultipliedAlpha:false})
+const mk=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s}
+const pg=gl.createProgram()
+gl.attachShader(pg,mk(gl.VERTEX_SHADER,VERT))
+gl.attachShader(pg,mk(gl.FRAGMENT_SHADER,FRAG))
+gl.linkProgram(pg);gl.useProgram(pg)
+const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf)
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,0,0,1,-1,1,0,-1,1,0,1,-1,1,0,1,1,-1,1,0,1,1,1,1]),gl.STATIC_DRAW)
+const p0=gl.getAttribLocation(pg,'a_position'),p1=gl.getAttribLocation(pg,'a_texCoord')
+gl.enableVertexAttribArray(p0);gl.vertexAttribPointer(p0,2,gl.FLOAT,false,16,0)
+gl.enableVertexAttribArray(p1);gl.vertexAttribPointer(p1,2,gl.FLOAT,false,16,8)
+const u=n=>gl.getUniformLocation(pg,n)
+const U={colors:u('u_colors'),cl:u('u_colors_length'),seed:u('u_seed'),speed:u('u_speed'),
+  scale:u('u_scale'),turbAmp:u('u_turbAmp'),turbFreq:u('u_turbFreq'),turbIter:u('u_turbIter'),
+  waveFreq:u('u_waveFreq'),distBias:u('u_distBias'),jellify:u('u_jellify'),
+  ditherMode:u('u_ditherMode'),dither:u('u_dither'),
+  exposure:u('u_exposure'),contrast:u('u_contrast'),saturation:u('u_saturation'),
+  time:u('u_time'),res:u('u_resolution'),dpr:u('u_pixelRatio')}
+
+// Exact same params as live site
+gl.uniform4fv(U.colors,new Float32Array(COLORS));gl.uniform1i(U.cl,5)
+gl.uniform1f(U.seed,689);gl.uniform1f(U.speed,.79);gl.uniform1f(U.scale,.28)
+gl.uniform1f(U.turbAmp,0);gl.uniform1f(U.turbFreq,2);gl.uniform1f(U.turbIter,9)
+gl.uniform1f(U.waveFreq,4.5) // starts on A
+gl.uniform1f(U.distBias,0);gl.uniform1f(U.jellify,0)
+gl.uniform1f(U.ditherMode,1);gl.uniform1f(U.dither,.1)
+gl.uniform1f(U.exposure,1.1);gl.uniform1f(U.contrast,1.1);gl.uniform1f(U.saturation,1)
+
+setFreq = v => gl.uniform1f(U.waveFreq, v)
+
+const dpr=Math.min(devicePixelRatio||1,2)
+let w=0,h=0
+function resize(){const nw=Math.floor(innerWidth*dpr),nh=Math.floor(innerHeight*dpr);if(nw===w&&nh===h)return;w=nw;h=nh;cv.width=w;cv.height=h;gl.viewport(0,0,w,h);gl.uniform2f(U.res,w,h);gl.uniform1f(U.dpr,dpr)}
+const t0=performance.now()
+function frame(now){resize();gl.uniform1f(U.time,(now-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,6);requestAnimationFrame(frame)}
+requestAnimationFrame(frame)
+window.addEventListener('resize',resize)
+</script>
+</body>
+</html>
