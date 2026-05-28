@@ -64,6 +64,19 @@ window.addEventListener('scroll', onScroll, { passive: true })
 window.addEventListener('resize', onScroll, { passive: true })
 update()
 
+/* ----- Column grid overlay — 6 cols, same padding as content so lines stay in sync at any viewport ----- */
+;(function () {
+  const grid = document.createElement('div')
+  grid.className = 'col-grid'
+  grid.setAttribute('aria-hidden', 'true')
+  for (let i = 0; i < 6; i++) {
+    const col = document.createElement('div')
+    col.className = 'col-grid__col'
+    grid.appendChild(col)
+  }
+  document.body.appendChild(grid)
+})()
+
 /* ----- Active nav link — marks current page with aria-current so CSS can expand brackets ----- */
 document.querySelectorAll('.A-topbar__center a, .A-topbar__right a').forEach(a => {
   const href = a.getAttribute('href')
