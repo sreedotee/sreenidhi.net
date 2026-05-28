@@ -875,16 +875,53 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 .album-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--navy-ghost);
-  border-left: 1px solid var(--navy-ghost);
+  position: relative;
+}
+/* Outer top edge */
+.album-grid::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent 0%, rgba(190,215,235,.5) 20%, rgba(230,244,255,.65) 50%, rgba(185,210,232,.5) 80%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+/* Outer left edge */
+.album-grid::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(190,215,235,.5) 20%, rgba(230,244,255,.65) 50%, rgba(185,210,232,.5) 80%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 .album {
   position: relative;
   aspect-ratio: 1;
   background: transparent;
-  border-right: 1px solid var(--navy-ghost);
-  border-bottom: 1px solid var(--navy-ghost);
   overflow: hidden;
+}
+/* Right vertical chrome line — same gradient as col-grid */
+.album::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(190,215,235,.6) 20%, rgba(230,244,255,.78) 50%, rgba(185,210,232,.6) 80%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+/* Bottom horizontal chrome line — rotated version of the same gradient */
+.album::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 1px; width: 100%;
+  background: linear-gradient(to right, transparent 0%, rgba(190,215,235,.6) 20%, rgba(230,244,255,.78) 50%, rgba(185,210,232,.6) 80%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
 }
 /* Image-mode cells (photos / albums) stack two <img>s and crossfade between
    them — matches the OG Framer GridCell fade transition (420ms cubic-bezier). */
@@ -1348,11 +1385,15 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
    About page (/about/)
    ============================================================ */
 .A-about {
-  padding: 160px 32px 120px;
+  padding-top: 160px;
+  padding-bottom: 120px;
+  padding-inline: max(32px, calc((100% - 1320px) / 2));
 }
 .A-about__inner {
-  max-width: 1100px;
-  margin: 0 auto;
+  /* fills A-about's content area edge-to-edge so children left-align with the
+     col-grid's first vertical guide; prose width is constrained on .A-about__body */
+  max-width: none;
+  margin: 0;
 }
 .A-about__head {
   display: flex;
@@ -2595,7 +2636,7 @@ body.is-bigfoot-visible .col-grid { opacity: 0; transition: opacity 0.3s; }
   .A-foot__social svg { width: 18px; height: 18px; }
 
   /* About page */
-  .A-about { padding: 120px 20px 120px; }
+  .A-about { padding-top: 120px; padding-bottom: 120px; }
   .A-about__head { margin-bottom: 48px; }
   .A-about__bigprose { font-size: clamp(24px, 5.5vw, 40px); margin-bottom: 56px; }
   .A-about__body p { font-size: 17px; line-height: 1.5; }
@@ -2711,7 +2752,7 @@ body.is-bigfoot-visible .col-grid { opacity: 0; transition: opacity 0.3s; }
   .A-foot__social img,
   .A-foot__social svg { width: 16px; height: 16px; }
 
-  .A-about { padding: 96px 16px 96px; }
+  .A-about { padding-top: 96px; padding-bottom: 96px; padding-inline: 16px; }
   .A-about__eyebrow, .A-about__phonetic { font-size: 14px; }
   .A-about__bigprose { font-size: clamp(20px, 6vw, 30px); margin-bottom: 40px; }
   .A-about__body { gap: 18px; }
