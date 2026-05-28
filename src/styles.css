@@ -55,7 +55,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { padding-bottom: 60px; }
+body { padding-bottom: 0; }
 
 /* Column grid overlay — injected via JS; same padding formula as content so lines stay in sync at all viewports */
 .col-grid {
@@ -2060,7 +2060,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #7cb8e8  100%
   );
   min-height: 26vh;
-  padding: 24px max(32px, calc((100% - 1320px) / 2)) 28px;
+  padding: 24px max(32px, calc((100% - 1320px) / 2)) 72px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
