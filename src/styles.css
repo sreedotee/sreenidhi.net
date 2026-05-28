@@ -55,7 +55,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { padding-bottom: 0; }
+body { padding-bottom: 60px; }
 
 /* Column grid overlay — injected via JS; same padding formula as content so lines stay in sync at all viewports */
 .col-grid {
@@ -1118,17 +1118,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   margin-left: 12px;
 }
 
-/* On pages with the silk hero, keep the fixed footer hidden until the hero is scrolled past. */
-body:has(.A-hero) .A-foot {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-body:has(.A-hero).is-scrolled .A-foot {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
+/* Fixed footer always visible — no paper-pull animation */
 
 .A-hero {
   position: relative;
