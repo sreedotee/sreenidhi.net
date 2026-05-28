@@ -1761,7 +1761,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   grid-template-columns: 1fr;
   align-items: flex-end;
   gap: 48px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 .A-testimonials__eyebrow {
   font-family: var(--sans);
