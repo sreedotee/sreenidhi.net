@@ -2065,12 +2065,10 @@ body:has(.A-hero).is-scrolled .A-foot {
 .A-bigfoot {
   background: linear-gradient(to bottom,
     #ffffff    0%,
-    #edf6ff   15%,
-    #c8e4f8   35%,
-    #a4cff0   55%,
-    #7cb8e8   75%,
-    #5a9ad4   90%,
-    #04083d  100%
+    #edf6ff   20%,
+    #c8e4f8   50%,
+    #a4cff0   75%,
+    #7cb8e8  100%
   );
   min-height: 52vh;
   padding: 36px max(32px, calc((100% - 1320px) / 2)) 52px;
