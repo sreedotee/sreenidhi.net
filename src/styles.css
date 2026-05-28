@@ -2088,7 +2088,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   font-size: clamp(26px, 3vw, 42px);
 }
 .A-bigfoot__synthesis {
-  font-family: var(--mono);
+  font-family: var(--serif);
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
