@@ -1277,16 +1277,10 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   line-height: 26px;
   letter-spacing: -0.03em;
   color: var(--navy);
-  max-width: 420px;
+  max-width: 620px;
 }
 
-.A-hero__intro p {
-  margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.A-hero__intro p { margin-bottom: 16px; }
 .A-hero__ctas { display: flex; gap: 12px; margin-top: 12px; }
 
 .A-band {
