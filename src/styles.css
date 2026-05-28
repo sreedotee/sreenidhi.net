@@ -2078,36 +2078,24 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   background: rgba(255, 255, 255, 0.7);
 }
 
-/* Mini A-graph in bigfoot */
-.A-bigfoot__mini-graph {
+/* Live A-graph instance in bigfoot */
+.A-bigfoot__graph {
   position: absolute;
-  bottom: 36px;
-  left: 50%;
-  width: 640px;
-  height: 320px;
-  transform: translateX(-50%) scale(0.13);
-  transform-origin: bottom center;
-  pointer-events: none;
+  inset: 0;
+  bottom: 40px;
+  pointer-events: auto;
 }
-.A-bigfoot__mini-graph span {
-  position: absolute;
-  font-family: var(--sans);
-  font-size: 15px;
+.A-bigfoot .A-graph__word {
   color: rgba(4, 8, 61, 0.45);
-  white-space: nowrap;
-  letter-spacing: -0.01em;
+  font-size: 13px;
 }
-.A-bigfoot__mgr-title {
-  position: absolute;
-  top: 42%;
-  left: 16%;
-  font-family: var(--serif);
-  font-size: 128px;
-  line-height: 1;
-  letter-spacing: -0.02em;
+.A-bigfoot .A-graph__word--primary {
+  color: rgba(4, 8, 61, 0.7);
+  font-size: 16px;
+}
+.A-bigfoot .A-graph__title {
   color: var(--navy);
-  white-space: nowrap;
-  pointer-events: none;
+  font-size: clamp(48px, 6vw, 88px);
 }
 .A-bigfoot__synthesis {
   position: absolute;
@@ -2117,8 +2105,9 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(4, 8, 61, 0.4);
   white-space: nowrap;
+  z-index: 1;
 }
 
 .A-bigfoot__top {

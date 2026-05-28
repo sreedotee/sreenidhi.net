@@ -228,8 +228,7 @@ if (trifectaSection && trifectaFoot) {
 
    Bounding boxes: words bounce off the central title's bbox + 20px breathing,
    and off the outer canvas walls + 20px. */
-const graphEl = document.querySelector('.A-graph')
-if (graphEl) {
+function initGraph(graphEl) {
   const canvas = graphEl.querySelector('.A-graph__canvas')
   const ctx = canvas.getContext('2d')
   const titleEl = graphEl.querySelector('.A-graph__title')
@@ -628,6 +627,7 @@ if (graphEl) {
     document.fonts.ready.then(measureLayout)
   }
 }
+document.querySelectorAll('.A-graph').forEach(initGraph)
 
 /* ----- Creative Coding hover preview — spring-physics cursor follow.
    Matches the og Framer site: preview floats ~225px to the right of the
