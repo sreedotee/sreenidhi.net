@@ -69,7 +69,7 @@ update()
   const grid = document.createElement('div')
   grid.className = 'col-grid'
   grid.setAttribute('aria-hidden', 'true')
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 4; i++) {
     const col = document.createElement('div')
     col.className = 'col-grid__col'
     grid.appendChild(col)
