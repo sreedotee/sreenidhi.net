@@ -41,6 +41,15 @@ function update() {
   }
 }
 
+/* Hide col-grid lines when bigfoot is in view */
+const bigfootEl = document.querySelector('.A-bigfoot')
+if (bigfootEl) {
+  new IntersectionObserver(
+    ([entry]) => document.body.classList.toggle('is-bigfoot-visible', entry.isIntersecting),
+    { threshold: 0.1 }
+  ).observe(bigfootEl)
+}
+
 /* Topbar stays transparent while the hero is in view; becomes glass once it's fully scrolled past */
 const heroForTopbar = document.querySelector('.A-hero, .P-hero')
 if (heroForTopbar) {

@@ -2243,6 +2243,8 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 }
 .A-bigfoot__socials a:hover svg { opacity: 0.7; }
 
+/* Hide grid lines when bigfoot is visible — body class toggled via JS */
+body.is-bigfoot-visible .col-grid { opacity: 0; transition: opacity 0.3s; }
 
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
