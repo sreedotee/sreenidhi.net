@@ -2098,32 +2098,32 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 .A-bigfoot__foot {
   position: absolute;
-  bottom: 20px;
-  left: max(32px, calc((100% - 1320px) / 2));
-  right: max(32px, calc((100% - 1320px) / 2));
+  bottom: 24px;
+  left: 32px;
+  right: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: var(--mono);
-  font-size: 13px;
-  color: rgba(4, 8, 61, 0.5);
-  letter-spacing: 0.04em;
+  font-size: 16px;
+  color: rgba(4, 8, 61, 0.6);
+  letter-spacing: 0.03em;
   z-index: 2;
 }
 .A-bigfoot__year { color: inherit; }
 .A-bigfoot__socials {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
 }
 .A-bigfoot__socials svg {
-  width: 18px;
-  height: 18px;
-  color: rgba(4, 8, 61, 0.5);
+  width: 22px;
+  height: 22px;
+  color: rgba(4, 8, 61, 0.6);
   display: block;
   transition: color 0.2s;
 }
-.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.9); }
+.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.95); }
 
 .A-bigfoot__top {
   display: flex;
