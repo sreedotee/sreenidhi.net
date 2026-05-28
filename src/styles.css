@@ -62,7 +62,7 @@ body { padding-bottom: 0; }
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   padding: 0 max(32px, calc((100% - 1320px) / 2));
