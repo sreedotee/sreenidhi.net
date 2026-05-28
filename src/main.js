@@ -270,8 +270,7 @@ function initGraph(graphEl) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
     const tr = titleEl.getBoundingClientRect()
-    const isBigfoot = graphEl.classList.contains('A-bigfoot__graph')
-    const breathing = isBigfoot ? 0 : (window.innerWidth < 640 ? 12 : 25)
+    const breathing = window.innerWidth < 640 ? 12 : 25
     titleBox = {
       width: tr.width + 2 * breathing,
       height: tr.height + 2 * breathing,

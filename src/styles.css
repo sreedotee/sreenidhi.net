@@ -2069,7 +2069,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   left: 0;
   right: 0;
   bottom: 0;
-  top: 0;
+  height: 75%;
   min-height: 0;
 }
 .A-bigfoot .A-graph__word {
