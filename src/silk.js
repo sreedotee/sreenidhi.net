@@ -169,8 +169,6 @@ void main() {
   float sn = sin(seedAngle);
   p = mat2(cs, -sn, sn, cs) * p;
 
-  float dither = getDither(floor(fragCoord / u_pixelRatio), u_ditherMode);
-
   float totalVal = 0.0;
   float totalWeight = 0.0;
   int turbIter = int(u_turbIter);
@@ -202,13 +200,27 @@ void main() {
   float val = totalVal / totalWeight;
   val = clamp((val - 0.3) / 0.4, 0.0, 1.0);
   val = pow(val, exp(-u_distBias));
-  val = clamp(val + (dither - 0.5) * u_dither, 0.0, 1.0);
+  val = clamp(val, 0.0, 1.0);
 
+  // Silk base
   vec3 col = paletteN(val, colorCount);
   col *= u_exposure;
   col = applyContrastSaturation(col, u_contrast, u_saturation);
   col = softGamutMap(col);
   col = toSrgb(col);
+
+  // Metallic dot overlay — silver pearls with radial highlight
+  vec2 dotCoord = fragCoord / u_pixelRatio;
+  float cellPx = 5.0;
+  float ang = 0.2618;
+  float ca = cos(ang), sa = sin(ang);
+  vec2 rCoord = mat2(ca, -sa, sa, ca) * dotCoord;
+  vec2 cellUV = fract(rCoord / cellPx) - 0.5;
+  float dotDist = length(cellUV) * 2.0;
+  float dotMask = smoothstep(0.5 + 0.08, 0.5 - 0.08, dotDist);
+  float hl = pow(clamp(1.0 - dotDist / 0.5, 0.0, 1.0), 2.0);
+  vec3 dotCol = mix(vec3(0.48, 0.51, 0.58), vec3(0.97, 0.97, 1.0), hl);
+  col = mix(col, dotCol, dotMask * 0.3);
 
   fragColor = vec4(col, 1.0);
 }`
