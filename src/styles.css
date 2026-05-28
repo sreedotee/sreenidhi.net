@@ -1244,11 +1244,11 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 .A-section__lede {
   font-family: var(--sans);
-  font-size: calc(28px - var(--tuck) * 14px);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+  font-size: calc(13px - var(--tuck) * 3px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--navy);
-  max-width: calc(480px - var(--tuck) * 160px);
+  max-width: calc(380px - var(--tuck) * 100px);
   opacity: calc(1 - var(--tuck) * 0.25);
   margin: 0;
   display: -webkit-box;
