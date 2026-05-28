@@ -57,6 +57,29 @@ html, body {
 
 body { padding-bottom: 60px; }
 
+/* Vertical column guides — 1px lines at 25/50/75%, always on top, never blocks clicks */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: linear-gradient(to right,
+    transparent calc(25% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(25% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(25% + 0.5px),
+    transparent calc(25% + 0.5px),
+    transparent calc(50% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(50% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px),
+    transparent calc(75% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(75% - 0.5px),
+    rgba(4, 8, 61, 0.06) calc(75% + 0.5px),
+    transparent calc(75% + 0.5px)
+  );
+}
+
 a { color: inherit; text-decoration: none; transition: opacity .25s ease; }
 a:hover { opacity: 0.65; }
 h1, h2, h3, h4, h5, h6, p { margin: 0; font-weight: 400; }
