@@ -87,7 +87,6 @@ body { padding-bottom: 0; }
 /* All content sections sit above the col-grid overlay (z-index: 0).
    position: relative without offset values doesn't shift layout — it just
    creates a stacking context so z-index: 1 takes effect. */
-.A-hero,
 .A-section,
 .A-tools,
 .A-testimonials,
@@ -98,6 +97,13 @@ body { padding-bottom: 0; }
 .album-section {
   position: relative;
   z-index: 2;
+}
+
+/* Hero must NOT create a stacking context — silk canvas (z-index: 0) needs
+   to stack below the col-grid (z-index: 0 fixed, but later in DOM order),
+   while hero text/grid (z-index: 2) stays above both. */
+.A-hero {
+  position: relative;
 }
 
 a { color: inherit; text-decoration: none; transition: opacity .25s ease; }
