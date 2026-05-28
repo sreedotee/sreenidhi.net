@@ -2070,8 +2070,8 @@ body:has(.A-hero).is-scrolled .A-foot {
     #a4cff0   75%,
     #7cb8e8  100%
   );
-  min-height: 52vh;
-  padding: 36px max(32px, calc((100% - 1320px) / 2)) 52px;
+  min-height: 26vh;
+  padding: 24px max(32px, calc((100% - 1320px) / 2)) 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
