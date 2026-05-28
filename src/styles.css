@@ -1169,7 +1169,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   font-size: clamp(48px, 6.7vw, 96px);
   line-height: 0.9;
   letter-spacing: -0.04em;
-  color: #ffffff;
+  color: var(--navy);
 }
 
 .A-hero__intro {
@@ -2059,7 +2059,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
     #a4cff0   75%,
     #7cb8e8  100%
   );
-  min-height: 32vh;
+  min-height: 20vh;
   padding: 0;
   position: relative;
 }
