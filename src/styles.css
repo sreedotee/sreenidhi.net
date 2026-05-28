@@ -2095,10 +2095,15 @@ body:has(.A-hero).is-scrolled .A-foot {
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.85);
+  color: rgba(4, 8, 61, 0.55);
 }
 
-.A-bigfoot__top a:hover,
+.A-bigfoot__bottom span,
+.A-bigfoot__bottom a {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.A-bigfoot__top a:hover { color: rgba(4, 8, 61, 0.9); }
 .A-bigfoot__bottom a:hover { color: #fff; }
 
 .A-bigfoot__socials {
@@ -2110,10 +2115,10 @@ body:has(.A-hero).is-scrolled .A-foot {
   width: 16px;
   height: 16px;
   display: block;
-  color: rgba(255,255,255,0.75);
+  color: rgba(4, 8, 61, 0.45);
   transition: color 0.2s;
 }
-.A-bigfoot__socials a:hover svg { color: #fff; }
+.A-bigfoot__socials a:hover svg { color: rgba(4, 8, 61, 0.9); }
 
 /* Fixed bottom footer — year on left, social icons on right (sizes scaled 1.5× from OG) */
 .A-foot {
