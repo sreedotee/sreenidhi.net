@@ -1046,7 +1046,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 
 .A-topbar__right {
   position: absolute;
-  right: max(32px, calc((100% - 1320px) / 2));
+  right: 32px;
   top: 14px;
 }
 
