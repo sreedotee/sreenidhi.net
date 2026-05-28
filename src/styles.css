@@ -74,14 +74,14 @@ body { padding-bottom: 60px; }
   position: absolute;
   top: 0; right: 0;
   width: 1px; height: 100%;
-  background: linear-gradient(to bottom, transparent 0%, #d0d3dc 20%, #f8f9fb 50%, #c8cad4 80%, transparent 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(208,211,220,0.35) 20%, rgba(248,249,251,0.45) 50%, rgba(200,202,212,0.35) 80%, transparent 100%);
 }
 .col-grid__col:first-child::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
   width: 1px; height: 100%;
-  background: linear-gradient(to bottom, transparent 0%, #d0d3dc 20%, #f8f9fb 50%, #c8cad4 80%, transparent 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(208,211,220,0.35) 20%, rgba(248,249,251,0.45) 50%, rgba(200,202,212,0.35) 80%, transparent 100%);
 }
 
 a { color: inherit; text-decoration: none; transition: opacity .25s ease; }
@@ -224,16 +224,34 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
 .btn-pill {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px;
-  border-radius: 0;
-  background: #222222;
+  padding: 3px 10px;
+  background: rgba(4, 8, 61, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: #ffffff;
   font-family: var(--sans);
   font-size: 20px;
   line-height: 26px;
   letter-spacing: -0.03em;
   font-weight: 400;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
 }
+.btn-pill:hover { opacity: 1; }
+.btn-pill::before {
+  content: '[';
+  display: inline-block;
+  margin-right: 5px;
+  transition: margin-right 0.25s ease;
+}
+.btn-pill::after {
+  content: ']';
+  display: inline-block;
+  margin-left: 5px;
+  transition: margin-left 0.25s ease;
+}
+.btn-pill:hover::before { margin-right: 12px; }
+.btn-pill:hover::after { margin-left: 12px; }
 
 /* ============================================================
    Section base
