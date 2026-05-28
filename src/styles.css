@@ -1225,7 +1225,7 @@ body:has(.A-hero).is-scrolled .A-foot {
   display: flex;
   flex-direction: row;
   gap: calc(48px - var(--tuck) * 32px);
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 64px;
   z-index: 5;
 }
@@ -1244,11 +1244,11 @@ body:has(.A-hero).is-scrolled .A-foot {
 }
 .A-section__lede {
   font-family: var(--sans);
-  font-size: calc(18px - var(--tuck) * 5px);
-  line-height: 1.4;
+  font-size: calc(28px - var(--tuck) * 14px);
+  line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--navy);
-  max-width: calc(380px - var(--tuck) * 100px);
+  max-width: calc(480px - var(--tuck) * 160px);
   opacity: calc(1 - var(--tuck) * 0.25);
   margin: 0;
   display: -webkit-box;
