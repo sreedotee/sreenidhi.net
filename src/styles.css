@@ -1225,7 +1225,7 @@ body:has(.A-hero).is-scrolled .A-foot {
   display: flex;
   flex-direction: row;
   gap: calc(48px - var(--tuck) * 32px);
-  align-items: center;
+  align-items: baseline;
   margin-bottom: 64px;
   z-index: 5;
 }
