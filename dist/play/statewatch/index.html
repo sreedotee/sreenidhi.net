@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statewatch — Sreenidhi</title>
+    <meta name="description" content="Designers are in code now. The bugs we ship are state bugs. I tried a 40-year-old technique — state machines for UI — on a checkout flow, with Alloy verifying it." />
+    <link rel="icon" href="/favicon.ico" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Statewatch — Sreenidhi" />
+    <meta property="og:description" content="Designers are in code now. The bugs we ship are state bugs. I tried a 40-year-old technique — state machines for UI — on a checkout flow, with Alloy verifying it." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Text-based artifacts (console output, code blocks) */
+      .P-shot--text {
+        width: 100%;
+        background: #f5f6f8;
+        border: 1px solid rgba(4, 8, 61, 0.08);
+        padding: 32px 40px;
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #04083d;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .P-shot--text .label {
+        font-family: 'Geist', system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(4, 8, 61, 0.5);
+        margin-bottom: 16px;
+        display: block;
+      }
+      .P-shot--text .pass { color: #04083d; }
+      .P-shot--text .fail { color: #c0392b; font-weight: 500; }
+      .P-shot--text .dim { color: rgba(4, 8, 61, 0.5); }
+
+      /* Inline SVG artifacts */
+      .P-shot--svg {
+        width: 100%;
+        aspect-ratio: 1600 / 720;
+        background: #ffffff;
+        overflow: hidden;
+      }
+      .P-shot--svg svg { width: 100%; height: 100%; display: block; }
+
+      /* Reference list at the end */
+      .P-refs {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px 0 0;
+        font-family: 'Geist', system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(4, 8, 61, 0.7);
+      }
+      .P-refs ul { padding-left: 1.2em; }
+      .P-refs li { margin-bottom: 6px; list-style: disc; }
+      .P-refs a { color: #04083d; text-decoration: underline; text-underline-offset: 2px; }
+      .P-refs h3 {
+        font-family: 'Geist', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(4, 8, 61, 0.5);
+        margin: 24px 0 12px;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/styles-BYgihfEn.js"></script>
+    <script type="module" crossorigin src="/assets/main-Cgo1W744.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/styles-CgSYKD_e.css">
+  </head>
+  <body>
+    <header class="A-topbar">
+      <div class="A-topbar__name"><a href="/">Sreenidhi</a></div>
+      <nav class="A-topbar__center">
+        <a href="/about/">About</a>
+      </nav>
+      <div class="A-topbar__right">
+        <a href="mailto:sreenidhi.dev@gmail.com">Contact</a>
+      </div>
+    </header>
+
+    <main class="P-page">
+      <section class="P-hero">
+        <h1 class="P-hero__title">Statewatch</h1>
+        <p class="P-hero__lead">It's 4am. Something's broken in the checkout I built last weekend, and the bug isn't in the screens I drew. It's in a state nobody drew. Designers ship state bugs now, so I went and learned a 40-year-old technique people kept writing about. Tried it on a checkout flow. With Alloy actually verifying it.</p>
+        <dl class="P-meta">
+          <div><dt>Tool</dt><dd>State machines, Alloy, Stately</dd></div>
+          <div><dt>Year</dt><dd>2026</dd></div>
+          <div><dt>Type</dt><dd>Play</dd></div>
+          <div><dt>Topic</dt><dd>Behavioral spec</dd></div>
+        </dl>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para">Half my design work happens in code now. So do half my bugs. Not the kind where a margin breaks in Safari. The kind where the user ends up in a state I never drew. A modal that won't close because the payment is stuck in some retry loop the spec didn't anticipate. A button that stays loading after the request finished. The Figma file said one thing, the code drifted into another, and neither of us noticed.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--text"><span class="label">The brief I started with</span>I'm designing a standard e-commerce checkout flow.
+
+The customer has items in their cart, reviews them, enters payment details,
+completes payment, and gets a confirmation. I need to handle the common
+edge cases properly:
+
+  - Declined cards (the card is rejected by the bank)
+  - 3D Secure challenges (the bank wants extra verification)
+  - Network failures during payment
+  - Sessions that expire mid-checkout
+  - Items going out of stock between adding to cart and paying
+  - The user navigating back at various points
+
+Don't lose state if they refresh. Don't let them double-charge if they
+double-click. The whole thing should feel robust.
+
+I want this modeled as a state machine so I can see all the states laid
+out, find the holes in my own design before I ship, and use it as the
+source of truth my code references.</section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">State machines were invented for exactly this kind of thing. Harel published the formalism in 1987. Horrocks wrote a whole book applying it to UI in 1999. Khourshid built XState. Hillel Wayne formally verified a real shipped UI (Edmodo Snapshot) with Alloy in 2018. sketch.systems and Stately Studio ship the "state machine with frames attached" pattern as products today. None of this is new. It just hasn't caught on with designers, even though it's a designer's problem.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--svg">
+          <svg viewBox="0 0 1600 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagram-title">
+            <title id="diagram-title">The verified checkout state machine — 14 states across cart, coupon, payment, and outcome clusters, plus parallel session and network regions.</title>
+            <defs>
+              <pattern id="sw-dotgrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1" fill="#04083d" opacity="0.08"/>
+              </pattern>
+              <marker id="sw-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d"/>
+              </marker>
+            </defs>
+            <style>
+              .sw-bg { fill: #ffffff; }
+              .sw-cluster { fill: none; stroke: #04083d; stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.25; }
+              .sw-state { fill: #ffffff; stroke: #04083d; stroke-width: 2; }
+              .sw-state-inflight { fill: #f5f6f8; stroke: #04083d; stroke-width: 2; }
+              .sw-state-terminal { fill: #04083d; stroke: #04083d; stroke-width: 2; }
+              .sw-name { font-family: 'Geist', system-ui, sans-serif; font-size: 13px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .sw-name-terminal { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; fill: #ffffff; letter-spacing: -0.02em; }
+              .sw-cluster-label { font-family: 'Geist Mono', monospace; font-size: 11px; fill: #04083d; opacity: 0.5; letter-spacing: 2px; }
+              .sw-edge { stroke: #04083d; stroke-width: 1.4; fill: none; opacity: 0.55; }
+              .sw-edge-label { font-family: 'Geist Mono', monospace; font-size: 10px; fill: #04083d; opacity: 0.45; }
+              .sw-header-tag { font-family: 'Geist Mono', monospace; font-size: 12px; fill: #04083d; opacity: 0.5; letter-spacing: 2px; }
+              .sw-header-title { font-family: 'Geist', sans-serif; font-size: 22px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .sw-parallel { fill: none; stroke: #04083d; stroke-width: 1.2; stroke-dasharray: 2 3; opacity: 0.4; }
+              .sw-parallel-state { fill: #ffffff; stroke: #04083d; stroke-width: 1.2; }
+              .sw-parallel-name { font-family: 'Geist', sans-serif; font-size: 11px; fill: #04083d; }
+            </style>
+
+            <rect class="sw-bg" width="1600" height="720"/>
+            <rect width="1600" height="720" fill="url(#sw-dotgrid)"/>
+
+            <text class="sw-header-tag" x="60" y="50">VERIFIED MACHINE · 14 STATES · 28 EVENTS · 9 INVARIANTS HOLD</text>
+            <text class="sw-header-title" x="60" y="82">Checkout, after Alloy verification</text>
+
+            <!-- Parallel regions (top right, small) -->
+            <g transform="translate(1130 50)">
+              <rect class="sw-parallel" x="0" y="0" width="420" height="60" rx="2"/>
+              <text class="sw-cluster-label" x="14" y="22">SESSION · parallel</text>
+              <rect class="sw-parallel-state" x="14" y="32" width="80" height="20" rx="10"/>
+              <text class="sw-parallel-name" x="54" y="46" text-anchor="middle">active</text>
+              <rect class="sw-parallel-state" x="100" y="32" width="80" height="20" rx="10"/>
+              <text class="sw-parallel-name" x="140" y="46" text-anchor="middle">expiring</text>
+              <rect class="sw-parallel-state" x="186" y="32" width="80" height="20" rx="10"/>
+              <text class="sw-parallel-name" x="226" y="46" text-anchor="middle">expired</text>
+            </g>
+            <g transform="translate(1130 122)">
+              <rect class="sw-parallel" x="0" y="0" width="420" height="44" rx="2"/>
+              <text class="sw-cluster-label" x="14" y="22">NETWORK · parallel</text>
+              <rect class="sw-parallel-state" x="280" y="14" width="60" height="20" rx="10"/>
+              <text class="sw-parallel-name" x="310" y="28" text-anchor="middle">online</text>
+              <rect class="sw-parallel-state" x="350" y="14" width="60" height="20" rx="10"/>
+              <text class="sw-parallel-name" x="380" y="28" text-anchor="middle">offline</text>
+            </g>
+
+            <!-- CART CLUSTER -->
+            <rect class="sw-cluster" x="40" y="220" width="240" height="280" rx="4"/>
+            <text class="sw-cluster-label" x="60" y="248">CART</text>
+
+            <rect class="sw-state" x="80" y="270" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="160" y="297" text-anchor="middle">Cart</text>
+
+            <rect class="sw-state" x="80" y="340" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="160" y="367" text-anchor="middle">Reviewing</text>
+
+            <rect class="sw-state" x="80" y="410" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="160" y="437" text-anchor="middle">StockCheck</text>
+
+            <rect class="sw-state" x="80" y="470" width="160" height="22" rx="11"/>
+            <text class="sw-name" x="160" y="486" text-anchor="middle" style="font-size: 11px;">StockProblem</text>
+
+            <!-- COUPON CLUSTER -->
+            <rect class="sw-cluster" x="320" y="220" width="240" height="180" rx="4"/>
+            <text class="sw-cluster-label" x="340" y="248">COUPON · new feature</text>
+
+            <rect class="sw-state" x="360" y="270" width="160" height="36" rx="18"/>
+            <text class="sw-name" x="440" y="293" text-anchor="middle">CouponEntering</text>
+
+            <rect class="sw-state" x="360" y="318" width="160" height="36" rx="18"/>
+            <text class="sw-name" x="440" y="341" text-anchor="middle">CouponValidating</text>
+
+            <rect class="sw-state" x="360" y="364" width="160" height="32" rx="16"/>
+            <text class="sw-name" x="440" y="385" text-anchor="middle" style="font-size: 12px;">CouponInvalid</text>
+
+            <!-- PAYMENT CLUSTER -->
+            <rect class="sw-cluster" x="600" y="220" width="540" height="380" rx="4"/>
+            <text class="sw-cluster-label" x="620" y="248">PAYMENT</text>
+
+            <rect class="sw-state" x="640" y="270" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="720" y="297" text-anchor="middle">PaymentEntry</text>
+
+            <rect class="sw-state" x="640" y="340" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="720" y="367" text-anchor="middle">PaymentReady</text>
+
+            <rect class="sw-state-inflight" x="820" y="305" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="900" y="332" text-anchor="middle">Processing</text>
+
+            <rect class="sw-state-inflight" x="820" y="240" width="160" height="36" rx="18"/>
+            <text class="sw-name" x="900" y="263" text-anchor="middle">ThreeDSecure</text>
+
+            <rect class="sw-state-inflight" x="820" y="380" width="160" height="36" rx="18"/>
+            <text class="sw-name" x="900" y="403" text-anchor="middle">NetworkError</text>
+
+            <rect class="sw-state" x="820" y="450" width="160" height="36" rx="18"/>
+            <text class="sw-name" x="900" y="473" text-anchor="middle">Declined</text>
+
+            <rect class="sw-state" x="640" y="500" width="340" height="36" rx="4"/>
+            <text class="sw-name" x="810" y="523" text-anchor="middle">StockProblemDuringPayment</text>
+
+            <text class="sw-cluster-label" x="640" y="568" style="font-size: 10px;">SHADED = IN-FLIGHT · IGNORES SESSION_EXPIRED</text>
+
+            <!-- OUTCOME CLUSTER -->
+            <rect class="sw-cluster" x="1180" y="220" width="240" height="380" rx="4"/>
+            <text class="sw-cluster-label" x="1200" y="248">OUTCOME</text>
+
+            <rect class="sw-state" x="1220" y="290" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="1300" y="317" text-anchor="middle">Success</text>
+
+            <rect class="sw-state-terminal" x="1220" y="350" width="160" height="44" rx="22"/>
+            <text class="sw-name-terminal" x="1300" y="377" text-anchor="middle">Receipt</text>
+
+            <rect class="sw-state" x="1220" y="450" width="160" height="44" rx="22"/>
+            <text class="sw-name" x="1300" y="477" text-anchor="middle">SessionLost</text>
+
+            <!-- Primary flow arrows -->
+            <path class="sw-edge" d="M 160 314 L 160 340" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 160 384 L 160 410" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 240 362 Q 280 362 320 362" marker-end="url(#sw-arrow)"/>
+            <text class="sw-edge-label" x="270" y="354">APPLY_COUPON</text>
+            <path class="sw-edge" d="M 240 432 Q 440 432 640 362" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 800 362 L 820 350" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 800 292 Q 810 292 820 282"/>
+            <path class="sw-edge" d="M 980 327 L 1220 312" marker-end="url(#sw-arrow)"/>
+            <text class="sw-edge-label" x="1080" y="310">PAYMENT_AUTHORIZED</text>
+            <path class="sw-edge" d="M 1300 334 L 1300 350" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 720 314 L 720 340" marker-end="url(#sw-arrow)"/>
+
+            <!-- Coupon flow arrows -->
+            <path class="sw-edge" d="M 440 306 L 440 318" marker-end="url(#sw-arrow)"/>
+            <path class="sw-edge" d="M 440 354 L 440 364" marker-end="url(#sw-arrow)"/>
+
+            <!-- Bottom legend -->
+            <g transform="translate(60 640)">
+              <rect class="sw-state" x="0" y="0" width="28" height="14" rx="7"/>
+              <text class="sw-edge-label" x="38" y="10">user-facing state</text>
+              <rect class="sw-state-inflight" x="160" y="0" width="28" height="14" rx="7"/>
+              <text class="sw-edge-label" x="198" y="10">in-flight (verified invariant)</text>
+              <rect class="sw-state-terminal" x="370" y="0" width="28" height="14" rx="7"/>
+              <text class="sw-edge-label" x="408" y="10">terminal</text>
+              <rect class="sw-parallel-state" x="500" y="0" width="28" height="14" rx="7"/>
+              <text class="sw-edge-label" x="538" y="10">parallel region (independent)</text>
+            </g>
+
+            <!-- Footer note -->
+            <text class="sw-edge-label" x="60" y="682" style="font-size: 11px;">14 atomic states + 2 parallel regions · 28 events · 9 invariants verified by Alloy</text>
+          </svg>
+        </section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">The diagram came out of about an hour of work. AI drafted the machine from the brief in XState. Then I ran Alloy on it. Alloy doesn't find bugs on its own — it verifies properties you specify. I encoded the brief's requirements as Alloy assertions ("in-flight payments survive session expiry", "success states cannot regress", "stock changes handled in payment states") and asked the solver to check them.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--text"><span class="label">Alloy verification — first pass</span>00. <span class="pass">check allStatesReachable           UNSAT  ✓ holds</span>
+01. <span class="pass">check noDeadlock                   UNSAT  ✓ holds</span>
+02. <span class="fail">check inFlightSurvivesSessionExpiry  SAT  ✗ counterexample</span>
+03. <span class="fail">check successCannotRegress         SAT    ✗ counterexample</span>
+04. <span class="fail">check stockHandledEverywhere       SAT    ✗ counterexample</span>
+05. <span class="fail">check networkTimeoutHandled        SAT    ✗ counterexample</span>
+
+<span class="dim">4 of 6 properties failed. Each failure = an Alloy counterexample
+showing a sequence of events that violates the assertion.</span>
+
+<span class="dim">In plain language:</span>
+
+  <span class="fail">✗</span> User in mid-3DS, session timer expires, machine kicks them to
+    "session lost." Order may already be charged. Brief said
+    "in-flight is sacred."
+
+  <span class="fail">✗</span> User on the receipt screen, session expires, machine drops
+    them off the receipt to "session lost." Order is done; this
+    shouldn't matter.
+
+  <span class="fail">✗</span> Inventory webhook fires while user is mid-payment. Machine
+    has no defined behavior. Brief said handle stock changes
+    "between adding to cart and paying."
+
+  <span class="fail">✗</span> User in NetworkError, another timeout fires. Silently dropped.
+    Designer call: visible counter or genuinely ignore?</section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">Fixed each one. Re-ran Alloy. Every property held. The verified machine has 14 atomic states across cart, coupon, payment, and outcome clusters, plus two parallel regions for session and network. Most of those states weren't in the initial AI draft — they came out of fixing what Alloy flagged. That's the workflow's first dividend: 4 real bugs caught before any UI code was written.</p>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para">The second dividend is maintenance. I added a gift-coupon feature to the verified machine — three new states, seven new events, transitions into the existing flow from the Reviewing screen. Re-ran Alloy. Round trip was about fifteen minutes.</p>
+      </section>
+
+      <div class="P-shots">
+        <section class="P-shot P-shot--text"><span class="label">Alloy verification — after adding gift coupon</span><span class="dim">// the 6 previously-verified invariants — re-checked</span>
+00. <span class="pass">check allStatesReachable             UNSAT  ✓ still holds</span>
+01. <span class="pass">check noDeadlock                     UNSAT  ✓ still holds</span>
+02. <span class="pass">check inFlightSurvivesSessionExpiry  UNSAT  ✓ still holds</span>
+03. <span class="pass">check successCannotRegress           UNSAT  ✓ still holds</span>
+04. <span class="pass">check stockHandledEverywhere         UNSAT  ✓ still holds</span>
+05. <span class="pass">check networkTimeoutHandled          UNSAT  ✓ still holds</span>
+
+<span class="dim">// new invariants written for the coupon feature</span>
+06. <span class="fail">check couponHandlesSessionExpiry     SAT    ✗ counterexample</span>
+07. <span class="fail">check couponValidationHandlesTimeout SAT    ✗ counterexample</span>
+08. <span class="pass">check couponFlowExits                UNSAT  ✓ holds</span>
+
+<span class="dim">Extension didn't regress any existing invariant. Two new bugs
+found in the coupon feature itself:</span>
+
+  <span class="fail">✗</span> Coupon entry/validation states don't handle session expiry
+  <span class="fail">✗</span> Coupon validation (server call) doesn't handle network timeout
+
+<span class="dim">Both are the cross-cutting concerns a designer focused on
+feature happy paths always misses. Caught in seconds.</span></section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">The 11 states in the verified machine map to 11 screens. Not wireframes — not comps — screens that exist because the machine exists. When you add a state, you add a frame. When Alloy rejects a state, no frame gets built for it.</p>
+      </section>
+
+      <div class="P-shot" style="width:100%;max-width:540px;margin:0 auto;aspect-ratio:1600/2200;">
+      <svg viewBox="0 0 1600 2200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" role="img" aria-label="11 mobile UI frames, one per verified checkout state">
+        <!-- ─── shared defs ─── -->
+        <defs>
+          <clipPath id="screen-clip"><rect x="0" y="0" width="316" height="558" rx="0"/></clipPath>
+          <!-- phone body shadow -->
+          <filter id="phone-shadow" x="-5%" y="-3%" width="110%" height="110%">
+            <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#0B1524" flood-opacity="0.18"/>
+          </filter>
+          <!-- card shadow -->
+          <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#0B1524" flood-opacity="0.07"/>
+          </filter>
+          <!-- spinner path for processing / coupon validating -->
+          <style>
+            .fr-label { font: 600 11px/1 'Inter','Helvetica Neue',Arial,sans-serif; fill:#6B7480; text-anchor:middle; }
+            .fr-stateId { font: 500 10px/1 monospace; fill:#3B5BDB; text-anchor:middle; }
+            .spin-arc { fill:none; stroke:#3B5BDB; stroke-width:4; stroke-linecap:round; stroke-dasharray:50 94; }
+            .spin-track { fill:none; stroke:#E3E6EA; stroke-width:4; }
+          </style>
+        </defs>
+
+        <!-- ═══════════════════════════════════════
+             ROW 1:  cart · reviewing · paymentEntry · processing
+             y-origin 60, frame height 590+label area ≈ 630
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 1: cart ── -->
+        <g transform="translate(56,60)" filter="url(#phone-shadow)">
+          <!-- phone body -->
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <!-- notch -->
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <!-- screen -->
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <!-- status bar -->
+          <rect x="12" y="36" width="316" height="20" rx="0" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <!-- top bar -->
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Cart</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- item 1: Linen crew tee -->
+          <rect x="12" y="108" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="118" width="44" height="44" rx="8" fill="#E7F5FF"/>
+          <text x="78" y="134" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Linen crew tee</text>
+          <text x="78" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$38.00</text>
+          <!-- qty stepper -->
+          <rect x="245" y="128" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">1</text>
+          <text x="307" y="144" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- item 2: Canvas tote -->
+          <rect x="12" y="184" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="194" width="44" height="44" rx="8" fill="#FFF3BF"/>
+          <text x="78" y="210" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Canvas tote</text>
+          <text x="78" y="226" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$24.00</text>
+          <rect x="245" y="204" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">2</text>
+          <text x="307" y="220" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- item 3: Enamel mug -->
+          <rect x="12" y="260" width="316" height="68" rx="10" fill="#FFFFFF" filter="url(#card-shadow)" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="270" width="44" height="44" rx="8" fill="#FFE3E3"/>
+          <text x="78" y="286" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="500" fill="#0B1524">Enamel mug</text>
+          <text x="78" y="302" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">$16.00</text>
+          <rect x="245" y="280" width="72" height="24" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="255" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">−</text>
+          <text x="281" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="middle">1</text>
+          <text x="307" y="296" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">+</text>
+          <!-- subtotal -->
+          <line x1="22" y1="344" x2="328" y2="344" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="362" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480">Subtotal</text>
+          <text x="328" y="362" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524" text-anchor="end">$102.00</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Review order</text>
+          <!-- home indicator -->
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <!-- label -->
+        <text x="226" y="696" class="fr-label">cart</text>
+        <text x="226" y="709" class="fr-stateId">state.cart</text>
+
+        <!-- ── FRAME 2: reviewing ── -->
+        <g transform="translate(436,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <!-- top bar with back -->
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- items card condensed -->
+          <rect x="12" y="108" width="316" height="90" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="126" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524">Items</text>
+          <rect x="22" y="132" width="28" height="28" rx="6" fill="#E7F5FF"/>
+          <text x="56" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Linen crew tee × 1</text>
+          <text x="310" y="150" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$38.00</text>
+          <rect x="22" y="162" width="28" height="14" rx="3" fill="#FFF3BF"/>
+          <text x="56" y="173" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Canvas tote × 2</text>
+          <text x="310" y="173" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$48.00</text>
+          <rect x="22" y="183" width="28" height="10" rx="3" fill="#FFE3E3"/>
+          <text x="56" y="192" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524">Enamel mug × 1</text>
+          <text x="310" y="192" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="end">$16.00</text>
+          <!-- ship to card -->
+          <rect x="12" y="206" width="316" height="54" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="224" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600" fill="#0B1524">Ship to</text>
+          <text x="22" y="240" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Sreenidhi · 14 Maple St, Austin TX 78701</text>
+          <text x="316" y="224" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#3B5BDB" text-anchor="end">Change</text>
+          <!-- totals card -->
+          <rect x="12" y="268" width="316" height="106" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="288" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Subtotal</text>
+          <text x="316" y="288" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$102.00</text>
+          <text x="22" y="306" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Shipping</text>
+          <text x="316" y="306" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$6.00</text>
+          <text x="22" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Tax</text>
+          <text x="316" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#0B1524" text-anchor="end">$8.64</text>
+          <line x1="22" y1="332" x2="316" y2="332" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="350" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524">Total</text>
+          <text x="316" y="350" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="end">$116.64</text>
+          <!-- apply coupon link -->
+          <text x="170" y="390" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#3B5BDB" text-anchor="middle">Apply coupon</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="696" class="fr-label">reviewing</text>
+        <text x="606" y="709" class="fr-stateId">state.reviewing</text>
+
+        <!-- ── FRAME 3: paymentEntry ── -->
+        <g transform="translate(816,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- card form -->
+          <rect x="12" y="108" width="316" height="200" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <!-- card number -->
+          <text x="22" y="128" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Card number</text>
+          <rect x="22" y="134" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#3B5BDB" stroke-width="2"/>
+          <text x="32" y="157" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524" letter-spacing="2">4242 4242 4242 4242</text>
+          <!-- expiry + cvc row -->
+          <text x="22" y="188" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Expiry</text>
+          <rect x="22" y="194" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="217" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">12 / 28</text>
+          <text x="182" y="188" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">CVC</text>
+          <rect x="182" y="194" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="192" y="217" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">•••</text>
+          <!-- name -->
+          <text x="22" y="248" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="500" fill="#6B7480">Name on card</text>
+          <rect x="22" y="254" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="277" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Sreenidhi</text>
+          <!-- billing address -->
+          <rect x="12" y="316" width="316" height="44" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="328" width="16" height="16" rx="4" fill="#3B5BDB"/>
+          <text x="44" y="340" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Same as shipping</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="696" class="fr-label">paymentEntry</text>
+        <text x="986" y="709" class="fr-stateId">state.paymentEntry</text>
+
+        <!-- ── FRAME 4: processing ── -->
+        <g transform="translate(1196,60)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- centered spinner card -->
+          <rect x="50" y="240" width="240" height="150" rx="16" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <!-- spinner ring -->
+          <circle cx="170" cy="288" r="24" class="spin-track"/>
+          <circle cx="170" cy="288" r="24" class="spin-arc"/>
+          <text x="170" y="318" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Processing payment</text>
+          <text x="170" y="334" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Don't close this window</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="1366" y="696" class="fr-label">processing</text>
+        <text x="1366" y="709" class="fr-stateId">state.processing</text>
+
+        <!-- ═══════════════════════════════════════
+             ROW 2:  threeDSecure · declined · stockProblemDuringPayment · success
+             y-origin 730
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 5: threeDSecure ── -->
+        <g transform="translate(56,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed bg -->
+          <rect x="12" y="100" width="316" height="494" fill="#0B1524" opacity="0.4"/>
+          <!-- bottom sheet -->
+          <rect x="12" y="340" width="316" height="254" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="352" x2="190" y2="352" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="378" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#0B1524" text-anchor="middle">Your Bank · Verified by Visa</text>
+          <text x="170" y="398" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">We sent a code to •••• 4242</text>
+          <!-- OTP boxes -->
+          <rect x="30" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="74" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="118" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#3B5BDB" stroke-width="2"/>
+          <rect x="162" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="206" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="250" y="410" width="36" height="36" rx="6" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="48" y="433" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#0B1524" text-anchor="middle">3</text>
+          <text x="92" y="433" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#0B1524" text-anchor="middle">7</text>
+          <rect x="28" y="458" width="284" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="480" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Verify</text>
+          <text x="170" y="512" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="226" y="1366" class="fr-label">threeDSecure</text>
+        <text x="226" y="1379" class="fr-stateId">state.threeDSecure</text>
+
+        <!-- ── FRAME 6: declined ── -->
+        <g transform="translate(436,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- error banner -->
+          <rect x="12" y="108" width="316" height="58" rx="10" fill="#FFF0F0" stroke="#E03131" stroke-width="1.5"/>
+          <rect x="12" y="108" width="4" height="58" rx="2" fill="#E03131"/>
+          <text x="26" y="128" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#E03131">⚠ Card declined</text>
+          <text x="26" y="148" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Insufficient funds. Try another card.</text>
+          <!-- card form (retry) -->
+          <rect x="12" y="174" width="316" height="200" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="22" y="194" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Card number</text>
+          <rect x="22" y="200" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E03131" stroke-width="2"/>
+          <text x="32" y="223" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524" letter-spacing="2">4242 4242 4242 4242</text>
+          <text x="22" y="254" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Expiry</text>
+          <rect x="22" y="260" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="283" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">12 / 28</text>
+          <text x="182" y="254" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">CVC</text>
+          <rect x="182" y="260" width="136" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="192" y="283" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">•••</text>
+          <text x="22" y="314" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Name on card</text>
+          <rect x="22" y="320" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="343" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#0B1524">Sreenidhi</text>
+          <!-- bottom bar -->
+          <rect x="12" y="542" width="316" height="52" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="542" x2="328" y2="542" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="551" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="573" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Pay $116.64</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="1366" class="fr-label">declined</text>
+        <text x="606" y="1379" class="fr-stateId">state.declined</text>
+
+        <!-- ── FRAME 7: stockProblemDuringPayment ── -->
+        <g transform="translate(816,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Payment</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed bg -->
+          <rect x="12" y="100" width="316" height="494" fill="#0B1524" opacity="0.4"/>
+          <!-- dialog -->
+          <rect x="30" y="230" width="280" height="190" rx="16" fill="#FFFFFF"/>
+          <text x="170" y="268" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="20" text-anchor="middle">⚠️</text>
+          <text x="170" y="292" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Item no longer available</text>
+          <text x="170" y="310" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Canvas tote sold out.</text>
+          <text x="170" y="324" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">Remove it to continue.</text>
+          <rect x="42" y="336" width="256" height="32" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="357" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">Remove &amp; continue</text>
+          <text x="170" y="400" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="1366" class="fr-label">stockProblem</text>
+        <text x="986" y="1379" class="fr-stateId">state.stockProblemDuringPayment</text>
+
+        <!-- ── FRAME 8: success ── -->
+        <g transform="translate(1196,730)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Order placed</text>
+          <!-- success check circle -->
+          <circle cx="170" cy="210" r="36" fill="#EBFBEE"/>
+          <text x="170" y="223" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="28" fill="#2F9E44" text-anchor="middle">✓</text>
+          <text x="170" y="270" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="600" fill="#0B1524" text-anchor="middle">Payment confirmed</text>
+          <text x="170" y="292" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" text-anchor="middle">Order #SW-4821</text>
+          <!-- summary card -->
+          <rect x="22" y="308" width="296" height="80" rx="10" fill="#FFFFFF" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="32" y="330" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480">3 items · Total paid</text>
+          <text x="306" y="330" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="end">$116.64</text>
+          <text x="32" y="370" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480">Receipt emailed to sreenidhi.dev@gmail.com</text>
+          <!-- bottom bar: 2 buttons -->
+          <rect x="12" y="522" width="316" height="72" rx="0" fill="#FFFFFF"/>
+          <line x1="12" y1="522" x2="328" y2="522" stroke="#E3E6EA" stroke-width="1"/>
+          <rect x="22" y="530" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="552" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">View receipt</text>
+          <rect x="22" y="571" width="296" height="16" rx="6" fill="none"/>
+          <text x="170" y="583" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#3B5BDB" text-anchor="middle">Continue shopping</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="1366" y="1366" class="fr-label">success</text>
+        <text x="1366" y="1379" class="fr-stateId">state.success</text>
+
+        <!-- ═══════════════════════════════════════
+             ROW 3:  couponEntering · couponValidating · couponInvalid  (+ note card)
+             y-origin 1400
+        ═══════════════════════════════════════ -->
+
+        <!-- ── FRAME 9: couponEntering ── -->
+        <g transform="translate(56,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <!-- dimmed reviewing bg -->
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <!-- coupon bottom sheet -->
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#FFFFFF" stroke="#3B5BDB" stroke-width="2"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#0B1524" letter-spacing="2">GIFT20</text>
+          <rect x="22" y="502" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="524" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Apply</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="226" y="2036" class="fr-label">couponEntering</text>
+        <text x="226" y="2049" class="fr-stateId">state.couponEntering</text>
+
+        <!-- ── FRAME 10: couponValidating ── -->
+        <g transform="translate(436,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#6B7480">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#F6F7F9" stroke="#E3E6EA" stroke-width="1" opacity="0.7"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#6B7480" letter-spacing="2" opacity="0.6">GIFT20</text>
+          <!-- spinner button -->
+          <rect x="22" y="502" width="296" height="34" rx="10" fill="#3B5BDB" opacity="0.7"/>
+          <circle cx="148" cy="519" r="8" class="spin-track"/>
+          <circle cx="148" cy="519" r="8" class="spin-arc"/>
+          <text x="164" y="524" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#FFFFFF">Checking…</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle" opacity="0.4">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="606" y="2036" class="fr-label">couponValidating</text>
+        <text x="606" y="2049" class="fr-stateId">state.couponValidating</text>
+
+        <!-- ── FRAME 11: couponInvalid ── -->
+        <g transform="translate(816,1400)" filter="url(#phone-shadow)">
+          <rect x="0" y="0" width="340" height="620" rx="32" fill="#1a1a2e"/>
+          <rect x="130" y="10" width="80" height="20" rx="10" fill="#0d0d1e"/>
+          <rect x="12" y="36" width="316" height="558" rx="6" fill="#F6F7F9"/>
+          <rect x="12" y="36" width="316" height="20" fill="#F6F7F9"/>
+          <text x="30" y="51" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600" fill="#0B1524">9:41</text>
+          <rect x="294" y="42" width="20" height="10" rx="2" fill="none" stroke="#0B1524" stroke-width="1.5"/>
+          <rect x="295" y="43" width="14" height="8" rx="1" fill="#2F9E44"/>
+          <rect x="315" y="44" width="2" height="6" rx="1" fill="#0B1524"/>
+          <rect x="12" y="56" width="316" height="44" fill="#FFFFFF"/>
+          <line x1="12" y1="100" x2="328" y2="100" stroke="#E3E6EA" stroke-width="1"/>
+          <text x="28" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="16" fill="#3B5BDB">‹</text>
+          <text x="170" y="83" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">Review order</text>
+          <text x="310" y="80" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="8" fill="#3B5BDB" text-anchor="end">🔒 Secure</text>
+          <rect x="12" y="100" width="316" height="320" fill="#0B1524" opacity="0.3"/>
+          <rect x="12" y="390" width="316" height="204" rx="20" fill="#FFFFFF"/>
+          <line x1="150" y1="402" x2="190" y2="402" stroke="#E3E6EA" stroke-width="3" stroke-linecap="round"/>
+          <text x="170" y="430" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" fill="#0B1524" text-anchor="middle">Add a coupon</text>
+          <text x="22" y="452" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="9" fill="#E03131">Coupon code</text>
+          <rect x="22" y="458" width="296" height="36" rx="8" fill="#FFF0F0" stroke="#E03131" stroke-width="2"/>
+          <text x="32" y="481" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="12" fill="#0B1524" letter-spacing="2">GIFT20</text>
+          <text x="22" y="500" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#E03131">Coupon code is invalid.</text>
+          <rect x="22" y="510" width="296" height="34" rx="10" fill="#3B5BDB"/>
+          <text x="170" y="532" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Try again</text>
+          <text x="170" y="562" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">Cancel</text>
+          <rect x="145" y="603" width="50" height="5" rx="3" fill="#FFFFFF" opacity="0.3"/>
+        </g>
+        <text x="986" y="2036" class="fr-label">couponInvalid</text>
+        <text x="986" y="2049" class="fr-stateId">state.couponInvalid</text>
+
+        <!-- ── NOTE CARD (col 4, row 3) ── -->
+        <rect x="1196" y="1400" width="340" height="620" rx="16" fill="#F1F3F5" stroke="#E3E6EA" stroke-width="1.5"/>
+        <text x="1366" y="1660" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#0B1524" text-anchor="middle">+3 more states</text>
+        <text x="1366" y="1682" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">networkError</text>
+        <text x="1366" y="1698" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">sessionLost</text>
+        <text x="1366" y="1714" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="11" fill="#6B7480" text-anchor="middle">receipt</text>
+        <text x="1366" y="1738" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">omitted — no distinct UI</text>
+        <text x="1366" y="1752" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" fill="#6B7480" text-anchor="middle">beyond existing variants</text>
+
+      </svg>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">Why this matters. When someone adds a feature, they extend the machine and re-run Alloy. The previously-verified invariants protect the verified core — if the extension breaks something already proven, Alloy says so. Anyone on the team can ask the spec questions: how many happy paths exist, can a user reach this state without verifying their email, what's the shortest path to an error. The chart is interrogable. States and their UI frames live in the same artifact — when the flow changes, the diagram changes, the verification re-runs, the frames are re-attached. Stale documentation is the eternal problem. This one stays current because it is the truth, not derivative of it.</p>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para">The machine isn't the runtime. Production code stays whatever you build it as — vibecode, real React, legacy Rails, doesn't matter. The spec is a separate document that intent lives in: formally checkable, visually documented, read by engineers to know what to build, used by tests (auto-generated via xstate-test) to catch drift. Khourshid spells this out in his CSS-Tricks piece on model-based testing. Wayne demonstrated the verification angle on the Edmodo Snapshot app in 2018. sketch.systems and Stately ship the state-machine-with-attached-frames pattern. The piece that isn't yet a product is AI doing the manual labor those tools currently leave to the designer — drafting the machine from intent, generating frames per state. That's what I tried here.</p>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para P-body__caption">This is a play exercise, not production-validated. One brief, one flow, one extension, on my own machine. The AI translation steps need real review under real conditions. Stately's Figma embed feature is paid. The maintenance pattern needs to hold up across many features and team rotations, not a single addition. But each piece of the chain — Harel's formalism, Horrocks' maintained-spec pattern, Khourshid's tooling, Wayne's verification approach, Lucas's sketch.systems, Stately's embed — has been published and used. Composing them, with AI in the loop, held together once. Whether it scales is the next question.</p>
+      </section>
+
+      <section class="P-body">
+        <div class="P-refs">
+          <h3>Sources</h3>
+          <ul>
+            <li><a href="https://www.sciencedirect.com/science/article/pii/0167642387900359" target="_blank" rel="noreferrer">David Harel — Statecharts: A Visual Formalism for Complex Systems (1987)</a></li>
+            <li><a href="https://www.amazon.com/Constructing-User-Interface-Statecharts-Horrocks/dp/0201342782" target="_blank" rel="noreferrer">Ian Horrocks — Constructing the User Interface with Statecharts (1999)</a></li>
+            <li><a href="https://statecharts.dev/" target="_blank" rel="noreferrer">Erik Mogensen — statecharts.dev</a></li>
+            <li><a href="https://stately.ai/" target="_blank" rel="noreferrer">David Khourshid — XState / Stately Studio</a></li>
+            <li><a href="https://css-tricks.com/model-based-testing-in-react-with-state-machines/" target="_blank" rel="noreferrer">Khourshid — Model-Based Testing in React with State Machines (CSS-Tricks)</a></li>
+            <li><a href="https://stately.ai/docs/xstate-test" target="_blank" rel="noreferrer">@xstate/test docs</a></li>
+            <li><a href="https://www.hillelwayne.com/formally-specifying-uis/" target="_blank" rel="noreferrer">Hillel Wayne — Formally Specifying UIs (Edmodo Snapshot, Alloy)</a></li>
+            <li><a href="https://sketch.systems/" target="_blank" rel="noreferrer">Ryan Lucas — sketch.systems</a></li>
+            <li><a href="https://stately.ai/blog/2024-01-24-embed-figma" target="_blank" rel="noreferrer">Stately Studio — Figma embed</a></li>
+            <li><a href="https://alloytools.org/" target="_blank" rel="noreferrer">Alloy</a></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+    <div class="A-bigfoot__foot">
+      <span class="A-bigfoot__year">&copy; 2026</span>
+      <div class="A-bigfoot__socials">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.063 2.063 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/></svg></a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Duolingo Streak Mechanic — Sreenidhi</title>
+    <meta name="description" content="Modeling what the streak freeze actually does to the retention loop — in Machinations." />
+    <link rel="icon" href="/favicon.ico" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Duolingo Streak Mechanic — Sreenidhi" />
+    <meta property="og:description" content="Modeling what the streak freeze actually does to the retention loop — in Machinations." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Inline Machinations diagrams render as block SVGs, full-width, 16:9 */
+      .P-shot--svg {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #ffffff;
+        overflow: hidden;
+      }
+      .P-shot--svg svg { width: 100%; height: 100%; display: block; }
+    </style>
+    <script type="module" crossorigin src="/assets/styles-BYgihfEn.js"></script>
+    <script type="module" crossorigin src="/assets/main-Cgo1W744.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/styles-CgSYKD_e.css">
+  </head>
+  <body>
+    <header class="A-topbar">
+      <div class="A-topbar__name"><a href="/">Sreenidhi</a></div>
+      <nav class="A-topbar__center">
+        <a href="/about/">About</a>
+      </nav>
+      <div class="A-topbar__right">
+        <a href="mailto:sreenidhi.dev@gmail.com">Contact</a>
+      </div>
+    </header>
+
+    <main class="P-page">
+      <section class="P-hero">
+        <h1 class="P-hero__title">Duolingo Streak Mechanic</h1>
+        <p class="P-hero__lead">I played Wordle every day until I broke my streak once. Never went back. Duolingo runs on the exact same mechanic of daily streaks and loss aversion. The only difference is a freeze that absorbs the miss. I modeled what that buffer actually does to the system.</p>
+        <dl class="P-meta">
+          <div><dt>Tool</dt><dd>Machinations</dd></div>
+          <div><dt>Year</dt><dd>2026</dd></div>
+          <div><dt>Type</dt><dd>Play</dd></div>
+          <div><dt>Topic</dt><dd>Gamification</dd></div>
+        </dl>
+      </section>
+
+      <section class="P-body">
+        <p class="P-body__para">Been wanting to try Machinations for a while. Gamification mechanics like streaks, loss aversion, and habit loops show up in almost every consumer app now. The Duolingo streak felt like a good first thing to model: simple enough to be legible, interesting enough to actually think about.</p>
+      </section>
+
+      <div class="P-shots">
+        <!-- ============================================================
+             SCENARIO A. No freeze in stock. Missed day collapses streak.
+             ============================================================ -->
+        <section class="P-shot P-shot--svg">
+          <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagA-title">
+            <title id="diagA-title">Scenario A. No freeze. One missed day collapses the streak to zero.</title>
+            <defs>
+              <pattern id="dotgridA" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1" fill="#04083d" opacity="0.08"/>
+              </pattern>
+              <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d"/>
+              </marker>
+              <marker id="ahA-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d" opacity="0.35"/>
+              </marker>
+              <marker id="ahA-state" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d" opacity="0.6"/>
+              </marker>
+            </defs>
+            <style>
+              .mA-bg { fill: #ffffff; }
+              .mA-node { stroke: #04083d; stroke-width: 2.5; fill: #ffffff; }
+              .mA-node-inner { stroke: #04083d; stroke-width: 1.4; fill: none; }
+              .mA-flow { stroke: #04083d; stroke-width: 2; fill: none; }
+              .mA-flow-hot { stroke: #04083d; stroke-width: 3.5; fill: none; }
+              .mA-flow-dim { stroke: #04083d; stroke-width: 1.5; fill: none; opacity: 0.3; }
+              .mA-state { stroke: #04083d; stroke-width: 1.4; fill: none; stroke-dasharray: 5 5; opacity: 0.6; }
+              .mA-name { font-family: 'Geist', system-ui, sans-serif; font-size: 16px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .mA-meta { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.55; letter-spacing: 1px; }
+              .mA-edge { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; fill: #04083d; }
+              .mA-edge-dim { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; fill: #04083d; opacity: 0.4; }
+              .mA-edge-hot { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #04083d; }
+              .mA-val { font-family: 'Geist', system-ui, sans-serif; font-size: 56px; font-weight: 400; fill: #04083d; letter-spacing: -0.05em; }
+              .mA-val-sm { font-family: 'Geist', system-ui, sans-serif; font-size: 44px; font-weight: 400; fill: #04083d; letter-spacing: -0.05em; }
+              .mA-formula { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; fill: #04083d; opacity: 0.7; }
+              .mA-tag { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; fill: #04083d; opacity: 0.5; letter-spacing: 2px; }
+              .mA-title { font-family: 'Geist', system-ui, sans-serif; font-size: 24px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .mA-foot { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.45; }
+              .mA-outcome { font-family: 'Geist', system-ui, sans-serif; font-size: 16px; fill: #04083d; }
+              .mA-sub { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.5; }
+            </style>
+
+            <rect class="mA-bg" width="1600" height="900"/>
+            <rect width="1600" height="900" fill="url(#dotgridA)"/>
+
+            <text class="mA-tag" x="80" y="60">MACHINATIONS · SCENARIO A</text>
+            <text class="mA-title" x="80" y="95">No freeze. One missed day, the streak resets.</text>
+
+            <g transform="translate(820 200)">
+              <rect class="mA-node" x="-140" y="-55" width="280" height="110"/>
+              <text class="mA-meta" x="0" y="-22" text-anchor="middle">REGISTER</text>
+              <text class="mA-name" x="0" y="5" text-anchor="middle">Loss Aversion</text>
+              <text class="mA-formula" x="0" y="30" text-anchor="middle">= Streak × 0.15</text>
+            </g>
+
+            <g transform="translate(220 470)">
+              <polygon class="mA-node" points="0,-55 55,50 -55,50"/>
+              <polygon class="mA-node-inner" points="0,-40 42,42 -42,42"/>
+              <text class="mA-name" x="0" y="90" text-anchor="middle">Daily Lesson</text>
+              <text class="mA-meta" x="0" y="110" text-anchor="middle">SOURCE · INTERACTIVE</text>
+            </g>
+
+            <g transform="translate(820 470)">
+              <circle class="mA-node" r="90"/>
+              <text class="mA-meta" x="0" y="-30" text-anchor="middle">STREAK</text>
+              <text class="mA-val" x="0" y="18" text-anchor="middle">0</text>
+              <text class="mA-meta" x="0" y="48" text-anchor="middle">POOL</text>
+              <text class="mA-sub" x="0" y="125" text-anchor="middle">was 30 · fully drained</text>
+            </g>
+
+            <g transform="translate(1380 470)">
+              <circle class="mA-node" r="75"/>
+              <text class="mA-meta" x="0" y="-25" text-anchor="middle">FREEZE</text>
+              <text class="mA-val-sm" x="0" y="18" text-anchor="middle">0</text>
+              <text class="mA-meta" x="0" y="42" text-anchor="middle">POOL · EMPTY</text>
+              <text class="mA-sub" x="0" y="105" text-anchor="middle">no buffer in stock</text>
+            </g>
+
+            <g transform="translate(1100 720)">
+              <polygon class="mA-node" points="0,-55 55,0 0,55 -55,0"/>
+              <polygon class="mA-node-inner" points="0,-42 42,0 0,42 -42,0"/>
+              <text class="mA-name" x="0" y="5" text-anchor="middle">Missed Day?</text>
+              <text class="mA-meta" x="0" y="80" text-anchor="middle">GATE · INTERACTIVE</text>
+            </g>
+
+            <line class="mA-flow" x1="280" y1="465" x2="725" y2="465" marker-end="url(#ahA)"/>
+            <text class="mA-edge" x="502" y="450" text-anchor="middle">+1</text>
+
+            <line class="mA-state" x1="820" y1="375" x2="820" y2="260" marker-end="url(#ahA-state)"/>
+            <text class="mA-meta" x="838" y="322">state</text>
+
+            <path class="mA-state" d="M 680 200 Q 420 200 240 410" marker-end="url(#ahA-state)"/>
+            <text class="mA-meta" x="430" y="185" text-anchor="middle">modifies activation rate</text>
+
+            <path class="mA-flow-hot" d="M 880 540 Q 985 645 1050 685" marker-end="url(#ahA)"/>
+            <text class="mA-edge-hot" x="1010" y="595" text-anchor="middle">if Freeze = 0 ▸ drain all</text>
+
+            <path class="mA-flow-dim" d="M 1325 525 Q 1220 645 1150 685" marker-end="url(#ahA-dim)"/>
+            <text class="mA-edge-dim" x="1245" y="600" text-anchor="middle">if Freeze &gt; 0 ▸ −1</text>
+
+            <g transform="translate(1100 835)">
+              <text class="mA-meta" x="0" y="0" text-anchor="middle">AFTER FIRE</text>
+              <text class="mA-outcome" x="0" y="22" text-anchor="middle">Streak 30 → 0 · loop breaks</text>
+            </g>
+
+            <text class="mA-foot" x="80" y="875">Real Duolingo: default freeze cap = 2 (5 for Streak Society at 7+ day streaks). +3 free at every 100-day milestone.</text>
+          </svg>
+        </section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para P-body__caption">Without the freeze, one missed day collapses the whole system. With it, the loop survives real life.</p>
+      </section>
+
+      <div class="P-shots">
+        <!-- ============================================================
+             SCENARIO B. Freeze in stock. The miss is absorbed.
+             ============================================================ -->
+        <section class="P-shot P-shot--svg">
+          <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagB-title">
+            <title id="diagB-title">Scenario B. Freeze absorbs the miss. The streak is preserved.</title>
+            <defs>
+              <pattern id="dotgridB" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1" fill="#04083d" opacity="0.08"/>
+              </pattern>
+              <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d"/>
+              </marker>
+              <marker id="ahB-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d" opacity="0.35"/>
+              </marker>
+              <marker id="ahB-state" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#04083d" opacity="0.6"/>
+              </marker>
+            </defs>
+            <style>
+              .mB-bg { fill: #ffffff; }
+              .mB-node { stroke: #04083d; stroke-width: 2.5; fill: #ffffff; }
+              .mB-node-inner { stroke: #04083d; stroke-width: 1.4; fill: none; }
+              .mB-flow { stroke: #04083d; stroke-width: 2; fill: none; }
+              .mB-flow-hot { stroke: #04083d; stroke-width: 3.5; fill: none; }
+              .mB-flow-dim { stroke: #04083d; stroke-width: 1.5; fill: none; opacity: 0.3; }
+              .mB-state { stroke: #04083d; stroke-width: 1.4; fill: none; stroke-dasharray: 5 5; opacity: 0.6; }
+              .mB-name { font-family: 'Geist', system-ui, sans-serif; font-size: 16px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .mB-meta { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.55; letter-spacing: 1px; }
+              .mB-edge { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; fill: #04083d; }
+              .mB-edge-dim { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; fill: #04083d; opacity: 0.4; }
+              .mB-edge-hot { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #04083d; }
+              .mB-val { font-family: 'Geist', system-ui, sans-serif; font-size: 56px; font-weight: 400; fill: #04083d; letter-spacing: -0.05em; }
+              .mB-val-sm { font-family: 'Geist', system-ui, sans-serif; font-size: 44px; font-weight: 400; fill: #04083d; letter-spacing: -0.05em; }
+              .mB-formula { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; fill: #04083d; opacity: 0.7; }
+              .mB-tag { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; fill: #04083d; opacity: 0.5; letter-spacing: 2px; }
+              .mB-title { font-family: 'Geist', system-ui, sans-serif; font-size: 24px; font-weight: 500; fill: #04083d; letter-spacing: -0.02em; }
+              .mB-foot { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.45; }
+              .mB-outcome { font-family: 'Geist', system-ui, sans-serif; font-size: 16px; fill: #04083d; }
+              .mB-sub { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; fill: #04083d; opacity: 0.5; }
+            </style>
+
+            <rect class="mB-bg" width="1600" height="900"/>
+            <rect width="1600" height="900" fill="url(#dotgridB)"/>
+
+            <text class="mB-tag" x="80" y="60">MACHINATIONS · SCENARIO B</text>
+            <text class="mB-title" x="80" y="95">Freeze in stock. The miss is absorbed.</text>
+
+            <g transform="translate(820 200)">
+              <rect class="mB-node" x="-140" y="-55" width="280" height="110"/>
+              <text class="mB-meta" x="0" y="-22" text-anchor="middle">REGISTER</text>
+              <text class="mB-name" x="0" y="5" text-anchor="middle">Loss Aversion</text>
+              <text class="mB-formula" x="0" y="30" text-anchor="middle">= Streak × 0.15</text>
+            </g>
+
+            <g transform="translate(220 470)">
+              <polygon class="mB-node" points="0,-55 55,50 -55,50"/>
+              <polygon class="mB-node-inner" points="0,-40 42,42 -42,42"/>
+              <text class="mB-name" x="0" y="90" text-anchor="middle">Daily Lesson</text>
+              <text class="mB-meta" x="0" y="110" text-anchor="middle">SOURCE · INTERACTIVE</text>
+            </g>
+
+            <g transform="translate(820 470)">
+              <circle class="mB-node" r="90"/>
+              <text class="mB-meta" x="0" y="-30" text-anchor="middle">STREAK</text>
+              <text class="mB-val" x="0" y="18" text-anchor="middle">30</text>
+              <text class="mB-meta" x="0" y="48" text-anchor="middle">POOL</text>
+              <text class="mB-sub" x="0" y="125" text-anchor="middle">unchanged · loop alive</text>
+            </g>
+
+            <g transform="translate(1380 470)">
+              <circle class="mB-node" r="75"/>
+              <text class="mB-meta" x="0" y="-25" text-anchor="middle">FREEZE</text>
+              <text class="mB-val-sm" x="0" y="18" text-anchor="middle">1</text>
+              <text class="mB-meta" x="0" y="42" text-anchor="middle">POOL</text>
+              <text class="mB-sub" x="0" y="105" text-anchor="middle">was 2 · one consumed</text>
+            </g>
+
+            <g transform="translate(1100 720)">
+              <polygon class="mB-node" points="0,-55 55,0 0,55 -55,0"/>
+              <polygon class="mB-node-inner" points="0,-42 42,0 0,42 -42,0"/>
+              <text class="mB-name" x="0" y="5" text-anchor="middle">Missed Day?</text>
+              <text class="mB-meta" x="0" y="80" text-anchor="middle">GATE · INTERACTIVE</text>
+            </g>
+
+            <line class="mB-flow" x1="280" y1="465" x2="725" y2="465" marker-end="url(#ahB)"/>
+            <text class="mB-edge" x="502" y="450" text-anchor="middle">+1</text>
+
+            <line class="mB-state" x1="820" y1="375" x2="820" y2="260" marker-end="url(#ahB-state)"/>
+            <text class="mB-meta" x="838" y="322">state</text>
+
+            <path class="mB-state" d="M 680 200 Q 420 200 240 410" marker-end="url(#ahB-state)"/>
+            <text class="mB-meta" x="430" y="185" text-anchor="middle">modifies activation rate</text>
+
+            <path class="mB-flow-dim" d="M 880 540 Q 985 645 1050 685" marker-end="url(#ahB-dim)"/>
+            <text class="mB-edge-dim" x="1010" y="595" text-anchor="middle">if Freeze = 0 ▸ drain all</text>
+
+            <path class="mB-flow-hot" d="M 1325 525 Q 1220 645 1150 685" marker-end="url(#ahB)"/>
+            <text class="mB-edge-hot" x="1245" y="600" text-anchor="middle">if Freeze &gt; 0 ▸ −1</text>
+
+            <g transform="translate(1100 835)">
+              <text class="mB-meta" x="0" y="0" text-anchor="middle">AFTER FIRE</text>
+              <text class="mB-outcome" x="0" y="22" text-anchor="middle">Freeze 2 → 1 · streak intact at 30</text>
+            </g>
+
+            <text class="mB-foot" x="80" y="875">Real Duolingo: freeze is proactive (must be equipped before the miss). Each freeze covers one day; streak holds but does not increment.</text>
+          </svg>
+        </section>
+      </div>
+
+      <section class="P-body">
+        <p class="P-body__para">Streaks run on loss aversion, not motivation. Users aren't pushing the streak forward. They're protecting it from collapse. A streak that can't be repaired is a bomb set for a bad day. The freeze isn't a convenience feature. It's structural infrastructure that keeps the loop from being too fragile to survive real life.</p>
+      </section>
+    </main>
+    <div class="A-bigfoot__foot">
+      <span class="A-bigfoot__year">&copy; 2026</span>
+      <div class="A-bigfoot__socials">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.063 2.063 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/></svg></a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+      </div>
+    </div>
+  </body>
+</html>
