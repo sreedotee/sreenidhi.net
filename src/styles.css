@@ -1834,7 +1834,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(230, 230, 230, 0.25);
+  background: rgb(230, 230, 230);
   box-sizing: border-box;
 }
 .A-tools__item img {
@@ -1886,7 +1886,7 @@ body.is-scrolled .nav__menu  { display: inline-flex; }
   margin-top: 4px;
 }
 .A-testimonials__card {
-  background: rgba(230, 230, 230, 0.25);
+  background: rgb(230, 230, 230);
   padding: 40px;
   position: relative;
   box-sizing: border-box;
