@@ -1,4 +1,4 @@
-import"./styles-BYgihfEn.js";function e(){return`
+import"./styles-DPnw2qBL.js";function e(){return`
     <nav class="nav">
       <ul class="nav__links">
         <li><a href="/">Home</a></li>
